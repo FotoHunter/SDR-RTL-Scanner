@@ -1,5 +1,7 @@
 SDR RTL FM RDS Scanner (English Version)
 
+**Документация на русском языке:** [README.RU.md](./README.RU.md)
+
 A powerful tool for automatic scanning of the FM band (87.5–108.0 MHz) and collecting RDS (Radio Data System) data using an RTL-SDR receiver. Focused on Saint Petersburg (SPB) database creation, but easily adaptable to any region.
 
 Key feature: The project uses the rtl_fm (signal capture) + RedSea (RDS decoding) pipeline, ensuring high accuracy in PI code and station text recognition even with weak signals.
@@ -10,6 +12,18 @@ Key feature: The project uses the rtl_fm (signal capture) + RedSea (RDS decoding
     Filtering and structuring: saving only valid stations with metadata.
     Flexible region configuration: support for different geographic zones via JSON configs.
     Temporary file ignoring: .gitignore configured to keep only the database in the repo.
+
+## 📸 Examples of Work
+
+Here is how the scanner output and the resulting database look in real life.
+
+### Terminal Output
+<img src="assets/SDR-RTL-Scanner1.png" alt="Terminal: FM scanning process with RDS data" width="800" />
+*Fig. 1: Real-time terminal output showing frequencies and detected RDS packets.*
+
+### RDS Database Sample (JSON)
+<img src="assets/SDR-RTL-Scanner2.png" alt="JSON: sample of the RDS database structure" width="800" />
+*Fig. 2: Fragment of scanning*
 
 📦 Requirements
 Hardware
