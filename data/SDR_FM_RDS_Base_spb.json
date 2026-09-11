@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "region": "spb",
+  "scan_date": "2026-09-10T15:20:41.653022",
+  "mode": "init",
+  "stations": [
+    {
+      "freq": 81.2,
+      "signal": 2.64,
+      "name_ru": "",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 82.0,
+      "signal": 2.8,
+      "name_ru": "",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 84.5,
+      "signal": 4.76,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 85.0,
+      "signal": 15.07,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 85.5,
+      "signal": 2.9,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 88.0,
+      "signal": 16.6,
+      "name_ru": "Ретро FM",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 89.3,
+      "signal": 5.89,
+      "name_ru": "Вести FM",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 89.7,
+      "signal": 6.53,
+      "name_ru": "Радио Зенит",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 90.1,
+      "signal": 4.76,
+      "name_ru": "Радио Эрмитаж",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 90.6,
+      "signal": 9.07,
+      "name_ru": "Радио Ваня",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 91.1,
+      "signal": 5.12,
+      "name_ru": "Новое радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 92.0,
+      "signal": 5.07,
+      "name_ru": "Радио Комсомольская Правда",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 95.0,
+      "signal": 19.0,
+      "name_ru": "Радио Energy",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7202",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 98.6,
+      "signal": 7.6,
+      "name_ru": "Royal Radio",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 99.0,
+      "signal": 12.4,
+      "name_ru": "Радио России",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 99.4,
+      "signal": 8.66,
+      "name_ru": "",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 100.0,
+      "signal": 9.55,
+      "name_ru": "",
+      "rds": {}
+    },
+    {
+      "freq": 100.5,
+      "signal": 14.59,
+      "name_ru": "Европа Плюс",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7760",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 100.9,
+      "signal": 15.58,
+      "name_ru": "Питер FM",
+      "rds": {}
+    },
+    {
+      "freq": 101.0,
+      "signal": 12.0,
+      "name_ru": "Питер FM",
+      "rds": {}
+    },
+    {
+      "freq": 101.4,
+      "signal": 7.08,
+      "name_ru": "Эльдорадио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 101.9,
+      "signal": 4.41,
+      "name_ru": "Rock FM",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 102.0,
+      "signal": 15.5,
+      "name_ru": "Rock FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7201",
+        "PTY": "News",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 102.3,
+      "signal": 8.1,
+      "name_ru": "Радио Метро",
+      "rds": {}
+    },
+    {
+      "freq": 102.8,
+      "signal": 7.45,
+      "name_ru": "Максимум",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 103.4,
+      "signal": 13.36,
+      "name_ru": "DFM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7709",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 103.7,
+      "signal": 6.12,
+      "name_ru": "Детское радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 104.0,
+      "signal": 7.36,
+      "name_ru": "Наше радио",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 104.4,
+      "signal": 13.21,
+      "name_ru": "Шансон",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 105.9,
+      "signal": 16.35,
+      "name_ru": "Монте-Карло",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7719",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 106.4,
+      "signal": 12.08,
+      "name_ru": "Рекорд",
+      "rds": {}
+    },
+    {
+      "freq": 107.0,
+      "signal": 10.93,
+      "name_ru": "Маяк",
+      "rds": {}
+    },
+    {
+      "freq": 107.4,
+      "signal": 24.9,
+      "name_ru": "Бизнес FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7729",
+        "PTY": "Finance",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 107.8,
+      "signal": 5.01,
+      "name_ru": "Русское радио",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 109.9,
+      "signal": 3.08,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    }
+  ],
+  "last_merge": "2026-09-11T13:28:33.525622"
+}
