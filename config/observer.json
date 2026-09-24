@@ -1,0 +1,14 @@
+{
+  "name": "spb_observer_01",
+  "location": {
+    "city": "Saint Petersburg",
+    "lat": 59.9343,
+    "lon": 30.3351,
+    "altitude_m": 25
+  },
+  "metar_station": "ULLI",
+  "description": "Home station, north side",
+  "timezone": "Europe/Moscow",
+  "contact": "aes222ripn@gmail.com",
+  "active": true
+}

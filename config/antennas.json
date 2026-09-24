@@ -1,0 +1,24 @@
+{
+  "ant_001": {
+    "model": "RTL-FM-Dipole-V1",
+    "type": "dipole",
+    "gain_dbi": 2.15,
+    "azimuth_deg": 0,
+    "polarization": "vertical",
+    "height_m": 10,
+    "frequency_range_mhz": [87.5, 108.0],
+    "impedance_ohm": 75,
+    "notes": "Default dipole for RTL-SDR FM band"
+  },
+  "ant_002": {
+    "model": "LogPeriodic-FM-Pro",
+    "type": "log_periodic",
+    "gain_dbi": 5.8,
+    "azimuth_deg": 180,
+    "polarization": "horizontal",
+    "height_m": 15,
+    "frequency_range_mhz": [87.5, 108.0],
+    "impedance_ohm": 50,
+    "notes": "Higher gain, directional"
+  }
+}
