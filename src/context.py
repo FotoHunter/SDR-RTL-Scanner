@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-
+from _version import __version__
 """
 Context Module — observer, antenna, weather (METAR), artifacts, interference.
 
-Part of SDR-RTL-Scanner / Radio Catalogizer project.
+Part of SDR-RTL-Scanner v{__version__} Radio Catalogizer project.
 License: MIT
 """
-
 import json
 import urllib.request
 import re
@@ -18,6 +17,13 @@ WX_CODES_FOG = {"FG", "MIFG", "BCFG", "PRFG", "FZFG"}
 WX_CODES_HAZE = {"HZ", "DU", "SA", "DS", "SS", "BLDU", "BLSA", "BLSS"}
 WX_CODES_PRECIP = {"DZ", "RA", "SN", "SG", "IC", "PL", "GR", "GS", "UP"}
 WX_CODES_THUNDER = {"TS", "TSRA", "TSSN", "TSPL", "TSGS", "TSGR"}
+
+# ── METAR ──
+# Primary: new AWC API (JSON, no key needed)
+METAR_URL_PRIMARY = "https://aviationweather.gov/api/data/metar?ids={station}&format=json&taf=false&hours=1"
+# Backup: NOAA NWS direct text (no key, very stable)
+METAR_URL_BACKUP = "https://tgftp.nws.noaa.gov/data/observations/metar/stations/{station}.TXT"
+
 
 ARTIFACT_TYPES = [
     "tropospheric_duct",
@@ -124,98 +130,110 @@ class Context:
 
     # ── METAR ──
 
+
     def fetch_metar(self, station_code: str = "") -> dict:
-        """Fetch METAR from NOAA (no API key needed)."""
+        """Fetch METAR — primary AWC JSON API, fallback to NOAA NWS raw text."""
         station = station_code or self.get_metar_station()
         if not station:
             return {}
-        url = f"https://aviationweather.gov/cgi-bin/data/metar.php?ids={station}&format=raw&hours=1"
+
+        # ── Primary: AWC JSON API ──
+        url = self.METAR_URL_PRIMARY.format(station=station)
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "SDR-Scanner/0.9"})
+            req = urllib.request.Request(url, headers={"User-Agent": f"SDR-Scanner/{__version__}"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 raw = resp.read().decode("utf-8").strip()
         except Exception as e:
-            print(f"[!] METAR fetch error: {e}")
+            print(f"[!] METAR primary fetch error: {e}")
+            raw = ""
+
+        if raw:
+            try:
+                data = json.loads(raw)
+                if isinstance(data, list) and len(data) > 0:
+                    metar_json = data[0]
+                    return self._metar_from_json(metar_json)
+            except (json.JSONDecodeError, KeyError, IndexError) as e:
+                print(f"[!] METAR JSON parse error: {e}, trying backup...")
+
+        # ── Backup: NOAA NWS raw text ──
+        url_b = self.METAR_URL_BACKUP.format(station=station)
+        try:
+            req = urllib.request.Request(url_b, headers={"User-Agent": f"SDR-Scanner/{__version__}"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                raw_text = resp.read().decode("utf-8").strip()
+        except Exception as e:
+            print(f"[!] METAR backup fetch error: {e}")
             return {}
-        if not raw:
+
+        if not raw_text:
             return {}
-        lines = [l for l in raw.split("\n") if l.strip()]
+
+        # raw_text может содержать пустую строку + METAR, берём последнюю непустую
+        lines = [l.strip() for l in raw_text.split("\n") if l.strip()]
         if not lines:
             return {}
-        metar_raw = lines[-1].strip()
+        # Последняя строка — свежий METAR
+        metar_raw = lines[-1]
         return self.parse_metar(metar_raw)
 
-    def parse_metar(self, metar_raw: str) -> dict:
-        """Parse a raw METAR string into structured data."""
+    def _metar_from_json(self, m: dict) -> dict:
+        """Convert AWC JSON METAR to the same dict structure as parse_metar()."""
         result = {
-            "raw": metar_raw,
-            "station": "",
-            "datetime": "",
-            "temperature_c": None,
-            "dewpoint_c": None,
-            "visibility_m": None,
-            "wind_dir": None,
-            "wind_speed_kt": None,
-            "qnh_hpa": None,
+            "raw": m.get("rawOb", ""),
+            "station": m.get("icaoId", ""),
+            "datetime": m.get("obsTime", ""),
+            "temperature_c": m.get("tempC"),
+            "dewpoint_c": m.get("dewpC"),
+            "visibility_m": m.get("visib", ""),
+            "wind_dir": m.get("wdir"),
+            "wind_speed_kt": m.get("wspd"),
+            "qnh_hpa": m.get("altim"),
             "wx_codes": [],
             "clouds": [],
             "inversion": False,
             "inversion_type": None,
         }
-        tokens = metar_raw.split()
-        if not tokens:
-            return result
-        result["station"] = tokens[0]
-        for t in tokens[1:4]:
-            if re.match(r'^\d{6}Z$', t):
-                result["datetime"] = t
-                break
-        for t in tokens:
-            m = re.match(r'^(\d{3}|VRB)(\d{2,3})KT$', t)
-            if m:
-                result["wind_dir"] = m.group(1) if m.group(1) != "VRB" else None
-                result["wind_speed_kt"] = int(m.group(2))
-                break
-        for t in tokens:
-            if re.match(r'^\d{4}$', t):
-                result["visibility_m"] = int(t)
-                break
-            m = re.match(r'^(\d)/(\d)SM$', t)
-            if m:
-                result["visibility_m"] = int(int(m.group(1)) / int(m.group(2)) * 1609)
-                break
-            m = re.match(r'^(\d+)SM$', t)
-            if m:
-                result["visibility_m"] = int(m.group(1)) * 1609
-                break
-        for t in tokens:
-            m = re.match(r'^(M?\d{2})/(M?\d{2})$', t)
-            if m:
-                def parse_temp(s):
-                    neg = s.startswith("M")
-                    val = int(s.lstrip("M"))
-                    return -val if neg else val
-                result["temperature_c"] = parse_temp(m.group(1))
-                result["dewpoint_c"] = parse_temp(m.group(2))
-                break
-        for t in tokens:
-            if re.match(r'^Q\d{4}$', t):
-                result["qnh_hpa"] = int(t[1:])
-                break
-            m = re.match(r'^A(\d{4})$', t)
-            if m:
-                result["qnh_hpa"] = round(int(m.group(1)) * 0.3386)
-                break
-        for t in tokens:
-            if t in WX_CODES_FOG or t in WX_CODES_HAZE or t in WX_CODES_PRECIP or t in WX_CODES_THUNDER:
-                result["wx_codes"].append(t)
-            m = re.match(r'^[-+]?(VC)?(' + "|".join(WX_CODES_PRECIP | WX_CODES_THUNDER | WX_CODES_FOG) + r')$', t)
-            if m and t not in result["wx_codes"]:
-                result["wx_codes"].append(t)
-        for t in tokens:
-            m = re.match(r'^(FEW|SCT|BKN|OVC|CLR|SKC|CAVOK)(\d{3})?$', t)
-            if m:
-                result["clouds"].append(t)
+        # visibility: AWC отдаёт в милях, переводим в метры
+        vis = m.get("visib")
+        if vis is not None:
+            try:
+                result["visibility_m"] = int(float(vis) * 1609)
+            except (ValueError, TypeError):
+                result["visibility_m"] = None
+
+        # qnh: AWC отдаёт в дюймах ртутного столба (altim), переводим в гПа
+        altim = m.get("altim")
+        if altim is not None:
+            try:
+                result["qnh_hpa"] = round(float(altim) * 33.8639)
+            except (ValueError, TypeError):
+                result["qnh_hpa"] = None
+
+        # wind_dir: AWC отдаёт число, нормализуем
+        wdir = m.get("wdir")
+        if wdir is not None and wdir != "VRB":
+            result["wind_dir"] = str(wdir)
+        else:
+            result["wind_dir"] = None
+
+        # погодные явления
+        wx = m.get("wxString", "")
+        if wx:
+            result["wx_codes"] = [w.strip() for w in wx.split() if w.strip()]
+
+        # облака
+        clouds = m.get("clouds", [])
+        if isinstance(clouds, list):
+            for c in clouds:
+                layer = c.get("cover", "")
+                base = c.get("base", "")
+                if layer and base is not None:
+                    result["clouds"].append(f"{layer}{int(base):03d}")
+                elif layer:
+                    result["clouds"].append(layer)
+
+        # инверсию определяем как и раньше
         result["inversion"], result["inversion_type"] = self._detect_inversion(result)
         return result
 
