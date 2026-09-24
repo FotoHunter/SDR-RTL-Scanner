@@ -9,6 +9,9 @@ data/*.tmp
 *.wav
 *.log
 
+# Папка скриптов, если это песочница
+scripts/
+
 # Python
 __pycache__/
 *.pyc
@@ -34,3 +37,6 @@ __pycache__/
 # IDE
 .idea/
 .vscode/
+
+# Markdown-патчи, если они временные
+INTEGRATION_PATCH.md
