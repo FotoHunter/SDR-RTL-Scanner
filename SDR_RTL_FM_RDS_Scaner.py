@@ -24,6 +24,7 @@ License: MIT
 import os, sys, json, argparse, subprocess, select, time
 from pathlib import Path
 from datetime import datetime
+from src.context import Context
 
 # ═══════════════════════════════════════════════════════════════
 #  CONFIG
@@ -32,7 +33,30 @@ from datetime import datetime
 SCRIPT_DIR      = Path(__file__).parent
 REGIONS_DIR     = SCRIPT_DIR / "regions"
 DATA_DIR        = SCRIPT_DIR / "data"
+#
+# Определяем базовый путь к проекту (чтобы не зависеть от текущей рабочей директории)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_DIR = os.path.join(BASE_DIR, "config")
+OBSERVER_PATH = os.path.join(CONFIG_DIR, "observer.json")
+ANTENNAS_PATH = os.path.join(CONFIG_DIR, "antennas.json")
+#
+# --- НАЧАЛО НОВОГО БЛОКА: ЗАГРУЗКА КОНФИГУРАЦИИ ---
+try:
+    with open(OBSERVER_PATH, "r", encoding="utf-8") as f:
+        OBSERVER_CONFIG = json.load(f)
+    print(f"[*] Loaded observer config: {OBSERVER_PATH}")
+except FileNotFoundError:
+    print(f"[!] Warning: observer.json not found at {OBSERVER_PATH}. Using defaults.")
+    OBSERVER_CONFIG = {}
 
+try:
+    with open(ANTENNAS_PATH, "r", encoding="utf-8") as f:
+        ANTENNAS_CONFIG = json.load(f)
+    print(f"[*] Loaded antennas config: {ANTENNAS_PATH}")
+except FileNotFoundError:
+    print(f"[!] Warning: antennas.json not found at {ANTENNAS_PATH}. Using defaults.")
+    ANTENNAS_CONFIG = {}
+#
 DEFAULT_START    = 87.0
 DEFAULT_STOP     = 109.0
 DEFAULT_STEP     = 100      # kHz
@@ -52,6 +76,11 @@ C_GREEN  = '\033[92m'
 C_BLUE   = '\033[94m'
 C_YELLOW = '\033[93m'
 C_RESET  = '\033[0m'
+
+# Выбираем антенну по умолчанию (первый ключ из справочника)
+_default_antenna = ANTENNAS_CONFIG[list(ANTENNAS_CONFIG.keys())[0]] if ANTENNAS_CONFIG else {}
+app_context = Context(OBSERVER_CONFIG, _default_antenna)
+print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, Antenna: {app_context.get_antenna_model()}")
 
 # Устанавливаются в main() после выбора региона
 CURRENT_REGION  = "default"
@@ -227,6 +256,33 @@ def multi_gain_scan(start_mhz, stop_mhz, step_khz, gains_str, threshold_db, ppm=
     start_mhz = snap_freq(start_mhz, step_khz)
     stop_mhz  = snap_freq(stop_mhz,  step_khz)
     gains = [int(x.strip()) for x in gains_str.split(",")]
+
+    # --- НОВЫЙ БЛОК: Корректировка усиления по антенне ---
+    # Если в antennas.json есть запись для диапазона частот, используем её
+    # Пример структуры antennas.json: {"87.5-108.0": {"default_gain": 25}}
+    
+    center_freq = (start_mhz + stop_mhz) / 2.0
+    
+    # Ищем подходящую антенну в конфиге
+    matched_antenna = None
+    for freq_range, data in ANTENNAS_CONFIG.items():
+        try:
+            min_f, max_f = map(float, freq_range.split("-"))
+            if min_f <= center_freq <= max_f:
+                matched_antenna = data
+                break
+        except ValueError:
+            continue
+            
+    if matched_antenna and "default_gain" in matched_antenna:
+        custom_gain = matched_antenna["default_gain"]
+        print(f"[*] Antenna profile matched for {center_freq:.1f} MHz: default gain={custom_gain} dB")
+        # Можно заменить весь список gains на один оптимальный, если нужно
+        # gains = [custom_gain] 
+        # Или добавить его в начало списка для приоритета
+        if custom_gain not in gains:
+            gains.insert(0, custom_gain)
+    # -------------------------------------------------------
     range_mhz = stop_mhz - start_mhz
     is_narrow = range_mhz < NARROW_RANGE_MHZ
     print(f"\n[*] Multi-gain scan: {gains} dB, threshold={threshold_db} dB")
@@ -487,6 +543,7 @@ def json_safe(obj):
     return obj
 
 def save_results(stations, args, mode, filename=None, scan_min=None, scan_max=None):
+    global app_context
     if filename is None:
         if mode in ("fullscan", "update"):
             filename = make_update_filename()
@@ -505,11 +562,13 @@ def save_results(stations, args, mode, filename=None, scan_min=None, scan_max=No
                        "rds_gains": args.rds_gains, "rds_rate": DEFAULT_RDS_RATE,
                        "dwell": args.dwell, "snap_khz": args.snap},
             "stations": filtered}
+    # ── Add observation context if available ──
+    if app_context is not None:
+        data["observation_context"] = app_context.to_dict()
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(json_safe(data), f, ensure_ascii=False, indent=2)
     print(f"\n[*] Saved: {filename}")
     return filename
-
 
 def load_json(fname):
     if not os.path.exists(fname): return None
@@ -666,6 +725,184 @@ def print_summary(stations, ppm=0, snap=0):
     print(f"С RDS (PI): {n_pi} | С PS: {n_ps} | С RT: {n_rt} | С русским названием: {n_ru}")
 
 # ═══════════════════════════════════════════════════════════════
+#  Export to html
+# ═══════════════════════════════════════════════════════════════
+
+def export_html(data, region="spb", output_path=None):
+    stations = data.get("stations", [])
+    scan_date = data.get("scan_date", "")
+    ppm = data.get("ppm", "?")
+    mode = data.get("mode", "?")
+
+    n_total = len(stations)
+    n_rds = sum(1 for s in stations if s.get("rds", {}).get("PI"))
+    n_ps = sum(1 for s in stations if s.get("rds", {}).get("PS"))
+    n_rt = sum(1 for s in stations if s.get("rds", {}).get("RadioText"))
+    n_named = sum(1 for s in stations if s.get("name_ru"))
+    n_lost = sum(1 for s in stations if s.get("status") == "lost")
+    n_new = sum(1 for s in stations if s.get("status") == "new")
+
+    stations.sort(key=lambda s: s.get("freq", 0))
+
+    rows = ""
+    for st in stations:
+        freq = st.get("freq", 0)
+        signal = st.get("signal", 0)
+        name_ru = st.get("name_ru", "") or "—"
+        rds = st.get("rds", {}) or {}
+        pi = rds.get("PI", "—")
+        ps = rds.get("PS", "—")
+        pty = rds.get("PTY", "—")
+        tp = rds.get("TP", "—")
+        ta = rds.get("TA", "—")
+        rt = rds.get("RadioText", "—")
+        stereo = st.get("stereo")
+        if stereo is True:
+            ster_str = "●"
+        elif stereo is False:
+            ster_str = "○"
+        else:
+            ster_str = "?"
+        status = st.get("status", "active")
+        last_seen = st.get("last_seen", "")[:10] if st.get("last_seen") else ""
+
+        row_class = ""
+        if status == "lost":
+            row_class = ' class="row-lost"'
+        elif status == "new":
+            row_class = ' class="row-new"'
+
+        rows += (
+            f"      <tr{row_class}>\n"
+            f"        <td>{freq:.1f}</td>\n"
+            f"        <td>{signal:.1f}</td>\n"
+            f"        <td>{name_ru}</td>\n"
+            f"        <td>{pi}</td>\n"
+            f"        <td>{ps}</td>\n"
+            f"        <td>{pty}</td>\n"
+            f"        <td>{ster_str}</td>\n"
+            f"        <td>{tp}</td>\n"
+            f"        <td>{ta}</td>\n"
+            f"        <td>{rt}</td>\n"
+            f"        <td>{status}</td>\n"
+            f"        <td>{last_seen}</td>\n"
+            f"      </tr>\n"
+        )
+
+    # JS отдельно — никаких конфликтов с f-string
+    js_code = """
+<script>
+let sortDir = {};
+function sortTable(col) {
+  const table = document.getElementById("stations");
+  const tbody = table.querySelector("tbody");
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const dir = sortDir[col] = !sortDir[col];
+  rows.sort((a, b) => {
+    let x = a.cells[col].textContent.trim();
+    let y = b.cells[col].textContent.trim();
+    let xn = parseFloat(x), yn = parseFloat(y);
+    if (!isNaN(xn) && !isNaN(yn)) return dir ? xn - yn : yn - xn;
+    return dir ? x.localeCompare(y) : y.localeCompare(x);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+"""
+
+    html = f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FM RDS Scanner — {region.upper()}</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #1a1a2e; color: #e0e0e0; padding: 20px;
+  }}
+  h1 {{ color: #00d4ff; margin-bottom: 5px; font-size: 1.5em; }}
+  .meta {{ color: #888; font-size: 0.85em; margin-bottom: 15px; }}
+  .stats {{
+    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+  }}
+  .stat {{
+    background: #16213e; border-radius: 8px; padding: 10px 16px;
+    font-size: 0.9em; border: 1px solid #1a1a3e;
+  }}
+  .stat b {{ color: #00d4ff; }}
+  table {{
+    width: 100%; border-collapse: collapse;
+    background: #16213e; border-radius: 8px; overflow: hidden;
+    font-size: 0.88em;
+  }}
+  th {{
+    background: #0f3460; color: #00d4ff; padding: 10px 8px;
+    text-align: left; position: sticky; top: 0; cursor: pointer;
+    white-space: nowrap; user-select: none;
+  }}
+  th:hover {{ background: #1a4080; }}
+  td {{ padding: 8px; border-bottom: 1px solid #1a1a3e; white-space: nowrap; }}
+  tr:hover {{ background: #1a1a4e; }}
+  .row-lost {{ opacity: 0.4; }}
+  .row-lost td {{ color: #666; }}
+  .row-new {{ background: #0a3a0a; }}
+  .row-new td {{ color: #6f6; }}
+  .footer {{ margin-top: 15px; color: #555; font-size: 0.8em; }}
+  @media (max-width: 800px) {{
+    table {{ font-size: 0.75em; }}
+    th, td {{ padding: 5px 4px; }}
+  }}
+</style>
+</head>
+<body>
+<h1>FM RDS Scanner — {region.upper()}</h1>
+<div class="meta">
+  Scan: {scan_date[:19]} | Mode: {mode} | PPM: {ppm}
+</div>
+<div class="stats">
+  <div class="stat">Всего: <b>{n_total}</b></div>
+  <div class="stat">С RDS (PI): <b>{n_rds}</b></div>
+  <div class="stat">С PS: <b>{n_ps}</b></div>
+  <div class="stat">С RT: <b>{n_rt}</b></div>
+  <div class="stat">С названием: <b>{n_named}</b></div>
+  <div class="stat">Потеряны: <b>{n_lost}</b></div>
+  <div class="stat">Новые: <b>{n_new}</b></div>
+</div>
+<table id="stations">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">Freq (MHz)</th>
+      <th onclick="sortTable(1)">Signal (dB)</th>
+      <th onclick="sortTable(2)">Name RU</th>
+      <th onclick="sortTable(3)">PI</th>
+      <th onclick="sortTable(4)">PS</th>
+      <th onclick="sortTable(5)">PTY</th>
+      <th onclick="sortTable(6)">Ster</th>
+      <th onclick="sortTable(7)">TP</th>
+      <th onclick="sortTable(8)">TA</th>
+      <th onclick="sortTable(9)">RadioText</th>
+      <th onclick="sortTable(10)">Status</th>
+      <th onclick="sortTable(11)">Last Seen</th>
+    </tr>
+  </thead>
+  <tbody>
+{rows}  </tbody>
+</table>
+<div class="footer">Generated by SDR-RTL-Scanner v0.8 | {scan_date[:19]}</div>
+{js_code}
+</body>
+</html>"""
+
+    if output_path is None:
+        output_path = os.path.join(DATA_DIR, f"fm_rds_report_{region}.html")
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"[*] HTML report: {output_path}")
+    return output_path
+
+# ═══════════════════════════════════════════════════════════════
 #  MODE 1: FULLSCAN
 # ═══════════════════════════════════════════════════════════════
 
@@ -715,18 +952,32 @@ def mode_fullscan(args):
         print()
     fname = save_results(stations, args, "fullscan", scan_min=args.start, scan_max=args.stop)
     print_summary(stations, args.ppm, args.snap)
+    # Переменная для финального списка станций
+    final_stations = stations
     if fname != BASE_FILE and os.path.exists(BASE_FILE):
         print(f"\n[*] Base: {BASE_FILE} | Update: {fname}")
         base_data = load_json(BASE_FILE)
         upd_data = load_json(fname)
+
         if base_data and upd_data:
             diff_info = show_diff(base_data, upd_data, args.start, args.stop)
             merged = interactive_merge(base_data, diff_info, args.start, args.stop)
+
             if merged:
                 with open(BASE_FILE, "w", encoding="utf-8") as f:
                     json.dump(merged, f, ensure_ascii=False, indent=2)
                 print(f"\n[*] База обновлена: {BASE_FILE}")
                 print_summary(merged.get("stations", []), args.ppm, args.snap)
+                # Если мердж успешен, финальные данные — это merged
+                final_stations = merged.get("stations", [])
+    # === ВЫЗОВ EXPORT_HTML ===
+    export_html({
+        "stations": final_stations, 
+        "scan_date": datetime.now().isoformat(), 
+        "ppm": args.ppm, 
+        "mode": args.mode  # <-- Важно: берём из args
+    }, region=args.region)
+    # ========================
 
 # ═══════════════════════════════════════════════════════════════
 #  MODE 2: UPDATE
@@ -887,8 +1138,22 @@ def main():
     p.add_argument("--json", type=str, default=None, help="JSON file (for update/edit/merge)")
     p.add_argument("--update", type=str, default=None, help="Update file for merge mode")
     p.add_argument("--output", type=str, default=None, help="Output JSON filename")
+    # ── Context parameters ──
+    p.add_argument("--with-context", action="store_true", default=True,
+                   help="Add observation context (weather, antenna, observer) to output")
+    p.add_argument("--no-context", dest="with_context", action="store_false",
+                   help="Disable context output (backward compatibility)")
+    p.add_argument("--antenna", type=str, default=None,
+                   help="Antenna ID from antennas.json (e.g. ant_001)")
+    p.add_argument("--artifact", type=str, default=None,
+                   help="Artifact type flag (e.g. tropospheric_duct, sporadic_e)")
+    p.add_argument("--artifact-notes", type=str, default="",
+                   help="Notes about the artifact")
+    p.add_argument("--interference", type=str, default=None,
+                   help="Interference type flag (e.g. power_line, co_channel)")
+    p.add_argument("--interference-notes", type=str, default="",
+                   help="Notes about the interference")
     args = p.parse_args()
-
     # ── Region selection ──
     ensure_dirs()
     region = args.region
@@ -899,6 +1164,40 @@ def main():
     ensure_base_file(region)
     BASE_FILE = get_base_file(region)
     STATIONS_FILE = args.stations or get_stations_file(region)
+
+    # ── Context initialization ──
+    if args.with_context:
+        # Выбор антенны по ID или дефолтная
+        if args.antenna and args.antenna in ANTENNAS_CONFIG:
+            selected_antenna = ANTENNAS_CONFIG[args.antenna]
+        else:
+            selected_antenna = _default_antenna
+        app_context = Context(OBSERVER_CONFIG, selected_antenna)
+        app_context.set_scan_datetime(datetime.now())
+
+        # Флаги артефактов и помех
+        if args.artifact:
+            app_context.set_artifact(args.artifact, args.artifact_notes)
+        if args.interference:
+            app_context.set_interference(args.interference, args.interference_notes)
+
+        # Запрос METAR
+        metar_station = app_context.get_metar_station()
+        if metar_station:
+            print(f"[*] Fetching METAR for {metar_station}...")
+            wx = app_context.fetch_metar()
+            if wx:
+                app_context.weather = wx
+                inv_str = f" | INVERSION: {wx['inversion_type']}" if wx.get("inversion") else ""
+                print(f"    METAR: {wx.get('raw', '?')[:60]}...")
+                print(f"    T={wx.get('temperature_c','?')}C, Td={wx.get('dewpoint_c','?')}C, "
+                      f"vis={wx.get('visibility_m','?')}m{inv_str}")
+            else:
+                print(f"    [!] METAR fetch failed")
+        print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, "
+              f"Antenna: {app_context.get_antenna_model()}")
+    else:
+        app_context = None
     print(f"[*] Region: {region}")
     print(f"[*] Base:   {BASE_FILE}")
     print(f"[*] Ref:    {STATIONS_FILE}")
