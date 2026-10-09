@@ -1,6 +1,8 @@
 # Базы и апдейты (не коммить личные результаты)
-data/SDR_FM_RDS_Update_*.json
+data/SDR_Update_*.json
 data/*.tmp
+data/*.html
+data/*_report*.html
 
 # Временные файлы
 *.cfile

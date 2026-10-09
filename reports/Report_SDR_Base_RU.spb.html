@@ -1,0 +1,1952 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDR Scanner v0.8.3 Report — RU.SPB</title>
+
+<style>
+    body {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+        padding: 20px;
+        margin: 0;
+    }
+    h1 { color: #ffffff; margin-bottom: 5px; font-size: 1.5em; }
+    p { color: #aaaaaa; font-size: 0.9em; margin-bottom: 15px; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #2b2b2b;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        font-size: 0.9em;
+    }
+    th, td {
+        border: 1px solid #444;
+        padding: 6px 8px;
+        text-align: left;
+        white-space: nowrap;
+        color: #e0e0e0;
+    }
+    th {
+        background-color: #3498db;
+        color: #ffffff;
+        position: sticky;
+        top: 0;
+        cursor: pointer;
+        user-select: none;
+        border-bottom: 2px solid #2980b9;
+    }
+
+    .station-name { color: #ffcc80; font-weight: bold; }
+    .rds-text { color: #aaffaa; font-style: italic; }
+    .pi-code { color: #ff8080; font-family: monospace; }
+    .pty-name { color: #bb88ff; }
+
+    tr:nth-child(even) { background-color: #333333; }
+    tr:hover { background-color: #444444; }
+
+    .row-lost { color: #666666; text-decoration: line-through; }
+    .row-new { background-color: #223322; }
+</style>
+
+<script>
+let sortDir = {};
+function sortTable(col) {
+  const table = document.getElementById("stations");
+  const tbody = table.querySelector("tbody");
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const dir = sortDir[col] = !sortDir[col];
+  rows.sort((a, b) => {
+    let x = a.cells[col].textContent.trim();
+    let y = b.cells[col].textContent.trim();
+    let xn = parseFloat(x), yn = parseFloat(y);
+    if (!isNaN(xn) && !isNaN(yn)) return dir ? xn - yn : yn - xn;
+    return dir ? x.localeCompare(y) : y.localeCompare(x);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+
+</head>
+<body>
+    <h1>SDR Scanner Report — RU.SPB</h1>
+    <p style="color:#aaa;"></p>
+    <p>Scan date: 2026-09-28T16:21:09.548121 | PPM: ?</p>
+    <table id="stations">
+        <thead>
+            <tr>
+            <th onclick="sortTable(0)">Freq (MHz)</th>
+            <th onclick="sortTable(1)">Signal (dB)</th>
+            <th onclick="sortTable(2)">Mod</th>
+            <th onclick="sortTable(3)">Band</th>
+            <th onclick="sortTable(4)">Name RU</th>
+            <th onclick="sortTable(5)">PI</th>
+            <th onclick="sortTable(6)">PS</th>
+            <th onclick="sortTable(7)">PTY</th>
+            <th>Stereo</th>
+            <th onclick="sortTable(9)">TP</th>
+            <th onclick="sortTable(10)">TA</th>
+            <th onclick="sortTable(11)">RadioText</th>
+            <th onclick="sortTable(12)">Status</th>
+            <th onclick="sortTable(13)">Last Seen</th>
+            </tr>
+        </thead>
+        <tbody>
+                  <tr>
+        <td class="col-freq">7.1</td>
+        <td class="col-signal">-36.5</td>
+<td class="col-mod"><font color="#80c0ff">USB</font></td>
+<td class="col-band">HF-marine-2</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#7f8c8d;">?</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">7.2</td>
+        <td class="col-signal">-37.4</td>
+<td class="col-mod"><font color="#80c0ff">LSB</font></td>
+<td class="col-band">Ham-40m</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#7f8c8d;">?</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">7.4</td>
+        <td class="col-signal">-39.5</td>
+<td class="col-mod"><font color="#80c0ff">USB</font></td>
+<td class="col-band">HF-misc-41m</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#7f8c8d;">?</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">50.4</td>
+        <td class="col-signal">-6.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">51.1</td>
+        <td class="col-signal">-9.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">52.0</td>
+        <td class="col-signal">-7.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">53.6</td>
+        <td class="col-signal">-3.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">54.3</td>
+        <td class="col-signal">-3.0</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">56.0</td>
+        <td class="col-signal">2.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">57.6</td>
+        <td class="col-signal">4.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">64.0</td>
+        <td class="col-signal">2.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">65.4</td>
+        <td class="col-signal">5.3</td>
+<td class="col-mod"><font color="#80c0ff">AM-VSB</font></td>
+<td class="col-band">OIRT-TV-ch2</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">66.3</td>
+        <td class="col-signal">15.6</td>
+<td class="col-mod"><font color="#80c0ff">WFM</font></td>
+<td class="col-band">OIRT</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио России</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">69.5</td>
+        <td class="col-signal">13.9</td>
+<td class="col-mod"><font color="#80c0ff">WFM</font></td>
+<td class="col-band">OIRT</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Петербург</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">73.1</td>
+        <td class="col-signal">18.2</td>
+<td class="col-mod"><font color="#80c0ff">WFM</font></td>
+<td class="col-band">OIRT</td>
+<td class="name-cell"><font color="#ffcc80"><b>Град Петров</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">74.8</td>
+        <td class="col-signal">0.7</td>
+<td class="col-mod"><font color="#80c0ff">NFM</font></td>
+<td class="col-band">VHF-mid-service</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">75.5</td>
+        <td class="col-signal">-3.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">76.4</td>
+        <td class="col-signal">0.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">77.6</td>
+        <td class="col-signal">-2.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">78.8</td>
+        <td class="col-signal">0.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">79.2</td>
+        <td class="col-signal">1.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">79.4</td>
+        <td class="col-signal">1.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">80.1</td>
+        <td class="col-signal">0.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">81.0</td>
+        <td class="col-signal">1.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">81.2</td>
+        <td class="col-signal">2.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">81.9</td>
+        <td class="col-signal">1.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">82.6</td>
+        <td class="col-signal">9.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">83.3</td>
+        <td class="col-signal">13.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">84.0</td>
+        <td class="col-signal">10.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">84.7</td>
+        <td class="col-signal">13.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">85.2</td>
+        <td class="col-signal">15.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">86.0</td>
+        <td class="col-signal">6.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">86.4</td>
+        <td class="col-signal">11.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">86.8</td>
+        <td class="col-signal">-0.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">87.5</td>
+        <td class="col-signal">9.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Дорожное радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7727</tt></font></td>
+        <td class="col-rds-meta">DOPO*HOE</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>REKLAMA (812)325-94-94</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">88.0</td>
+        <td class="col-signal">15.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Ретро FM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7704</tt></font></td>
+        <td class="col-rds-meta">RETRO ÊM</td>
+<td class="col-rds-meta"><font color="#bb88ff">Oldies music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">88.4</td>
+        <td class="col-signal">14.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Авторадио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7261</tt></font></td>
+        <td class="col-rds-meta">* ABTO *</td>
+<td class="col-rds-meta"><font color="#bb88ff">Varied</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">89.3</td>
+        <td class="col-signal">8.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Вести FM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7840</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">News</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">89.7</td>
+        <td class="col-signal">12.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Зенит</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">90.1</td>
+        <td class="col-signal">10.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Эрмитаж</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">90.6</td>
+        <td class="col-signal">21.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Ваня</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7850</tt></font></td>
+        <td class="col-rds-meta">BAHR</td>
+<td class="col-rds-meta"><font color="#bb88ff">No PTY</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>Reklama 8(812)467-40-47</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">91.1</td>
+        <td class="col-signal">12.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Новое радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">91.2</td>
+        <td class="col-signal">18.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Новое радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">91.5</td>
+        <td class="col-signal">9.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Sputnik</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">92.0</td>
+        <td class="col-signal">7.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Комсомольская Правда</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">92.4</td>
+        <td class="col-signal">8.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Хит FM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">92.9</td>
+        <td class="col-signal">22.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Вера</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7721</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">Culture</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">93.7</td>
+        <td class="col-signal">20.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио МИР</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7734</tt></font></td>
+        <td class="col-rds-meta">93,7 FM</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">94.1</td>
+        <td class="col-signal">8.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Звезда</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">94.5</td>
+        <td class="col-signal">15.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Relax FM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7216</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">Easy listening</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">95.0</td>
+        <td class="col-signal">17.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Energy</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7202</tt></font></td>
+        <td class="col-rds-meta">ENERGY</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>ENERGY: www.energyfm.ru</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">95.5</td>
+        <td class="col-signal">13.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Studio 21</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7714</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">95.8</td>
+        <td class="col-signal">17.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Comedy Radio</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">95.9</td>
+        <td class="col-signal">23.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Comedy Radio</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7244</tt></font></td>
+        <td class="col-rds-meta">COMEDY</td>
+<td class="col-rds-meta"><font color="#bb88ff">Varied</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>SMS 1025  www.comedy-radio.ru</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">96.4</td>
+        <td class="col-signal">0.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Radio Jazz</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">96.7</td>
+        <td class="col-signal">4.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">97.0</td>
+        <td class="col-signal">11.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Дача</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7724</tt></font></td>
+        <td class="col-rds-meta">97,0FM</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">97.6</td>
+        <td class="col-signal">4.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Орфей</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">98.1</td>
+        <td class="col-signal">13.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7212</tt></font></td>
+        <td class="col-rds-meta">LikeFM</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>Reklama</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">98.6</td>
+        <td class="col-signal">15.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Royal Radio</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7894</tt></font></td>
+        <td class="col-rds-meta">ROYAL</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">98.8</td>
+        <td class="col-signal">18.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">99.0</td>
+        <td class="col-signal">16.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио России</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7848</tt></font></td>
+        <td class="col-rds-meta">99.0 FM</td>
+<td class="col-rds-meta"><font color="#bb88ff">No PTY</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">100.5</td>
+        <td class="col-signal">21.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Европа Плюс</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7760</tt></font></td>
+        <td class="col-rds-meta">EUROPA</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>REKLAMA (812)325-94-94</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">100.9</td>
+        <td class="col-signal">12.0</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Питер FM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7890</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">No PTY</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">101.4</td>
+        <td class="col-signal">7.0</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Эльдорадио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">102.0</td>
+        <td class="col-signal">16.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Rock FM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7201</tt></font></td>
+        <td class="col-rds-meta">RadioRBC</td>
+<td class="col-rds-meta"><font color="#bb88ff">News</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>Radio RBC</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">102.4</td>
+        <td class="col-signal">13.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Радио Метро</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7895</tt></font></td>
+        <td class="col-rds-meta">METRO</td>
+<td class="col-rds-meta"><font color="#bb88ff">Varied</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">102.8</td>
+        <td class="col-signal">11.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Максимум</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7703</tt></font></td>
+        <td class="col-rds-meta">MAXIMUM</td>
+<td class="col-rds-meta"><font color="#bb88ff">Rock music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">103.3</td>
+        <td class="col-signal">9.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>DFM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">103.4</td>
+        <td class="col-signal">18.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>DFM</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7709</tt></font></td>
+        <td class="col-rds-meta">DFM</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">103.7</td>
+        <td class="col-signal">4.0</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Детское радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">104.0</td>
+        <td class="col-signal">11.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Наше радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">104.4</td>
+        <td class="col-signal">20.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Шансон</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7707</tt></font></td>
+        <td class="col-rds-meta">SHANSON</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>RADIO SHANSON 104,4 FM</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">105.3</td>
+        <td class="col-signal">8.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Love Радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">105.9</td>
+        <td class="col-signal">19.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Монте-Карло</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7719</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">106.3</td>
+        <td class="col-signal">16.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Рекорд</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>0x7849</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">Pop music</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">False</td>
+        <td class="col-rds-meta">False</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">107.8</td>
+        <td class="col-signal">13.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>Русское радио</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#2ecc71;">●</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">109.4</td>
+        <td class="col-signal">-2.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">111.2</td>
+        <td class="col-signal">5.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">115.2</td>
+        <td class="col-signal">13.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">119.2</td>
+        <td class="col-signal">11.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">121.4</td>
+        <td class="col-signal">0.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">125.0</td>
+        <td class="col-signal">10.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">127.2</td>
+        <td class="col-signal">-3.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">127.8</td>
+        <td class="col-signal">-8.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">129.6</td>
+        <td class="col-signal">-7.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">129.9</td>
+        <td class="col-signal">-9.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">130.6</td>
+        <td class="col-signal">-7.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">131.3</td>
+        <td class="col-signal">-8.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">132.7</td>
+        <td class="col-signal">-8.7</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">135.0</td>
+        <td class="col-signal">-4.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">141.2</td>
+        <td class="col-signal">-5.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">141.7</td>
+        <td class="col-signal">8.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">143.2</td>
+        <td class="col-signal">3.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">144.0</td>
+        <td class="col-signal">8.1</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">147.1</td>
+        <td class="col-signal">-1.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">148.3</td>
+        <td class="col-signal">10.0</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">149.7</td>
+        <td class="col-signal">-2.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">150.0</td>
+        <td class="col-signal">7.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">150.8</td>
+        <td class="col-signal">-3.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">151.2</td>
+        <td class="col-signal">3.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">153.0</td>
+        <td class="col-signal">-3.5</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">154.6</td>
+        <td class="col-signal">-1.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">155.3</td>
+        <td class="col-signal">-3.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">157.7</td>
+        <td class="col-signal">-3.9</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">159.2</td>
+        <td class="col-signal">5.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">159.7</td>
+        <td class="col-signal">-4.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">161.8</td>
+        <td class="col-signal">-3.8</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">168.7</td>
+        <td class="col-signal">6.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">170.1</td>
+        <td class="col-signal">7.4</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">171.5</td>
+        <td class="col-signal">-8.3</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">172.2</td>
+        <td class="col-signal">-7.6</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">172.8</td>
+        <td class="col-signal">6.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">176.0</td>
+        <td class="col-signal">1.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="col-freq">184.0</td>
+        <td class="col-signal">1.2</td>
+<td class="col-mod"><font color="#80c0ff">—</font></td>
+<td class="col-band">—</td>
+<td class="name-cell"><font color="#ffcc80"><b>—</b></font></td>
+<td class="col-rds-meta"><font color="#ff8080"><tt>—</tt></font></td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rds-meta"><font color="#bb88ff">—</font></td>
+        <td><span style="color:#95a5a6;">○</span></td>
+        <td class="col-rds-meta">—</td>
+        <td class="col-rds-meta">—</td>
+<td class="col-rt"><font color="#aaffaa"><i>—</i></font></td>
+        <td>active</td>
+        <td></td>
+      </tr>
+
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="14" style="text-align: center; font-size: 0.8em; color: #888; padding-top: 15px; border-top: 1px solid #444;">
+                    &copy; 2026 Andrey E. Smirnov | SDR-RTL-Scanner v0.8.3
+                    <a href="https://github.com/FotoHunter/SDR-RTL-Scanner" style="color: #5bc0de; text-decoration: none;">SDR-RTL-Scanner v0.8.3 | GitHub</a>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
+    

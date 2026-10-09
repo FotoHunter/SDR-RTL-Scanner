@@ -1,0 +1,85 @@
+{
+  "version": 2,
+  "description": "Справочник типов модуляции для SDR-сканера",
+  "last_updated": "2026-10-01",
+  "usage": "Загрузить JSON, найти модуляцию по диапазону, взять modulation/bandwidth",
+  "signal": [
+    {
+      "id": "fm_stereo",
+      "name": "FM Stereo (CCIR)",
+      "range_mhz": {"min": 87.5, "max": 108.0},
+      "modulation": "WFM",
+      "pilot_freq_hz": 19000,
+      "rds_enabled": true,
+      "ppm_hint_ppm": 30,
+      "gain_hint_db": 25,
+      "notes": "Стандартный FM-диапазон в Европе/РФ, пилот 19 кГц, RDS на 57 кГц"
+    },
+    {
+      "id": "fm_oirt",
+      "name": "FM OIRT (СССР/Восточная Европа)",
+      "range_mhz": {"min": 65.9, "max": 74.0},
+      "modulation": "WFM",
+      "pilot_freq_hz": 31250,
+      "rds_enabled": false,
+      "ppm_hint_ppm": 40,
+      "gain_hint_db": 28,
+      "notes": "Устаревший диапазон, пилот 31.25 кГц, RDS обычно отсутствует"
+    },
+    {
+      "id": "nfm_voice",
+      "name": "NFM Voice (речевая связь)",
+      "range_mhz": {"min": 136.0, "max": 174.0},
+      "modulation": "NFM",
+      "pilot_freq_hz": null,
+      "rds_enabled": false,
+      "ppm_hint_ppm": 20,
+      "gain_hint_db": 30,
+      "notes": "Узкополосная ЧМ для служебной/любительской связи, полоса ~12.5–25 кГц"
+    },
+    {
+      "id": "am_broadcast",
+      "name": "AM Broadcast (ДВ/СВ)",
+      "range_mhz": {"min": 0.15, "max": 1.7},
+      "modulation": "AM",
+      "pilot_freq_hz": null,
+      "rds_enabled": false,
+      "ppm_hint_ppm": 50,
+      "gain_hint_db": 22,
+      "notes": "Амплитудная модуляция, вещательные диапазоны ДВ/СВ"
+    },
+    {
+      "id": "ads_b",
+      "name": "ADS-B (самолёты)",
+      "range_mhz": {"min": 1090.0, "max": 1090.0},
+      "modlication": "P2P/OOK",
+      "pilot_freq_hz": null,
+      "rds_enabled": false,
+      "ppm_hint_ppm": 10,
+      "gain_hint_db": 35,
+      "notes": "Импульсный протокол, фиксированная частота 1090 МГц"
+    },
+    {
+      "id": "meteor_m",
+      "name": "Meteor-M LRPT (спутник)",
+      "range_mhz": {"min": 137.0, "max": 137.9},
+      "modulation": "QPSK/APSK",
+      "pilot_freq_hz": null,
+      "rds_enabled": false,
+      "ppm_hint_ppm": 15,
+      "gain_hint_db": 38,
+      "notes": "Спутниковый аналоговый/цифровой сигнал, полоса ~34–72 кГц"
+    },
+    {
+      "id": "anomaly_wide",
+      "name": "Аномалия (широкая полоса)",
+      "range_mhz": {"min": 1.0, "max": 6000.0},
+      "modulation": "UNKNOWN",
+      "pilot_freq_hz": null,
+      "rds_enabled": false,
+      "ppm_hint_ppm": 60,
+      "gain_hint_db": 32,
+      "notes": "Заглушка-маркер для нетипичных сигналов, требует ручного анализа"
+    }
+  ]
+}
