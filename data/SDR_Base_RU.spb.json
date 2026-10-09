@@ -1,0 +1,1484 @@
+{
+  "schema_version": 1,
+  "region": "RU.spb",
+  "scan_date": "2026-09-28T16:21:09.548121",
+  "mode": "init",
+  "stations": [
+    {
+      "freq": 7.053,
+      "signal": -36.53,
+      "_band": {
+        "freq_min": 6200,
+        "freq_max": 7100,
+        "name": "HF-marine-2",
+        "modulation": "USB",
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская SSB, DSC",
+        "notes": "RTTY 6.325, погода 6.504"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-marine-2"
+    },
+    {
+      "freq": 7.194,
+      "signal": -37.44,
+      "_band": {
+        "freq_min": 7100,
+        "freq_max": 7300,
+        "name": "Ham-40m",
+        "modulation": "LSB",
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 40 м",
+        "notes": "IARU R1: 7100–7200 кГц. Вещание до 7300 в США"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "LSB",
+      "band_name": "Ham-40m"
+    },
+    {
+      "freq": 7.392,
+      "signal": -39.55,
+      "_band": {
+        "freq_min": 7300,
+        "freq_max": 9400,
+        "name": "HF-misc-41m",
+        "modulation": "USB",
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Фиксированная, морская, авиация",
+        "notes": "FT8 7.074, 10.136 МГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-misc-41m"
+    },
+    {
+      "freq": 50.4,
+      "signal": -6.94,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 51.1,
+      "signal": -9.31,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 52.0,
+      "signal": -7.47,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 53.6,
+      "signal": -3.64,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 54.3,
+      "signal": -2.95,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 56.0,
+      "signal": 2.33,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 57.6,
+      "signal": 4.69,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 64.0,
+      "signal": 2.33,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 65.4,
+      "signal": 5.27,
+      "_band": {
+        "freq_min": 58250,
+        "freq_max": 65900,
+        "name": "OIRT-TV-ch2",
+        "modulation": "AM-VSB",
+        "bandwidth": 8000000,
+        "step": 30000,
+        "country": "RU",
+        "description": "OIRT телевидение, канал 2 (58–66 МГц)",
+        "notes": "Аналоговый SECAM, отключён с 14.10.2019 (федеральные). ГКРЧ продлила региональное до 31.12.2026. Полоса может быть перепрофилирована"
+      },
+      "_is_oirt": true,
+      "name_ru": "",
+      "modulation": "AM-VSB",
+      "band_name": "OIRT-TV-ch2",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 66.296,
+      "signal": 15.64,
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      },
+      "_is_oirt": true,
+      "name_ru": "Радио России",
+      "modulation": "WFM",
+      "band_name": "OIRT",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 69.452,
+      "signal": 13.94,
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      },
+      "_is_oirt": true,
+      "name_ru": "Радио Петербург",
+      "modulation": "WFM",
+      "band_name": "OIRT",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 73.095,
+      "signal": 18.2,
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      },
+      "_is_oirt": true,
+      "name_ru": "Град Петров",
+      "modulation": "WFM",
+      "band_name": "OIRT",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 74.754,
+      "signal": 0.67,
+      "_band": {
+        "freq_min": 74000,
+        "freq_max": 76000,
+        "name": "VHF-mid-service",
+        "modulation": "NFM",
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные частоты 74–76 МГц",
+        "notes": "РФ: зазор между OIRT и радиоастрономией"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-service",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 75.5,
+      "signal": -3.85,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 76.4,
+      "signal": 0.95,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 77.6,
+      "signal": -2.11,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 78.8,
+      "signal": 0.25,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 79.2,
+      "signal": 1.59,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 79.4,
+      "signal": 1.06,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 80.1,
+      "signal": 0.31,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 81.0,
+      "signal": 1.54,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 81.2,
+      "signal": 2.54,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 81.9,
+      "signal": 1.65,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 82.6,
+      "signal": 9.26,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 83.3,
+      "signal": 13.42,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 84.0,
+      "signal": 10.92,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 84.7,
+      "signal": 13.42,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 85.2,
+      "signal": 15.35,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 86.0,
+      "signal": 6.13,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 86.4,
+      "signal": 11.81,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 86.8,
+      "signal": -0.43,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 87.5,
+      "signal": 9.66,
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      },
+      "_is_oirt": false,
+      "name_ru": "Дорожное радио",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7727",
+        "PS": "DOPO*HOE",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "RadioText": "REKLAMA (812)325-94-94",
+        "gain_db": 25,
+        "rds_snr_db": 4.3,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 88.0,
+      "signal": 15.44,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Ретро FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7704",
+        "PTY": "Oldies music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 0.9,
+        "stereo": true,
+        "PS": "RETRO ÊM"
+      }
+    },
+    {
+      "freq": 88.4,
+      "signal": 14.78,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Авторадио",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7261",
+        "PS": "* ABTO *",
+        "PTY": "Varied",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 6.7,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 89.3,
+      "signal": 8.42,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Вести FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7840",
+        "PTY": "News",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 1.0,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 89.7,
+      "signal": 12.08,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Зенит",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 90.1,
+      "signal": 10.57,
+      "name_ru": "Радио Эрмитаж",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 90.6,
+      "signal": 21.44,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Ваня",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7850",
+        "PS": "BAHR",
+        "PTY": "No PTY",
+        "TP": false,
+        "TA": false,
+        "RadioText": "Reklama 8(812)467-40-47",
+        "gain_db": 25,
+        "rds_snr_db": 5.2,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 91.1,
+      "signal": 12.16,
+      "name_ru": "Новое радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 91.2,
+      "signal": 18.28,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Новое радио",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 91.5,
+      "signal": 9.64,
+      "name_ru": "Радио Sputnik",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 92.0,
+      "signal": 7.92,
+      "name_ru": "Радио Комсомольская Правда",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 92.4,
+      "signal": 8.12,
+      "name_ru": "Хит FM",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 92.9,
+      "signal": 22.6,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Вера",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7721",
+        "PTY": "Culture",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 0.1,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 93.7,
+      "signal": 20.95,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио МИР",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7734",
+        "PS": "93,7 FM",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 1.3,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 94.1,
+      "signal": 8.14,
+      "name_ru": "Радио Звезда",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 94.5,
+      "signal": 15.1,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Relax FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7216",
+        "PTY": "Easy listening",
+        "TP": false,
+        "gain_db": 25,
+        "rds_snr_db": -3.8,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 95.0,
+      "signal": 17.26,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Energy",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7202",
+        "PS": "ENERGY",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "RadioText": "ENERGY: www.energyfm.ru",
+        "gain_db": 25,
+        "rds_snr_db": 4.8,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 95.5,
+      "signal": 13.49,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Studio 21",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7714",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": -0.2,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 95.8,
+      "signal": 17.54,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Comedy Radio",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 95.9,
+      "signal": 23.07,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Comedy Radio",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7244",
+        "PS": "COMEDY",
+        "PTY": "Varied",
+        "TP": false,
+        "TA": false,
+        "RadioText": "SMS 1025  www.comedy-radio.ru",
+        "gain_db": 50,
+        "rds_snr_db": 1.4,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 96.4,
+      "signal": 0.38,
+      "name_ru": "Radio Jazz",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 96.7,
+      "signal": 4.07,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 97.0,
+      "signal": 11.64,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Дача",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7724",
+        "PS": "97,0FM",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 50,
+        "rds_snr_db": 2.4,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 97.6,
+      "signal": 4.73,
+      "name_ru": "Радио Орфей",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 98.1,
+      "signal": 13.33,
+      "name_ru": "",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7212",
+        "PS": "LikeFM",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "RadioText": "Reklama"
+      }
+    },
+    {
+      "freq": 98.6,
+      "signal": 15.05,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Royal Radio",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7894",
+        "PS": "ROYAL",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 50,
+        "rds_snr_db": 3.2,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 98.8,
+      "signal": 18.59,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 99.0,
+      "signal": 16.69,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио России",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7848",
+        "PS": "99.0 FM",
+        "PTY": "No PTY",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 4.1,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 100.5,
+      "signal": 21.86,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Европа Плюс",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7760",
+        "PS": "EUROPA",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "RadioText": "REKLAMA (812)325-94-94",
+        "gain_db": 25,
+        "rds_snr_db": 5.7,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 100.9,
+      "signal": 11.96,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Питер FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7890",
+        "PTY": "No PTY",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": -0.3,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 101.4,
+      "signal": 7.05,
+      "name_ru": "Эльдорадио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 102.0,
+      "signal": 16.78,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Rock FM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7201",
+        "PS": "RadioRBC",
+        "PTY": "News",
+        "TP": false,
+        "TA": false,
+        "RadioText": "Radio RBC",
+        "gain_db": 50,
+        "rds_snr_db": 10.2,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 102.4,
+      "signal": 13.21,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Метро",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7895",
+        "PS": "METRO",
+        "PTY": "Varied",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 12.5,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 102.8,
+      "signal": 11.68,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Максимум",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7703",
+        "PS": "MAXIMUM",
+        "PTY": "Rock music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 50,
+        "rds_snr_db": 3.1,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 103.3,
+      "signal": 9.89,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "DFM",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 103.4,
+      "signal": 18.33,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "DFM",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7709",
+        "PS": "DFM",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 50,
+        "rds_snr_db": 1.4,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 103.7,
+      "signal": 3.99,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Детское радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 104.0,
+      "signal": 11.33,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Наше радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 104.4,
+      "signal": 20.56,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Шансон",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7707",
+        "PS": "SHANSON",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "RadioText": "RADIO SHANSON 104,4 FM",
+        "gain_db": 50,
+        "rds_snr_db": 3.5,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 105.3,
+      "signal": 8.88,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Love Радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 105.9,
+      "signal": 19.27,
+      "name_ru": "Монте-Карло",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7719",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false
+      }
+    },
+    {
+      "freq": 106.3,
+      "signal": 16.11,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Рекорд",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7849",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 50,
+        "rds_snr_db": 0.9,
+        "stereo": true
+      }
+    },
+    {
+      "freq": 107.8,
+      "signal": 13.94,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Русское радио",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 109.4,
+      "signal": -2.86,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 111.2,
+      "signal": 5.29,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 115.2,
+      "signal": 13.43,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 119.2,
+      "signal": 11.71,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 121.4,
+      "signal": 0.21,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 125.0,
+      "signal": 10.07,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 127.2,
+      "signal": -3.75,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 127.8,
+      "signal": -8.87,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 129.6,
+      "signal": -7.53,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 129.9,
+      "signal": -9.23,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 130.6,
+      "signal": -7.21,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 131.3,
+      "signal": -8.27,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 132.7,
+      "signal": -8.72,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 135.0,
+      "signal": -4.91,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 141.2,
+      "signal": -5.2,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 141.7,
+      "signal": 8.75,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 143.2,
+      "signal": 3.93,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 144.0,
+      "signal": 8.11,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 147.1,
+      "signal": -1.58,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 148.3,
+      "signal": 10.01,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 149.7,
+      "signal": -2.61,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 150.0,
+      "signal": 7.24,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 150.8,
+      "signal": -3.55,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 151.2,
+      "signal": 3.51,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 153.0,
+      "signal": -3.55,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 154.6,
+      "signal": -1.17,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 155.3,
+      "signal": -3.18,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 157.7,
+      "signal": -3.93,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 159.2,
+      "signal": 5.62,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 159.7,
+      "signal": -4.83,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 161.8,
+      "signal": -3.79,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 168.7,
+      "signal": 6.27,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 170.1,
+      "signal": 7.39,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 171.5,
+      "signal": -8.3,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 172.2,
+      "signal": -7.57,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 172.8,
+      "signal": 6.15,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 176.0,
+      "signal": 1.22,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 184.0,
+      "signal": 1.22,
+      "name_ru": "",
+      "stereo": false,
+      "rds": {}
+    }
+  ],
+  "last_merge": "2026-10-09T08:26:24.662118"
+}
