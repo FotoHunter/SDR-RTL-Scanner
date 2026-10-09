@@ -21,29 +21,20 @@ import os
 import json
 import argparse
 from datetime import datetime
+from _version import __version__
 
-def export_html(data, region="spb", output_path=None, freq_min=None, freq_max=None):
-    # --- ДЕФОЛТНЫЕ ГРАНИЦЫ ДИАПАЗОНА ---
+def export_html(data, region="RU.spb", output_path=None, freq_min=None, freq_max=None):
     DEFAULT_MIN = 65.5
     DEFAULT_MAX = 108.5
 
-    # Сохраняем исходные значения для проверки (были ли переданы пользователем)
     user_min = freq_min is not None
     user_max = freq_max is not None
 
-
-    # Применяем дефолты для расчетов
     calc_min = freq_min if user_min else DEFAULT_MIN
     calc_max = freq_max if user_max else DEFAULT_MAX
 
-    stations = data.get("stations", )
-    """
-    data: dict с ключом 'stations' (список станций)
-    freq_min/freq_max: фильтр по частоте (МГц), None = без фильтра
-    """
+    stations = data.get("stations", [])
 
-
-    # Фильтрация (теперь freq_min/max гарантированно числа)
     if user_min or user_max:
         filtered = []
         for s in stations:
@@ -75,6 +66,8 @@ def export_html(data, region="spb", output_path=None, freq_min=None, freq_max=No
         freq = st.get("freq", 0)
         signal = st.get("signal", 0)
         name_ru = st.get("name_ru", "") or "—"
+        mod = st.get("modulation", "") or "—"
+        band = st.get("band_name", "") or "—"
         rds = st.get("rds", {}) or {}
         pi = rds.get("PI", "—")
         ps = rds.get("PS", "—")
@@ -86,10 +79,8 @@ def export_html(data, region="spb", output_path=None, freq_min=None, freq_max=No
         status = st.get("status", "active")
         last_seen = st.get("last_seen", "")[:10] if st.get("last_seen") else ""
 
-        # Лампочка стерео (используем Unicode, он работает везде)
         if stereo is True:
-            ster_str = '<span style="color:#2ecc71;">●</span>' # GUI
-            # Для текстовых браузеров цвет не сработает, но символ останется
+            ster_str = '<span style="color:#2ecc71;">●</span>'
         elif stereo is False:
             ster_str = '<span style="color:#95a5a6;">○</span>'
         else:
@@ -101,30 +92,27 @@ def export_html(data, region="spb", output_path=None, freq_min=None, freq_max=No
         elif status == "new":
             row_class = ' class="row-new"'
 
-        # --- ВАЖНО: Используем <font> для совместимости с ELinks ---
-        # ELinks игнорирует class="station-name", но видит <font color>
-        # Name RU: Оранжевый
         name_cell = f'<td class="name-cell"><font color="#ffcc80"><b>{html_lib.escape(str(name_ru))}</b></font></td>'
-        # PI: Красный
         pi_cell = f'<td class="col-rds-meta"><font color="#ff8080"><tt>{html_lib.escape(str(pi))}</tt></font></td>'
-        # PTY: Фиолетовый
         pty_cell = f'<td class="col-rds-meta"><font color="#bb88ff">{html_lib.escape(str(pty))}</font></td>'
-        # RadioText: Зелёный
         rt_cell = f'<td class="col-rt"><font color="#aaffaa"><i>{html_lib.escape(str(rt))}</i></font></td>'
+        mod_cell = f'<td class="col-mod"><font color="#80c0ff">{html_lib.escape(str(mod))}</font></td>'
+        band_cell = f'<td class="col-band">{html_lib.escape(str(band))}</td>'
 
         rows += (
             f"      <tr{row_class}>\n"
             f"        <td class=\"col-freq\">{freq:.1f}</td>\n"
             f"        <td class=\"col-signal\">{signal:.1f}</td>\n"
-            f"{name_cell}\n"                 # <-- Цветное имя (работает везде)
-            f"{pi_cell}\n"                    # <-- Цветной PI (работает везде)
+            f"{mod_cell}\n"
+            f"{band_cell}\n"
+            f"{name_cell}\n"
+            f"{pi_cell}\n"
             f"        <td class=\"col-rds-meta\">{html_lib.escape(str(ps))}</td>\n"
-
-            f"{pty_cell}\n"                    # <-- Цветной PTY (работает везде)
+            f"{pty_cell}\n"
             f"        <td>{ster_str}</td>\n"
             f"        <td class=\"col-rds-meta\">{html_lib.escape(str(tp))}</td>\n"
             f"        <td class=\"col-rds-meta\">{html_lib.escape(str(ta))}</td>\n"
-            f"{rt_cell}\n"                     # <-- Цветный RadioText (работает везде)
+            f"{rt_cell}\n"
             f"        <td>{status}</td>\n"
             f"        <td>{last_seen}</td>\n"
             f"      </tr>\n"
@@ -150,16 +138,11 @@ function sortTable(col) {
 </script>
 """
 
-    # --- СТРОКА ДИАПАЗОНА ДЛЯ ОТЧЕТА ---
-    # Показываем диапазон в шапке отчета, если он отличается от полного дефолтного
-    # или если пользователь явно что-то вводил (чтобы было видно, что срез сделан)
     show_range_in_report = (user_min or user_max)
-    
     if show_range_in_report:
         range_str = f"| Range: {calc_min:.1f}–{calc_max:.1f} MHz"
     else:
         range_str = ""
-
 
     html = f"""
 <!DOCTYPE html>
@@ -167,14 +150,13 @@ function sortTable(col) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FM RDS Scanner Report — {region.upper()}</title>
+<title>SDR Scanner v{__version__} Report — {region.upper()}</title>
 
 <style>
-    /* ТЕМНАЯ ТЕМА ДЛЯ БРАУЗЕРОВ */
     body {{
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        background-color: #1a1a1a;       /* Почти черный фон */
-        color: #e0e0e0;                  /* Светло-серый текст */
+        background-color: #1a1a1a;
+        color: #e0e0e0;
         padding: 20px;
         margin: 0;
     }}
@@ -184,19 +166,19 @@ function sortTable(col) {
     table {{
         width: 100%;
         border-collapse: collapse;
-        background-color: #2b2b2b;      /* Тёмный фон таблицы */
+        background-color: #2b2b2b;
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         font-size: 0.9em;
     }}
     th, td {{
-        border: 1px solid #444;          /* Тёмные границы */
+        border: 1px solid #444;
         padding: 6px 8px;
         text-align: left;
         white-space: nowrap;
-        color: #e0e0e0;                  /* Базовый цвет текста */
+        color: #e0e0e0;
     }}
     th {{
-        background-color: #3498db;      /* Синяя шапка */
+        background-color: #3498db;
         color: #ffffff;
         position: sticky;
         top: 0;
@@ -205,7 +187,6 @@ function sortTable(col) {
         border-bottom: 2px solid #2980b9;
     }}
 
-    /* ЦВЕТА ДЛЯ БРАУЗЕРОВ (перекрывают базовые, но работают вместе с <font> для терминалов) */
     .station-name {{ color: #ffcc80; font-weight: bold; }}
     .rds-text {{ color: #aaffaa; font-style: italic; }}
     .pi-code {{ color: #ff8080; font-family: monospace; }}
@@ -220,7 +201,7 @@ function sortTable(col) {
 {js_code}
 </head>
 <body>
-    <h1>FM RDS Scanner Report — {region.upper()}</h1>
+    <h1>SDR Scanner Report — {region.upper()}</h1>
     <p style="color:#aaa;">{range_str}</p>
     <p>Scan date: {scan_date} | PPM: {ppm}</p>
     <table id="stations">
@@ -228,27 +209,28 @@ function sortTable(col) {
             <tr>
             <th onclick="sortTable(0)">Freq (MHz)</th>
             <th onclick="sortTable(1)">Signal (dB)</th>
-            <th onclick="sortTable(2)">Name RU</th>
-            <th onclick="sortTable(3)">PI</th>
-            <th onclick="sortTable(4)">PS</th>
-            <th onclick="sortTable(5)">PTY</th>
+            <th onclick="sortTable(2)">Mod</th>
+            <th onclick="sortTable(3)">Band</th>
+            <th onclick="sortTable(4)">Name RU</th>
+            <th onclick="sortTable(5)">PI</th>
+            <th onclick="sortTable(6)">PS</th>
+            <th onclick="sortTable(7)">PTY</th>
             <th>Stereo</th>
-            <th onclick="sortTable(7)">TP</th>
-            <th onclick="sortTable(8)">TA</th>
-            <th onclick="sortTable(9)">RadioText</th>
-            <th onclick="sortTable(10)">Status</th>
-            <th onclick="sortTable(11)">Last Seen</th>
+            <th onclick="sortTable(9)">TP</th>
+            <th onclick="sortTable(10)">TA</th>
+            <th onclick="sortTable(11)">RadioText</th>
+            <th onclick="sortTable(12)">Status</th>
+            <th onclick="sortTable(13)">Last Seen</th>
             </tr>
         </thead>
         <tbody>
             {rows}
         </tbody>
-        <!-- КОПИРАЙТ -->
         <tfoot>
             <tr>
-                <td colspan="12" style="text-align: center; font-size: 0.8em; color: #888; padding-top: 15px; border-top: 1px solid #444;">
-                    &copy; 2026 Andrey E. Smirnov | 
-                    <a href="https://github.com/FotoHunter/SDR-RTL-Scanner" style="color: #5bc0de; text-decoration: none;">GitHub</a>
+                <td colspan="14" style="text-align: center; font-size: 0.8em; color: #888; padding-top: 15px; border-top: 1px solid #444;">
+                    &copy; 2026 Andrey E. Smirnov | SDR-RTL-Scanner v{__version__}
+                    <a href="https://github.com/FotoHunter/SDR-RTL-Scanner" style="color: #5bc0de; text-decoration: none;">SDR-RTL-Scanner v{__version__} | GitHub</a>
                 </td>
             </tr>
         </tfoot>
@@ -258,22 +240,19 @@ function sortTable(col) {
     """
 
     if output_path is None:
-        base_dir = "data"
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
+        reports_dir = "reports"
+        if not os.path.exists(reports_dir):
+            os.makedirs(reports_dir)
 
-        # Если пользователь задал хоть одну границу, включаем обе в имя файла
-        # Даже если вторая осталась дефолтной (например, --start 100 -> 100_108)
         if user_min or user_max:
             f_min_str = f"{calc_min:.1f}".replace('.', '_')
             f_max_str = f"{calc_max:.1f}".replace('.', '_')
             output_path = os.path.join(
-                base_dir,
-                f"Report_SDR_FM_RDS_Base_{region}_{f_min_str}_{f_max_str}.html"
+                reports_dir,
+                f"Report_SDR_Base_{region}_{f_min_str}_{f_max_str}.html"
             )
         else:
-            # Если ничего не задано — имя без частот
-            output_path = os.path.join(base_dir, f"Report_SDR_FM_RDS_Base_{region}.html")
+            output_path = os.path.join(reports_dir, f"Report_SDR_Base_{region}.html")
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
@@ -281,32 +260,36 @@ function sortTable(col) {
     print(f"[*] HTML report: {output_path}")
     return output_path
 
+
+
 def main():
     parser = argparse.ArgumentParser(description="Генерация HTML-отчётов из базы станций")
-    parser.add_argument("--base", default="SDR_FM_RDS_Base_spb.json", help="Путь к JSON-базе станций в папке data/ (по умолчанию: SDR_FM_RDS_Base_<region>.json)")
-    parser.add_argument("--region", default="spb", help="Регион (для заголовка и имени файла)")
+    parser.add_argument("--base", default="SDR_Base_RU.spb.json", help="Имя JSON-базы станций (ищется в папке data/)")
+    parser.add_argument("--region", default="RU.spb", help="Регион (для заголовка и имени файла)")
     parser.add_argument("--start", type=float, help="Нижняя граница диапазона (МГц)")
     parser.add_argument("--stop", type=float, help="Верхняя граница диапазона (МГц)")
     parser.add_argument("--all", action="store_true", help="Вывести все станции из базы (игнорирует start/stop)")
-    parser.add_argument("--output", help="Путь к выходному HTML-файлу")
+    parser.add_argument("--output", help="Полный путь к выходному HTML-файлу (переопределяет авто-генерацию)")
 
     args = parser.parse_args()
-    base_dir = "data"
 
-    # 1. Формируем полный путь к БАЗЕ ДАННЫХ (ВСЕВОЛНОВОЙ)
+    data_dir = "data"
+    reports_dir = "reports"
+
+    # 1. Формируем полный путь к БАЗЕ ДАННЫХ (всегда в data/)
     # Если пользователь передал полный путь (с /), используем его. Иначе добавляем папку data.
     if os.path.dirname(args.base):
         base_path = args.base
     else:
         # Если передано только имя файла, подставляем регион в имя, если оно дефолтное
-        if args.base == "SDR_FM_RDS_Base_spb.json":
-            args.base = f"SDR_FM_RDS_Base_{args.region}.json"
-        base_path = os.path.join(base_dir, args.base)
+        if args.base == "SDR_Base_RU.spb.json":
+            args.base = f"SDR_Base_{args.region}.json"
+        base_path = os.path.join(data_dir, args.base)
 
     # Проверка существования базы
     if not os.path.exists(base_path):
         print(f"[!] Ошибка: файл базы не найден: {base_path}")
-        print(f"   Подсказка: ожидается файл в папке '{base_dir}'")
+        print(f"   Подсказка: ожидается файл в папке '{data_dir}'")
         return 1
 
     # Чтение данных
@@ -327,30 +310,34 @@ def main():
         if args.stop is not None:
             freq_max = args.stop
 
-    # 3. Формирование пути для ВЫХОДНОГО HTML
-    # Вот тут мы добавляем диапазон в имя файла отчёта, так как это срез данных
+    # 3. Формирование пути для ВЫХОДНОГО HTML (всегда в reports/)
     output_path = args.output
+    
     if output_path is None:
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
+        # Создаем папку reports, если её нет
+        if not os.path.exists(reports_dir):
+            os.makedirs(reports_dir)
 
-        # Дефолтные границы
+        # Дефолтные границы для имени файла (если пользователь не задал диапазон, но мы хотим отразить срез)
         default_min = 65.5
         default_max = 108.5
 
-        # Подставляем дефолты, если аргумент не передан
+        # Подставляем дефолты, если аргумент не передан (для формирования имени файла)
         f_min = freq_min if freq_min is not None else default_min
         f_max = freq_max if freq_max is not None else default_max
 
+        # Формируем имя файла
         if freq_min is not None or freq_max is not None:
-            # Формат: data/fm_rds_report_spb_65_108.html
+            # Формат: reports/Report_SDR_Base_RU.spb_65_5_108_5.html
+            f_min_str = f"{f_min:.1f}".replace('.', '_')
+            f_max_str = f"{f_max:.1f}".replace('.', '_')
             output_path = os.path.join(
-                base_dir,
-                f"Report_SDR_FM_RDS_Base_{args.region}_{int(f_min)}_{int(f_max)}.html"
+                reports_dir,
+                f"Report_SDR_Base_{args.region}_{f_min_str}_{f_max_str}.html"
             )
         else:
-            # Формат: data/fm_rds_report_spb.html
-            output_path = os.path.join(base_dir, f"Report_SDR_FM_RDS_Base_{args.region}.html")
+            # Формат: reports/Report_SDR_Base_RU.spb.html
+            output_path = os.path.join(reports_dir, f"Report_SDR_Base_{args.region}.html")
 
     # Вызов функции генерации
     export_html(

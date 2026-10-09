@@ -1,4 +1,4 @@
-SDR RTL FM RDS Scanner (English Version)
+SDR-RTL Scanner (English Version)
 
 **Документация на русском языке:** [README.RU.md](./README.RU.md)
 
@@ -78,14 +78,14 @@ Installation Steps
 
     Ensure RedSea and rtl_fm are installed.
     Clone the repository (or ensure you’re in the project folder).
-    Check the region config in regions/ (use spb.json for Saint Petersburg).
+    Check the region config in regions/ (use RU.spb.json for Saint Petersburg).
     Run the scanner:
 
     bash
 
-    python3 SDR_RTL_FM_RDS_Scaner.py
+    python3 SDR_RTL_Scanner.py
 
-    Wait for the scan to finish. Results saved to data/SDR_FM_RDS_Base_spb.json.
+    Wait for the scan to finish. Results saved to data/SDR_Base_RU.spb.json.
 
     ⚠️ Important: The scanner needs USB device access rights. Use sudo or set up udev rules for RTL-SDR if you get permission errors.
 
@@ -95,13 +95,13 @@ To scan a different city or frequency range:
 
     Create a new JSON file in regions/ (e.g., msk.json).
     Specify parameters (see example in the Russian section).
-    Update the script (SDR_RTL_FM_RDS_Scaner.py) to use this file or pass it as an argument.
+    Update the script (SDR_RTL_Scaner.py) to use this file or pass it as an argument.
 
 📁 Project Structure
 
     data/ — stores station databases and temporary files (ignored by Git).
     regions/ — configurations for different regions.
-    SDR_RTL_FM_RDS_Scaner.py — main scanner script.
+    SDR_RTL_Scanner.py — main scanner script.
     .gitignore — configured to exclude temporary scan logs.
     LICENSE — MIT license.
 

@@ -1,6 +1,10 @@
 # Базы и апдейты (не коммить личные результаты)
-data/SDR_FM_RDS_Update_*.json
+data/SDR_Update_*.json
 data/*.tmp
+data/*.html
+data/*_report*.html
+repoerts/*
+logs/*
 
 # Временные файлы
 *.cfile
@@ -8,6 +12,9 @@ data/*.tmp
 *.raw
 *.wav
 *.log
+
+# Папка скриптов, если это песочница
+scripts/
 
 # Python
 __pycache__/
@@ -34,3 +41,6 @@ __pycache__/
 # IDE
 .idea/
 .vscode/
+
+# Markdown-патчи, если они временные
+INTEGRATION_PATCH.md
