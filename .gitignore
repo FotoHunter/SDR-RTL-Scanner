@@ -3,6 +3,8 @@ data/SDR_Update_*.json
 data/*.tmp
 data/*.html
 data/*_report*.html
+repoerts/*
+logs/*
 
 # Временные файлы
 *.cfile
