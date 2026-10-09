@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+from _version import __version__
 
 """
-FM RDS Scanner v0.8 — RTL-SDR (rtl_power + rtl_fm + redsea)
+SDR-RTL Scanner v{__version__} — RTL-SDR (rtl_power + rtl_fm + redsea)
 
-Universal FM scanner with RDS decoding and multi-region support.
+Universal SDR-scanner with RDS decoding and multi-region support.
 
 Modes:
   fullscan  — scan range with rtl_power, decode RDS with rtl_fm|redsea
@@ -13,18 +14,68 @@ Modes:
 
 Files:
   Regions:  regions/{region}.json (station reference, per region)
-  Base:     data/SDR_FM_RDS_Base_{region}.json
-  Update:   data/SDR_FM_RDS_Update_{region}_YYYY.MM.DD_hh.mm.json
+  Base:     data/SDR_Base_{region}.json
+  Update:   data/SDR_Update_{region}_YYYY.MM.DD_hh.mm.json
+  Reports:  reports/Last_Report_SDR_RTL_RU.spb.html
+  Reports:  reports/Report_SDR_RTL_RU.spb.html
 
 Author: Andrey E. Smirnov
 Email: aes222ripn@gmail.com
 License: MIT
 """
 
-import os, sys, json, argparse, subprocess, select, time
+import os, sys, json, argparse, subprocess, select, time, config, shutil
+import numpy as np
 from pathlib import Path
 from datetime import datetime
-from src.context import Context
+from src.context import Context, _format_metar_human
+from config import *
+from core.snr import auto_ppm_calibrate, check_rds_snr, decode_rds, decode_rds_multi
+from core.scanner import multi_gain_scan, bloom_split_scan, split_scan_ranges, snap_freq
+from config.styles import C_GREEN, C_RED, C_BLUE, C_YELLOW, C_RESET
+from config.system import DEFAULT_DWELL, DEFAULT_RDS_RATE, DEFAULT_PPM, PPM_REFERENCES
+
+# --- ФИЛЬТР ESCAPE-КОДОВ МЫШИ (для legacy-консоли Windows) ---
+# Если stdout подключён к терминалу и мы в Windows — оборачиваем sys.stdout
+if sys.stdout.isatty() and os.name == 'nt':
+    class MouseFilterWriter:
+        def __init__(self, target):
+            self.target = target
+            self.escape_seq = False
+            self.buffer = []
+
+        def write(self, text):
+            # Пропускаем любые последовательности, начинающиеся с ESC (\x1b)
+            # Это убирает xterm mouse reporting: 64;35;30M, M, C, D и т.п.
+            if not text:
+                return
+
+            # Простая эвристика: если видим ESC — игнорируем всё до конца последовательности
+            if '\x1b' in text:
+                # Разбиваем по ESC, оставляем только чистые куски
+                parts = text.split('\x1b')
+                clean = parts  # всё до первого ESC
+                # Если после ESC есть текст — он часть escape-последовательности, игнорируем
+                # (в редких случаях может быть смешанный вывод, но для логов это ок)
+                if clean:
+                    self.target.write(clean)
+                # Остатки после ESC игнорируем
+                return
+
+            self.target.write(text)
+
+        def flush(self):
+            self.target.flush()
+
+        def __getattr__(self, name):
+            # Пробрасываем остальные атрибуты (encoding, errors и т.п.)
+            return getattr(self.target, name)
+
+    sys.stdout = MouseFilterWriter(sys.stdout)
+    # При желании можно аналогично для stderr, если туда тоже сыпется мышь
+    # sys.stderr = MouseFilterWriter(sys.stderr)
+# ---------------------------------------------------------------
+
 
 # ═══════════════════════════════════════════════════════════════
 #  CONFIG
@@ -33,6 +84,7 @@ from src.context import Context
 SCRIPT_DIR      = Path(__file__).parent
 REGIONS_DIR     = SCRIPT_DIR / "regions"
 DATA_DIR        = SCRIPT_DIR / "data"
+REPORTS_DIR     = SCRIPT_DIR / "reports"
 #
 # Определяем базовый путь к проекту (чтобы не зависеть от текущей рабочей директории)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -57,25 +109,25 @@ except FileNotFoundError:
     print(f"[!] Warning: antennas.json not found at {ANTENNAS_PATH}. Using defaults.")
     ANTENNAS_CONFIG = {}
 #
-DEFAULT_START    = 87.0
-DEFAULT_STOP     = 109.0
-DEFAULT_STEP     = 100      # kHz
-DEFAULT_THRESHOLD = -25.0   # dB (auto-adjusted if too low)
-DEFAULT_PPM      = 0
-DEFAULT_DWELL    = 20       # seconds per station for RDS
-DEFAULT_GAINS    = "0,10,25,50"
-DEFAULT_RDS_GAIN = 50
-DEFAULT_RDS_GAINS = "-1,50,25,10,0"
-DEFAULT_RDS_RATE = 228000   # Hz
-DEFAULT_SNAP     = 100      # kHz
-FM_MIN, FM_MAX   = 87.5, 108.0
-NARROW_RANGE_MHZ = 5.0
+#DEFAULT_START    = 87.0
+#DEFAULT_STOP     = 109.0
+#DEFAULT_STEP     = 100      # kHz
+#DEFAULT_THRESHOLD = -25.0   # dB (auto-adjusted if too low)
+#DEFAULT_PPM      = 0
+#DEFAULT_DWELL    = 20       # seconds per station for RDS
+#DEFAULT_GAINS    = "0,10,25,50"
+#DEFAULT_RDS_GAIN = 50
+#DEFAULT_RDS_GAINS = "-1,50,25,10,0"
+#DEFAULT_RDS_RATE = 228000   # Hz
+#DEFAULT_SNAP     = 100      # kHz
+#FM_MIN, FM_MAX   = 87.5, 108.0
+#NARROW_RANGE_MHZ = 5.0
 # ── ANSI colors ──
-C_RED    = '\033[91m'
-C_GREEN  = '\033[92m'
-C_BLUE   = '\033[94m'
-C_YELLOW = '\033[93m'
-C_RESET  = '\033[0m'
+#C_RED    = '\033[91m'
+#C_GREEN  = '\033[92m'
+#C_BLUE   = '\033[94m'
+#C_YELLOW = '\033[93m'
+#C_RESET  = '\033[0m'
 
 # Выбираем антенну по умолчанию (первый ключ из справочника)
 _default_antenna = ANTENNAS_CONFIG[list(ANTENNAS_CONFIG.keys())[0]] if ANTENNAS_CONFIG else {}
@@ -84,21 +136,155 @@ print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, Antenna:
 
 # Устанавливаются в main() после выбора региона
 CURRENT_REGION  = "default"
+CURRENT_COUNTRY = ""
+CURRENT_SUBREGION = None
 BASE_FILE       = ""
 STATIONS_FILE   = ""
+BANDS_REF       = None
+
+def parse_region_name(region_str: str) -> dict:
+    """Разобрать имя региона в формате CC.city или CC.city.SUB.
+
+    Возвращает:
+      country   — ISO-код страны, uppercase (всегда)
+      city      — название города, lowercase (всегда)
+      subregion — код субрегиона, uppercase (или None)
+
+    Примеры:
+      "RU.spb"     → {"country": "RU", "city": "spb", "subregion": None}
+      "US.spb.FL"  → {"country": "US", "city": "spb", "subregion": "FL"}
+      "JP.tokyo"   → {"country": "JP", "city": "tokyo", "subregion": None}
+    """
+
+    if region_str == "default":
+        return {"country": "", "city": "default", "subregion": None}
+
+    parts = region_str.split(".")
+
+    if len(parts) < 2:
+        raise ValueError(
+            f"Имя региона '{region_str}' должно быть в формате CC.city "
+            f"или CC.city.SUB (например: RU.spb, US.spb.FL)"
+        )
+
+    if len(parts) > 3:
+        raise ValueError(
+            f"Имя региона '{region_str}' содержит слишком много частей. "
+            f"Ожидается 2 или 3, получено {len(parts)}"
+        )
+
+    result = {
+        "country": parts[0].upper(),
+        "city": parts[1].lower(),
+        "subregion": parts[2].upper() if len(parts) == 3 else None,
+    }
+
+    return result
 
 def get_base_file(region=None):
     r = region or CURRENT_REGION
-    return str(DATA_DIR / f"SDR_FM_RDS_Base_{r}.json")
+    return str(DATA_DIR / f"SDR_Base_{r}.json")
 
 def get_update_file(region=None):
     r = region or CURRENT_REGION
     ts = datetime.now().strftime("%Y.%m.%d_%H.%M")
-    return str(DATA_DIR / f"SDR_FM_RDS_Update_{r}_{ts}.json")
+    return str(DATA_DIR / f"SDR_Update_{r}_{ts}.json")
 
 def get_stations_file(region=None):
     r = region or CURRENT_REGION
     return str(REGIONS_DIR / f"{r}.json")
+
+# ═══════════════════════════════════════════════════════════════
+#  FQ REFERENCE per region)
+# ═══════════════════════════════════════════════════════════════
+
+def load_bands_reference(path="regions/radio_bands_reference.json"):
+    global BANDS_REF
+    if not os.path.exists(path):
+        print(f"[!] Warning: bands reference not found at {path}")
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        BANDS_REF = json.load(f)["bands"]
+    print(f"[*] Loaded {len(BANDS_REF)} band definitions from {path}")
+
+
+def lookup_band(freq_khz: float, bands: list, country: str = "", subregion: str | None = None) -> dict | None:
+    """Найти диапазон по частоте, стране и (опционально) субрегиону.
+    ================================================================
+    Логика приоритета:
+    1. Точное совпадение: country + subregion (если subregion задан в обоих местах)
+    2. Страна без субрегиона (глобальный для страны)
+    3. Глобальный диапазон (без country)
+    4. Fallback на ближайший нижний диапазон
+    """
+    if not bands:
+        return None
+
+    sorted_bands = sorted(bands, key=lambda b: b["freq_min"])
+
+    def match_country(b):
+        b_country = b.get("country") or b.get("region")
+        if b_country is None:
+            return True
+        return b_country == country
+
+    def match_subregion(b):
+        b_sub = b.get("subregion")
+        # Если ни в справочнике, ни в запросе нет subregion — OK
+        if b_sub is None and subregion is None:
+            return True
+        # В справочнике нет, в запросе есть — всё равно OK (глобальный диапазон покрывает)
+        if b_sub is None and subregion is not None:
+            return True
+        # В справочнике есть, в запросе нет — не подходит (это специфичный диапазон)
+        if b_sub is not None and subregion is None:
+            return False
+        # Оба есть — должно совпадать
+        return b_sub == subregion
+
+    # 1. Ищем точное совпадение по country и subregion
+    for b in sorted_bands:
+        if (b["freq_min"] <= freq_khz <= b["freq_max"]
+                and match_country(b)
+                and match_subregion(b)
+                and b.get("country") is not None):
+            return b
+
+    # 2. Ищем по стране (без учёта subregion)
+    for b in sorted_bands:
+        if (b["freq_min"] <= freq_khz <= b["freq_max"]
+                and match_country(b)
+                # subregion игнорируем на этом шаге
+                and b.get("country") is not None):
+            return b
+
+    # 3. Ищем глобальный (без country)
+    for b in sorted_bands:
+        if (b["freq_min"] <= freq_khz <= b["freq_max"]
+                and b.get("country") is None):
+            return b
+
+    # 4. Fallback: ближайший нижний диапазон (по max)
+    fallback = None
+    for b in sorted_bands:
+        if b["freq_max"] < freq_khz:
+            fallback = b
+        else:
+            break
+
+    if fallback:
+        return {
+            "name": "Unknown",
+            "modulation": fallback.get("modulation", "NFM"),
+            "bandwidth": fallback.get("bandwidth", 12000),
+            "step": fallback.get("step", 25000),
+            "description": f"Fallback from {fallback['name']} ({fallback['freq_min']}-{fallback['freq_max']} kHz)",
+            "fallback": True,
+            "source_band": fallback["name"],
+        }
+
+    return None
+
 
 # ═══════════════════════════════════════════════════════════════
 #  STATION REFERENCE (external JSON, per region)
@@ -159,19 +345,12 @@ def ensure_base_file(region):
     base = get_base_file(region)
     if os.path.exists(base):
         return
-    # Создаём пустую базу
     data = {"schema_version": 1, "region": region,
             "scan_date": datetime.now().isoformat(), "mode": "init",
             "stations": []}
     with open(base, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"[*] Создана база: {base}")
-    # ── Предупреждение о шаге сетки ──
-    if args.step == 200:
-        print(f"[*] Step=200 kHz — US/FCC channel spacing (88.1, 88.3, 88.5 ...)")
-    elif args.step == 100:
-        print(f"[*] Step=100 kHz — Europe/Russia channel spacing (87.5, 87.6, 87.7 ...)")
-
+    print(f"[*] Создана базу: {base}")
 
 def load_stations(filepath):
     global _station_map
@@ -197,336 +376,11 @@ def lookup_name_ru(freq):
 #  UTILITIES
 # ═══════════════════════════════════════════════════════════════
 
-def snap_freq(freq_mhz, snap_khz):
-    if snap_khz <= 0: return freq_mhz
-    step_mhz = snap_khz / 1000.0
-    return round(int(freq_mhz / step_mhz + 0.5) * step_mhz, 3)
-
-def is_in_fm_range(freq):
-    return FM_MIN <= freq <= FM_MAX
+def is_in_fq_range(freq):
+    return FQ_MIN <= freq <= FQ_MAX
 
 def make_update_filename():
     return get_update_file()
-
-# ═══════════════════════════════════════════════════════════════
-#  RTL_POWER SCANNING
-# ═══════════════════════════════════════════════════════════════
-
-def run_rtl_power(start_mhz, stop_mhz, step_khz, gain_db, ppm=0, snap_khz=0):
-    start_snapped = snap_freq(start_mhz, snap_khz)
-    stop_snapped  = snap_freq(stop_mhz,  snap_khz)
-    freq_range = f"{start_snapped}M:{stop_snapped}M:{step_khz}k"
-    range_mhz = stop_snapped - start_snapped
-    dwell_sec = max(int(range_mhz * 3) + 5, 10)
-    cmd = ["rtl_power", "-f", freq_range, "-g", str(gain_db), "-p", str(ppm),
-           "-i", "1", "-e", str(dwell_sec), "-F", "0"]
-    print(f"  [rtl_power] gain={gain_db} dB, range={start_snapped}-{stop_snapped} MHz, step={step_khz} kHz, {dwell_sec}s ...")
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=dwell_sec + 15)
-    except subprocess.TimeoutExpired:
-        print("  [rtl_power] timeout!"); return {}
-    except FileNotFoundError:
-        print("[!] rtl_power not found. Install: sudo apt install rtl-sdr"); sys.exit(1)
-    if result.returncode != 0:
-        stderr = result.stderr.strip()
-        if stderr: print(f"  [rtl_power] stderr: {stderr[:200]}")
-        return {}
-    freq_power = {}
-    for line in result.stdout.strip().split("\n"):
-        line = line.strip()
-        if not line or not line[0].isdigit(): continue
-        parts = line.split(",")
-        if len(parts) < 7: continue
-        try:
-            start_hz = float(parts[2].strip())
-            step_hz  = float(parts[4].strip())
-        except (ValueError, IndexError): continue
-        for i in range(6, len(parts)):
-            try:
-                pwr = float(parts[i].strip())
-            except ValueError: continue
-            freq = round((start_hz + (i - 6) * step_hz) / 1e6, 3)
-            freq_snapped = snap_freq(freq, snap_khz) if snap_khz > 0 else freq
-            if freq_snapped not in freq_power or pwr > freq_power[freq_snapped]:
-                freq_power[freq_snapped] = pwr
-    return freq_power
-
-def multi_gain_scan(start_mhz, stop_mhz, step_khz, gains_str, threshold_db, ppm=0, snap_khz=0):
-    # ── Авто-выравнивание границ на сетку шага ──
-    start_mhz = snap_freq(start_mhz, step_khz)
-    stop_mhz  = snap_freq(stop_mhz,  step_khz)
-    gains = [int(x.strip()) for x in gains_str.split(",")]
-
-    # --- НОВЫЙ БЛОК: Корректировка усиления по антенне ---
-    # Если в antennas.json есть запись для диапазона частот, используем её
-    # Пример структуры antennas.json: {"87.5-108.0": {"default_gain": 25}}
-    
-    center_freq = (start_mhz + stop_mhz) / 2.0
-    
-    # Ищем подходящую антенну в конфиге
-    matched_antenna = None
-    for freq_range, data in ANTENNAS_CONFIG.items():
-        try:
-            min_f, max_f = map(float, freq_range.split("-"))
-            if min_f <= center_freq <= max_f:
-                matched_antenna = data
-                break
-        except ValueError:
-            continue
-            
-    if matched_antenna and "default_gain" in matched_antenna:
-        custom_gain = matched_antenna["default_gain"]
-        print(f"[*] Antenna profile matched for {center_freq:.1f} MHz: default gain={custom_gain} dB")
-        # Можно заменить весь список gains на один оптимальный, если нужно
-        # gains = [custom_gain] 
-        # Или добавить его в начало списка для приоритета
-        if custom_gain not in gains:
-            gains.insert(0, custom_gain)
-    # -------------------------------------------------------
-    range_mhz = stop_mhz - start_mhz
-    is_narrow = range_mhz < NARROW_RANGE_MHZ
-    print(f"\n[*] Multi-gain scan: {gains} dB, threshold={threshold_db} dB")
-    print(f"    Range: {start_mhz}-{stop_mhz} MHz, step={step_khz} kHz, ppm={ppm}, snap={snap_khz} kHz")
-    if is_narrow:
-        print(f"    [!] Narrow range ({range_mhz:.1f} MHz < {NARROW_RANGE_MHZ:.0f} MHz): using user threshold, auto-threshold skipped")
-        print(f"    [!] Weak stations may be missed — set --threshold manually if needed")
-    print()
-    all_fp = {}
-    for gain in gains:
-        fp = run_rtl_power(start_mhz, stop_mhz, step_khz, gain, ppm, snap_khz)
-        for freq, pwr in fp.items():
-            if freq not in all_fp or pwr > all_fp[freq]: all_fp[freq] = pwr
-        time.sleep(0.3)
-    if all_fp:
-        max_pwr, min_pwr = max(all_fp.values()), min(all_fp.values())
-        auto_threshold = min_pwr + (max_pwr - min_pwr) * 0.3
-        expected_bins = int((stop_mhz - start_mhz) * 1000 / step_khz) + 1
-        print(f"  [scan] {len(all_fp)}/{expected_bins} bins, range: {min_pwr:.1f}..{max_pwr:.1f} dB")
-        print(f"  [scan] noise floor ~{min_pwr:.1f} dB | auto threshold ~{auto_threshold:.1f} dB | your threshold: {threshold_db} dB")
-        if len(all_fp) < expected_bins * 0.7:
-            print(f"  [!] Warning: only {len(all_fp)}/{expected_bins} bins scanned — incomplete coverage!")
-        if is_narrow:
-            effective_threshold = threshold_db
-            print(f"  [scan] Using your threshold {effective_threshold:.1f} dB (narrow range, auto skipped)")
-        else:
-            effective_threshold = max(threshold_db, auto_threshold)
-            if threshold_db < auto_threshold:
-                print(f"  [scan] Using auto threshold {effective_threshold:.1f} dB (your {threshold_db} too low)")
-    else:
-        print("  [scan] No data from rtl_power!"); return []
-    candidates = [(f, p) for f, p in all_fp.items() if p >= effective_threshold]
-    candidates.sort(key=lambda x: x[0])
-    if not candidates:
-        print(f"  [scan] No bins above {effective_threshold:.1f} dB.")
-        return []
-    stations, group = [], []
-    for freq, pwr in candidates:
-        if group and (freq - group[-1][0]) > 0.2:
-            best = max(group, key=lambda x: x[1])
-            stations.append({"freq": best[0], "signal": best[1]}); group = []
-        group.append((freq, pwr))
-    if group:
-        best = max(group, key=lambda x: x[1])
-        stations.append({"freq": best[0], "signal": best[1]})
-    print(f"[*] Found {len(stations)} station(s):")
-    for i, st in enumerate(stations):
-        name = lookup_name_ru(st["freq"]) or "?"
-        print(f"    {i+1}. {st['freq']:.1f} MHz  ({st['signal']:.1f} dB)  [{name}]")
-    print()
-    return stations
-
-# ═══════════════════════════════════════════════════════════════
-#  RDS SNR CHECK
-# ═══════════════════════════════════════════════════════════════
-
-def auto_ppm_calibrate(freq_mhz, gain_db=-1, rate=DEFAULT_RDS_RATE, duration=2.0):
-    """Калибровка PPM по пилот-тону 19 кГц. Возвращает (ppm, is_stereo)."""
-    freq_hz = int(freq_mhz * 1e6)
-    cmd_fm = ["rtl_fm", "-f", str(freq_hz), "-s", str(rate), "-r", str(rate),
-              "-M", "fm", "-A", "std", "-F", "9"]
-    if gain_db != -1:
-        cmd_fm.extend(["-g", str(gain_db)])
-    try:
-        proc = subprocess.Popen(cmd_fm, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    except FileNotFoundError:
-        return 0, None
-    n_bytes = int(rate * duration) * 2
-    audio = b""
-    while len(audio) < n_bytes:
-        chunk = proc.stdout.read(min(8192, n_bytes - len(audio)))
-        if not chunk: break
-        audio += chunk
-    proc.terminate()
-    try: proc.wait(timeout=2)
-    except subprocess.TimeoutExpired: proc.kill()
-    if len(audio) < n_bytes: return 0, None
-    try:
-        import numpy as np
-        samples = np.frombuffer(audio, dtype=np.int16).astype(np.float64)
-        win = np.hanning(len(samples))
-        fft = np.fft.rfft(samples * win)
-        freqs = np.fft.rfftfreq(len(samples), 1.0 / rate)
-        power = np.abs(fft) ** 2
-        # Поиск пилот-тона 19 кГц
-        pilot_mask = (freqs >= 18500) & (freqs <= 19500)
-        if not np.any(pilot_mask): return 0, None
-        pilot_freqs = freqs[pilot_mask]
-        pilot_power = power[pilot_mask]
-        peak_idx = np.argmax(pilot_power)
-        # Уровень шума для сравнения (15-17 кГц)
-        noise_mask = (freqs >= 15000) & (freqs <= 17000)
-        noise_pwr = np.mean(power[noise_mask]) if np.any(noise_mask) else 1e-10
-        pilot_snr = 10 * np.log10(pilot_power[peak_idx] / noise_pwr) if noise_pwr > 0 else 0
-        if pilot_snr < 10:
-            return 0, False  # Пилот-тона нет = моно
-        # Параболическая интерполяция для суббинной точности
-        if 0 < peak_idx < len(pilot_power) - 1:
-            alpha = pilot_power[peak_idx - 1]
-            beta  = pilot_power[peak_idx]
-            gamma = pilot_power[peak_idx + 1]
-            p = 0.5 * (alpha - gamma) / (alpha - 2 * beta + gamma)
-            bin_width = pilot_freqs[1] - pilot_freqs[0]
-            peak_freq = pilot_freqs[peak_idx] + p * bin_width
-        else:
-            peak_freq = pilot_freqs[peak_idx]
-        ppm = round((peak_freq / 19000 - 1) * 1e6)
-        return ppm, True
-    except Exception:
-        return 0, None
-
-def check_rds_snr(freq_mhz, gain_db, ppm, rate=DEFAULT_RDS_RATE, duration=1.0):
-    freq_hz = int(freq_mhz * 1e6)
-    cmd_fm = ["rtl_fm", "-f", str(freq_hz), "-s", str(rate), "-r", str(rate),
-              "-M", "fm", "-A", "std", "-F", "9"]
-    if gain_db != -1:
-        cmd_fm.extend(["-g", str(gain_db)])
-    if ppm != 0:
-        cmd_fm.extend(["-p", str(ppm)])
-    try:
-        proc = subprocess.Popen(cmd_fm, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    except FileNotFoundError:
-        return None, None
-    n_bytes = int(rate * duration) * 2
-    audio = b""
-    while len(audio) < n_bytes:
-        chunk = proc.stdout.read(min(8192, n_bytes - len(audio)))
-        if not chunk: break
-        audio += chunk
-    proc.terminate()
-    try: proc.wait(timeout=2)
-    except subprocess.TimeoutExpired: proc.kill()
-    if len(audio) < n_bytes: return None, None
-    try:
-        import numpy as np
-        samples = np.frombuffer(audio, dtype=np.int16).astype(np.float64)
-        win = np.hanning(len(samples))
-        fft = np.fft.rfft(samples * win)
-        freqs = np.fft.rfftfreq(len(samples), 1.0 / rate)
-        power = np.abs(fft) ** 2
-        # RDS SNR (57 кГц)
-        rds_mask = (freqs >= 54600) & (freqs <= 59400)
-        noise_mask = (freqs >= 68000) & (freqs <= 78000)
-        rds_pwr = np.mean(power[rds_mask]) if np.any(rds_mask) else 0
-        noise_pwr = np.mean(power[noise_mask]) if np.any(noise_mask) else 1e-10
-        if noise_pwr <= 0: return None, None
-        snr = 10 * np.log10(rds_pwr / noise_pwr)
-        # Стерео по пилот-тону 19 кГц (в том же FFT!)
-        pilot_mask = (freqs >= 18500) & (freqs <= 19500)
-        pilot_pwr = np.max(power[pilot_mask]) if np.any(pilot_mask) else 0
-        pilot_snr = 10 * np.log10(pilot_pwr / noise_pwr) if noise_pwr > 0 else 0
-        is_stereo = pilot_snr > 10
-        return round(snr, 1), is_stereo
-    except Exception:
-        return None, None
-
-# ═══════════════════════════════════════════════════════════════
-#  RDS DECODING
-# ═══════════════════════════════════════════════════════════════
-
-def _parse_rds_json(data, result):
-    if "pi" in data: result["PI"] = data["pi"]
-    if "ps" in data and isinstance(data["ps"], str): result["PS"] = data["ps"].strip()
-    if "prog_type" in data: result["PTY"] = data["prog_type"]
-    if "stereo" in data: result["Stereo"] = data["stereo"]
-    if "tp" in data: result["TP"] = data["tp"]
-    if "ta" in data: result["TA"] = data["ta"]
-    if "af" in data: result["AF"] = data["af"]
-    if "radiotext" in data and isinstance(data["radiotext"], str): result["RadioText"] = data["radiotext"].strip()
-    elif "rt" in data and isinstance(data["rt"], str): result["RadioText"] = data["rt"].strip()
-
-def decode_rds(freq_mhz, gain_db, ppm, dwell_sec, rate=DEFAULT_RDS_RATE):
-    freq_hz = int(freq_mhz * 1e6)
-    cmd_fm = ["rtl_fm", "-f", str(freq_hz), "-s", str(rate), "-r", str(rate),
-              "-M", "fm", "-A", "std", "-F", "9"]
-    if gain_db != -1:
-        cmd_fm.extend(["-g", str(gain_db)])
-    if ppm != 0:
-        cmd_fm.extend(["-p", str(ppm)])
-    cmd_rs = ["redsea", "-r", str(rate)]
-    g_str = "auto" if gain_db == "auto" else f"{gain_db} dB"
-    print(f"  [rtl_fm] {freq_mhz:.1f} MHz, gain={g_str}, ppm={ppm}, {rate} Hz, {dwell_sec}s ...")
-    try:
-        proc_fm = subprocess.Popen(cmd_fm, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        proc_rs = subprocess.Popen(cmd_rs, stdin=proc_fm.stdout, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        proc_fm.stdout.close()
-    except FileNotFoundError as e:
-        print(f"  [!] Command not found: {e}"); return {}
-    result = {"PI": None, "PS": None, "PTY": None, "Stereo": None,
-              "TP": None, "TA": None, "AF": None, "RadioText": None}
-    elapsed, chunk_timeout = 0, 0.5
-    while elapsed < dwell_sec:
-        ready, _, _ = select.select([proc_rs.stdout], [], [], chunk_timeout)
-        if ready:
-            line = proc_rs.stdout.readline()
-            if not line: break
-            try: data = json.loads(line)
-            except json.JSONDecodeError: continue
-            _parse_rds_json(data, result)
-        elapsed += chunk_timeout
-    proc_fm.terminate()
-    try: proc_rs.wait(timeout=2)
-    except subprocess.TimeoutExpired: proc_rs.kill()
-    try: proc_fm.wait(timeout=2)
-    except subprocess.TimeoutExpired: proc_fm.kill()
-    try:
-        while True:
-            ready, _, _ = select.select([proc_rs.stdout], [], [], 0.1)
-            if not ready: break
-            line = proc_rs.stdout.readline()
-            if not line: break
-            try: _parse_rds_json(json.loads(line), result)
-            except: pass
-    except: pass
-    if result["PI"]: return {k: v for k, v in result.items() if v is not None}
-    return {}
-
-def decode_rds_multi(freq_mhz, rds_gains, ppm, dwell_sec, rate=DEFAULT_RDS_RATE):
-    best_snr, best_gain, best_stereo = None, rds_gains[0], None
-    for gain in rds_gains:
-        snr, stereo = check_rds_snr(freq_mhz, gain, ppm, rate)
-        g_str = "auto" if gain == -1 else f"{gain} dB"
-        if snr is not None:
-            ster_str = ""
-            if stereo is not None:
-                ster_str = f" | {C_GREEN}STEREO{C_RESET}" if stereo else f" | mono"
-            print(f"    [SNR] gain={g_str} → RDS 57kHz SNR = {snr} dB{ster_str}")
-            if best_snr is None or snr > best_snr:
-                best_snr = snr
-                best_gain = gain
-                best_stereo = stereo
-        else:
-            print(f"    [SNR] gain={g_str} → no data")
-    tried = []
-    if best_gain in rds_gains:
-        tried.append(best_gain)
-    for g in rds_gains:
-        if g not in tried:
-            tried.append(g)
-    for gain in tried:
-        rds = decode_rds(freq_mhz, gain, ppm, dwell_sec, rate)
-        if rds:
-            return rds, gain, best_snr, best_stereo
-    return {}, best_gain, best_snr, best_stereo
 
 # ═══════════════════════════════════════════════════════════════
 #  JSON I/O
@@ -550,12 +404,13 @@ def save_results(stations, args, mode, filename=None, scan_min=None, scan_max=No
         else:
             filename = args.output or BASE_FILE
     if filename == BASE_FILE:
-        filtered = [s for s in stations if is_in_fm_range(s["freq"])]
+        filtered = [s for s in stations if is_in_fq_range(s["freq"])]
         if len(filtered) < len(stations):
             print(f"[!] {len(stations)-len(filtered)} station(s) outside {FM_MIN}-{FM_MAX} MHz not saved to {BASE_FILE}.")
     else:
         filtered = stations
-    data = {"scan_date": datetime.now().isoformat(), "mode": mode, "band": "FM",
+    scan_band = "OIRT" if (scan_min and scan_min >= 65.0 and scan_max and scan_max <= 74.5) else "FM"
+    data = {"scan_date": datetime.now().isoformat(), "mode": mode, "band": scan_band,
             "scan_range": {"min": scan_min, "max": scan_max},
             "params": {"start": args.start, "stop": args.stop, "step": args.step,
                        "threshold": args.threshold, "ppm": args.ppm, "gains": args.gains,
@@ -656,14 +511,29 @@ def interactive_merge(base_data, diff_info, scan_min, scan_max):
                                 diff_info["changed"], default_all=True)
         for idx in sel: to_update.append(diff_info["changed"][idx])
     print(f"\nИтого: +{len(to_add)} добавить, -{len(to_remove)} удалить, ~{len(to_update)} обновить")
-    resp = input("Подтвердить? (y/N): ").strip().lower()
-    if resp != "y": print("[*] Слияние отменено."); return None
-    for f in to_remove: base_sts.pop(f, None)
+
+#    resp = input("Подтвердить? (y/N): ").strip().lower()
+    try:
+        resp = input("Confirm? (y/N): ").strip().lower()
+    except UnicodeDecodeError:
+        # Если ввод битый — считаем отказом
+        resp = "n"
+
+    if resp == "y" or resp == "yes":
+        pass  # логика подтверждения уже ниже
+    else:
+        print("[*] Слияние отменено.")
+        return None
+
+    for f in to_remove:
+        base_sts.pop(f, None)
+
     for f in to_add:
         s = diff_info["new_sts"][f]
         if f in base_sts and not s.get("name_ru") and base_sts[f].get("name_ru"):
             s["name_ru"] = base_sts[f]["name_ru"]
         base_sts[f] = s
+
     for f in to_update:
         s = diff_info["changed_sts"][f]
         old = base_sts.get(f, {})
@@ -685,24 +555,27 @@ def interactive_merge(base_data, diff_info, scan_min, scan_max):
     return base_data
 
 # ═══════════════════════════════════════════════════════════════
-#  PRETTY PRINT
+#  PRETTY PRINT Summary
 # ═══════════════════════════════════════════════════════════════
 
 def print_summary(stations, ppm=0, snap=0):
-    print("\n" + "=" * 135)
-    hdr = f"{'Freq':>7} | {'Signal':>7} | {'Name RU':<22} | {'PI':>8} | {'PS':<24} | {'PTY':<16} | {'Ster':>5} | {'TP':>4} | {'TA':>4} | RadioText"
+    print("\n" + "=" * 155)
+    # Добавлены колонки Mod и Band
+    hdr = (f"{'Freq':>7} | {'Signal':>7} | {'Name RU':<22} | {'Mod':>5} | {'Band':<12} | "
+           f"{'PI':>8} | {'PS':<24} | {'PTY':<16} | {'Ster':>5} | {'TP':>4} | {'TA':>4} | RadioText")
     print(hdr)
-    print("-" * 135)
+    print("-" * 155)
     n_pi = n_ps = n_rt = n_ru = 0
     for st in stations:
         freq = st.get("freq", 0); signal = st.get("signal", 0)
         name_ru = st.get("name_ru", "") or "—"
+        mod = st.get("modulation", "") or "—"
+        band = st.get("band_name", "") or "—"
         rds = st.get("rds", {})
         pi = rds.get("PI", "—"); ps = rds.get("PS", "—") or "—"
         pty = rds.get("PTY", "—") or "—"
         tp = rds.get("TP", "—"); ta = rds.get("TA", "—")
         rt = rds.get("RadioText", "—") or "—"
-        # Стерео: сначала pilot tone, потом RDS flag
         stereo = st.get("stereo")
         if stereo is None:
             stereo = rds.get("Stereo")
@@ -712,15 +585,16 @@ def print_summary(stations, ppm=0, snap=0):
             ster_str = f"{C_RED}●{C_RESET}"
         else:
             ster_str = "?"
-        # Цвета для PI и RT
         pi_str = f"{C_BLUE}{pi}{C_RESET}" if pi != "—" else "—"
         rt_str = f"{C_BLUE}{rt}{C_RESET}" if rt != "—" else "—"
         if pi != "—": n_pi += 1
         if ps != "—": n_ps += 1
         if rt != "—": n_rt += 1
         if name_ru != "—": n_ru += 1
-        print(f"{freq:>6.1f}M | {signal:>6.1f} | {name_ru:<22} | {pi_str:>8} | {ps:<24} | {pty:<16} | {ster_str:>5} | {str(tp):>4} | {str(ta):>4} | {rt_str}")
-    print("=" * 135)
+        # Выводим Mod и Band
+        print(f"{freq:>6.1f}M | {signal:>6.1f} | {name_ru:<22} | {mod:>5} | {band:<12} | "
+              f"{pi_str:>8} | {ps:<24} | {pty:<16} | {ster_str:>5} | {str(tp):>4} | {str(ta):>4} | {rt_str}")
+    print("=" * 155)
     print(f"\nВсего станций: {len(stations)} | PPM: {ppm} | Snap: {snap} kHz")
     print(f"С RDS (PI): {n_pi} | С PS: {n_ps} | С RT: {n_rt} | С русским названием: {n_ru}")
 
@@ -728,8 +602,10 @@ def print_summary(stations, ppm=0, snap=0):
 #  Export to html
 # ═══════════════════════════════════════════════════════════════
 
-def export_html(data, region="spb", output_path=None):
-    stations = data.get("stations", [])
+
+# ══════════════════════════════
+def export_html(data, region="RU.spb", output_path=None):
+    stations = data.get("stations", )
     scan_date = data.get("scan_date", "")
     ppm = data.get("ppm", "?")
     mode = data.get("mode", "?")
@@ -749,6 +625,8 @@ def export_html(data, region="spb", output_path=None):
         freq = st.get("freq", 0)
         signal = st.get("signal", 0)
         name_ru = st.get("name_ru", "") or "—"
+        mod = st.get("modulation", "") or "—"
+        band = st.get("band_name", "") or "—"
         rds = st.get("rds", {}) or {}
         pi = rds.get("PI", "—")
         ps = rds.get("PS", "—")
@@ -777,6 +655,8 @@ def export_html(data, region="spb", output_path=None):
             f"        <td>{freq:.1f}</td>\n"
             f"        <td>{signal:.1f}</td>\n"
             f"        <td>{name_ru}</td>\n"
+            f"        <td>{mod}</td>\n"
+            f"        <td>{band}</td>\n"
             f"        <td>{pi}</td>\n"
             f"        <td>{ps}</td>\n"
             f"        <td>{pty}</td>\n"
@@ -789,7 +669,6 @@ def export_html(data, region="spb", output_path=None):
             f"      </tr>\n"
         )
 
-    # JS отдельно — никаких конфликтов с f-string
     js_code = """
 <script>
 let sortDir = {};
@@ -815,7 +694,7 @@ function sortTable(col) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FM RDS Scanner — {region.upper()}</title>
+<title>SDR-TRL Scanner — {region.upper()}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{
@@ -876,27 +755,29 @@ function sortTable(col) {
       <th onclick="sortTable(0)">Freq (MHz)</th>
       <th onclick="sortTable(1)">Signal (dB)</th>
       <th onclick="sortTable(2)">Name RU</th>
-      <th onclick="sortTable(3)">PI</th>
-      <th onclick="sortTable(4)">PS</th>
-      <th onclick="sortTable(5)">PTY</th>
-      <th onclick="sortTable(6)">Ster</th>
-      <th onclick="sortTable(7)">TP</th>
-      <th onclick="sortTable(8)">TA</th>
-      <th onclick="sortTable(9)">RadioText</th>
-      <th onclick="sortTable(10)">Status</th>
-      <th onclick="sortTable(11)">Last Seen</th>
+      <th onclick="sortTable(3)">Mod</th>
+      <th onclick="sortTable(4)">Band</th>
+      <th onclick="sortTable(5)">PI</th>
+      <th onclick="sortTable(6)">PS</th>
+      <th onclick="sortTable(7)">PTY</th>
+      <th onclick="sortTable(8)">Ster</th>
+      <th onclick="sortTable(9)">TP</th>
+      <th onclick="sortTable(10)">TA</th>
+      <th onclick="sortTable(11)">RadioText</th>
+      <th onclick="sortTable(12)">Status</th>
+      <th onclick="sortTable(13)">Last Seen</th>
     </tr>
   </thead>
   <tbody>
 {rows}  </tbody>
 </table>
-<div class="footer">Generated by SDR-RTL-Scanner v0.8 | {scan_date[:19]}</div>
+<div class="footer">Generated by SDR-RTL-Scanner v{__version__} | {scan_date[:19]}</div>
 {js_code}
 </body>
 </html>"""
 
     if output_path is None:
-        output_path = os.path.join(DATA_DIR, f"fm_rds_report_{region}.html")
+        output_path = os.path.join(REPORTS_DIR, f"Last_Report_SDR_RTL_{region}.html")
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"[*] HTML report: {output_path}")
@@ -907,77 +788,292 @@ function sortTable(col) {
 # ═══════════════════════════════════════════════════════════════
 
 def mode_fullscan(args):
-    print("=" * 60 + "\nFM RDS Scanner v0.8 — Mode 1: Full Scan\n" + "=" * 60)
+    print("=" * 60 + f"\nSDR-RTL Scanner v{__version__} — Mode 1: Full Scan\n" + "=" * 60)
     prev_names = {}
     if os.path.exists(BASE_FILE):
         prev = load_json(BASE_FILE)
         if prev:
             for st in prev.get("stations", []):
-                if st.get("name_ru"): prev_names[round(st["freq"], 1)] = st["name_ru"]
-    stations = multi_gain_scan(args.start, args.stop, args.step, args.gains, args.threshold, args.ppm, args.snap)
+                if st.get("name_ru"):
+                    prev_names[round(st["freq"], 1)] = st["name_ru"]
+
+    # ── Разбиваем на поддиапазоны по справочнику ──
+    sub_ranges = split_scan_ranges(
+        args.start, args.stop, BANDS_REF,
+        country=CURRENT_COUNTRY, subregion=CURRENT_SUBREGION
+    )
+
+    print(f"[*] Scan range {args.start}–{args.stop} MHz → {len(sub_ranges)} sub-range(s):")
+    for sr in sub_ranges:
+        tag = "OIRT" if sr["is_oirt"] else sr["modulation"]
+        print(f"    {sr['start_mhz']:.1f}–{sr['stop_mhz']:.1f} MHz | "
+              f"{sr['band_name']} | {tag} | step={sr['step_khz']:.0f} kHz")
+
+    # ── Сканируем каждый поддиапазон ──
+    all_stations = []
+    for sr in sub_ranges:
+        # Если юзер задал --step явно — используем его, иначе берём из справочника
+        step = args.step if args.step is not None else sr["step_khz"]
+        if not isinstance(step, (int, float)) or step <= 0:
+            step = DEFAULT_STEP
+
+
+        # Порог: из справочника, или --threshold, или дефолт
+        band_threshold = sr.get("threshold")
+        if band_threshold is not None:
+            effective_threshold = band_threshold
+        else:
+            effective_threshold = args.threshold
+
+
+        print(f"\n[*] Multi-gain scan: {sr['start_mhz']:.1f}–{sr['stop_mhz']:.1f} MHz "
+              f"({sr['band_name']}, step={step:.0f} kHz, threshold={effective_threshold:.1f} dB)")
+
+        found = bloom_split_scan(sr["start_mhz"], sr["stop_mhz"], step,
+                                 args.gains, effective_threshold, args.ppm, args.snap,
+                                 antennas_config=ANTENNAS_CONFIG)
+        if found:
+            all_stations.extend(found)
+
+    # ── Дедупликация (на стыках поддиапазонов могут быть дубли) ──
+    if len(sub_ranges) > 1:
+        seen = set()
+        unique = []
+        for st in all_stations:
+            key = round(st["freq"], 1)
+            if key not in seen:
+                seen.add(key)
+                unique.append(st)
+        all_stations = unique
+
+    stations = all_stations
     if not stations:
         save_results([], args, "fullscan", scan_min=args.start, scan_max=args.stop)
-        print_summary([], args.ppm, args.snap); return
-    print(f"[*] RDS decoding phase (rtl_fm | redsea)\n    RDS gains: {args.rds_gains} dB | Dwell: {args.dwell}s | Rate: {DEFAULT_RDS_RATE} Hz\n")
-    # ── Автокалибровка PPM по сильнейшей станции ──
-    if stations:
-        strongest = max(stations, key=lambda x: x["signal"])
-        print(f"\n[*] Auto-PPM calibration on {strongest['freq']:.1f} MHz ({strongest['signal']:.1f} dB)...")
-        ppm_cal, stereo_cal = auto_ppm_calibrate(strongest["freq"], -1, DEFAULT_RDS_RATE, 2.0)
-        if ppm_cal != 0:
-            print(f"    {C_GREEN}Pilot tone detected{C_RESET} → PPM = {ppm_cal} (was {args.ppm})")
-            args.ppm = ppm_cal
-        elif stereo_cal is False:
-            print(f"    No pilot tone (mono) → keeping PPM = {args.ppm}")
-        else:
-            print(f"    No pilot tone detected → keeping PPM = {args.ppm}")
+        print_summary([], args.ppm, args.snap)
+        return
+
+# ================================================================
+    # ── Тип сессии (для лога) ──
+    # ── Тип сессии (для лога) ──
+    HF_THRESHOLD_MHZ = 30.0
+    has_oirt = any(sr["is_oirt"] for sr in sub_ranges)
+    has_fm = any(not sr["is_oirt"] and sr["start_mhz"] >= HF_THRESHOLD_MHZ for sr in sub_ranges)
+    has_hf = any(sr["start_mhz"] < HF_THRESHOLD_MHZ for sr in sub_ranges)
+
+    if has_hf and (has_fm or has_oirt):
+        rds_label = "mixed: RDS (FM) + HF signal detection"
+    elif has_hf:
+        rds_label = "HF signal detection (no RDS in HF)"
+    elif has_oirt and has_fm:
+        rds_label = "mixed: RDS (FM) + stereo detection (OIRT)"
+    elif has_oirt:
+        rds_label = "stereo detection (OIRT — no RDS)"
+    else:
+        rds_label = "RDS decoding (rtl_fm | redsea)"
+
+    if has_hf and not has_fm and not has_oirt:
+        print(f"\n[*] {rds_label}\n")
+    else:
+        print(f"\n[*] {rds_label}\n    RDS gains: {args.rds_gains} dB | "
+              f"Dwell: {args.dwell}s | Rate: {DEFAULT_RDS_RATE} Hz\n")
+
+    # =================================
     rds_gains = args.rds_gains
     rate = DEFAULT_RDS_RATE
+    # =================================
+
+    # ── Предрасчёт типа диапазона для каждой станции ──
+    for st in stations:
+        st["_band"] = lookup_band(st["freq"] * 1000, BANDS_REF,
+                                   country=CURRENT_COUNTRY, subregion=CURRENT_SUBREGION)
+        st["_is_oirt"] = st["_band"] and "OIRT" in st["_band"].get("name", "").upper()
+# ================================================================
+    # ── Универсальная автокалибровка PPM ──
+    from config.system import PPM_REFERENCES
+    from core.snr import auto_ppm_calibrate, auto_ppm_calibrate_carrier
+
+    current_ppm = args.ppm
+    calibrated_band_type = None
+
     for i, st in enumerate(stations):
         freq = st["freq"]
-        print(f"[*] {i+1}/{len(stations)}: {freq:.1f} MHz ({st['signal']:.1f} dB)")
-        st["name_ru"] = prev_names.get(round(freq, 1)) or lookup_name_ru(freq) or ""
-        rds, used_gain, snr, stereo = decode_rds_multi(st["freq"], rds_gains, args.ppm, args.dwell, DEFAULT_RDS_RATE)
-        if stereo is not None:
-            st["stereo"] = stereo
-        if rds:
-            extra = f" | PS={rds.get('PS', '')}" if rds.get('PS') else ""
-            snr_str = f" | SNR={snr}dB" if snr is not None else ""
-            print(f"    -> {C_BLUE}PI={rds.get('PI', '?')}{extra}{snr_str}{C_RESET} (gain={used_gain})")
-            st["rds"] = rds
+        st_band = st["_band"]
+        st_is_oirt = st["_is_oirt"]
+        st_mod = st_band.get("modulation", "WFM") if st_band else "WFM"
+        is_hf = freq < HF_THRESHOLD_MHZ
+
+        # ── Частота для вывода: на КВ — больше знаков ──
+        if is_hf:
+            freq_str = f"{freq:.3f} MHz ({freq*1000:.1f} kHz)"
         else:
-            snr_str = f" | SNR={snr}dB" if snr is not None else ""
-            print(f"    -> {C_RED}no RDS{snr_str}{C_RESET}")
+            freq_str = f"{freq:.1f} MHz"
+
+        # ── HF: пропускаем RDS и PPM, просто записываем сигнал ──
+        if is_hf:
+            print(f"[*] {i+1}/{len(stations)}: {freq_str} "
+                  f"({st['signal']:.1f} dB) [{st_mod}]")
+            st["name_ru"] = prev_names.get(round(freq, 1)) or ""
             st["rds"] = {}
+            st["stereo"] = None
+            st["modulation"] = st_mod
+            st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
+            print()
+            continue
+
+        # ── Определяем тип для калибровки (только для FM/OIRT) ──
+        if st_is_oirt:
+            band_type = "OIRT"
+        elif st_mod == "AM":
+            band_type = "AM_AIR" if freq > 108 else "AM"
+        else:
+            band_type = "WFM"
+
+        # Калибруем ТОЛЬКО при смене типа диапазона
+        if band_type != calibrated_band_type and band_type in PPM_REFERENCES:
+            ref_config = PPM_REFERENCES[band_type]
+            method = ref_config["method"]
+
+            print(f"\n[*] Calibrating PPM for new band type: {band_type}...")
+
+            if method == "pilot":
+                # Калибровка по пилот-тону (FM или OIRT)
+                if band_type == "WFM":
+                    same_type = [s for s in stations if not s.get("_is_oirt") and s["freq"] >= HF_THRESHOLD_MHZ]
+                elif band_type == "OIRT":
+                    same_type = [s for s in stations if s.get("_is_oirt")]
+                else:
+                    same_type = []
+
+                if same_type:
+                    # --- ЗАЩИТА ОТ ШУМА ---
+                    valid_stations = [
+                        s for s in same_type
+                        if s.get("signal", -99) > -30 and s.get("freq") is not None
+                    ]
+
+                    if not valid_stations:
+                        print(f"[!] No strong stations found for PPM calibration "
+                              f"in band {band_type} (threshold > -30 dB). "
+                              f"Keeping current PPM.")
+                    else:
+                        strongest = max(valid_stations, key=lambda x: x["signal"])
+
+                        print(f"[*] Calibrating PPM on strongest valid station: "
+                              f"{strongest['freq']:.3f} MHz, "
+                              f"Signal: {strongest['signal']:.1f} dB")
+
+                        ppm_cal, stereo_cal = auto_ppm_calibrate(
+                            strongest["freq"], -1, DEFAULT_RDS_RATE, 2.0
+                        )
+
+                        if ppm_cal != 0:
+                            print(f"    {C_GREEN}Pilot tone detected → "
+                                  f"PPM = {ppm_cal} (was {current_ppm}){C_RESET}")
+                            current_ppm = ppm_cal
+                        elif stereo_cal is False:
+                            print(f"    No pilot tone (mono) → "
+                                  f"keeping PPM = {current_ppm}")
+                        else:
+                            print(f"    No pilot tone detected → "
+                                  f"keeping PPM = {current_ppm}")
+                else:
+                    print(f"    No stations of type {band_type} "
+                          f"found for pilot calibration.")
+# ======================================================================================
+            elif method == "carrier":
+                # Калибровка по несущей (AM/HF/Air) — перебор эталонов из PPM_REFERENCES
+                ref_found = False
+                for ref in ref_config.get("references", []):
+                    ref_freq = ref["freq"]
+                    print(f"[*] PPM calibration (carrier): {ref['name']} on "
+                          f"{ref_freq} MHz ({ref.get('desc', '')})...")
+
+                    ppm_cal, ok = auto_ppm_calibrate_carrier(
+                        ref_freq, -1, DEFAULT_RDS_RATE, 3.0, 10.0
+                    )
+
+                    if ok:
+                        current_ppm = ppm_cal
+                        print(f"    → PPM = {current_ppm}")
+                        ref_found = True
+                        break
+
+                if not ref_found:
+                    print(f"    No reference signal found for {band_type} — "
+                          f"keeping PPM = {current_ppm}")
+# =============================================================
+            else:
+                print(f"    Unknown calibration method '{method}' "
+                      f"for {band_type}")
+
+            calibrated_band_type = band_type
+
+        # ── Декодирование RDS / определение стерео (только FM/OIRT) ──
+        print(f"[*] {i+1}/{len(stations)}: {freq_str} "
+              f"({st['signal']:.1f} dB)")
+        st["name_ru"] = prev_names.get(round(freq, 1)) or lookup_name_ru(freq) or ""
+        st["modulation"] = st_mod
+        st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
+
+        if st_is_oirt:
+            rds, used_gain, snr, stereo = decode_rds_multi(
+                st["freq"], rds_gains, current_ppm, args.dwell, DEFAULT_RDS_RATE)
+            if stereo is not None:
+                st["stereo"] = stereo
+            snr_str = f" | SNR={snr}dB" if snr is not None else ""
+            ster_str = f" | {C_GREEN}STEREO{C_RESET}" if stereo else \
+                       " | mono" if stereo is not None else ""
+            print(f"    -> {C_YELLOW}OIRT{ster_str}{snr_str}{C_RESET}")
+            st["rds"] = {}
+        else:
+            rds, used_gain, snr, stereo = decode_rds_multi(
+                st["freq"], rds_gains, current_ppm, args.dwell, DEFAULT_RDS_RATE)
+            if stereo is not None:
+                st["stereo"] = stereo
+            if rds:
+                extra = f" | PS={rds.get('PS', '')}" if rds.get('PS') else ""
+                snr_str = f" | SNR={snr}dB" if snr is not None else ""
+                print(f"    -> {C_BLUE}PI={rds.get('PI', '?')}{extra}{snr_str}{C_RESET} "
+                      f"(gain={used_gain})")
+                st["rds"] = rds
+            else:
+                snr_str = f" | SNR={snr}dB" if snr is not None else ""
+                print(f"    -> {C_RED}no RDS{snr_str}{C_RESET}")
+                st["rds"] = {}
         print()
+# ================================================================
+    # Сохраняем итоговый PPM
+    args.ppm = current_ppm
+# ================================================================
     fname = save_results(stations, args, "fullscan", scan_min=args.start, scan_max=args.stop)
     print_summary(stations, args.ppm, args.snap)
-    # Переменная для финального списка станций
+
     final_stations = stations
     if fname != BASE_FILE and os.path.exists(BASE_FILE):
         print(f"\n[*] Base: {BASE_FILE} | Update: {fname}")
         base_data = load_json(BASE_FILE)
         upd_data = load_json(fname)
-
         if base_data and upd_data:
             diff_info = show_diff(base_data, upd_data, args.start, args.stop)
             merged = interactive_merge(base_data, diff_info, args.start, args.stop)
-
             if merged:
                 with open(BASE_FILE, "w", encoding="utf-8") as f:
                     json.dump(merged, f, ensure_ascii=False, indent=2)
                 print(f"\n[*] База обновлена: {BASE_FILE}")
                 print_summary(merged.get("stations", []), args.ppm, args.snap)
-                # Если мердж успешен, финальные данные — это merged
                 final_stations = merged.get("stations", [])
-    # === ВЫЗОВ EXPORT_HTML ===
+
+    # ── Band label для export_html ──
+    band_labels = sorted(set(sr["band_name"] for sr in sub_ranges))
+    band = " + ".join(band_labels)
+
     export_html({
-        "stations": final_stations, 
-        "scan_date": datetime.now().isoformat(), 
-        "ppm": args.ppm, 
-        "mode": args.mode  # <-- Важно: берём из args
+        "stations": final_stations,
+        "scan_date": datetime.now().isoformat(),
+        "ppm": args.ppm,
+        "mode": args.mode,
+        "band": band
     }, region=args.region)
-    # ========================
 
 # ═══════════════════════════════════════════════════════════════
 #  MODE 2: UPDATE
@@ -989,7 +1085,7 @@ def mode_update(args):
     if not data: print(f"[!] File not found: {src}"); return
     stations = data.get("stations", [])
     if not stations: print("[!] No stations in JSON"); return
-    print("=" * 60 + f"\nFM RDS Scanner v0.8 — Mode 2: Update ({src})\n" + "=" * 60)
+    print("=" * 60 + f"\nFM RDS Scanner v{__version__} — Mode 2: Update ({src})\n" + "=" * 60)
     print(f"Stations: {len(stations)} | RDS gains: {args.rds_gains} dB | Dwell: {args.dwell}s\n")
     for i, st in enumerate(stations):
         freq = st["freq"]
@@ -1033,7 +1129,7 @@ def mode_edit(args):
     if not data: print(f"[!] File not found: {src}"); return
     stations = data.get("stations", [])
     if not stations: print("[!] No stations in JSON"); return
-    print("=" * 60 + f"\nFM RDS Scanner v0.8 — Mode 3: Edit ({src})\n" + "=" * 60)
+    print("=" * 60 + f"\nFM RDS Scanner v{__version__} — Mode 3: Edit ({src})\n" + "=" * 60)
     print("Enter new name or press Enter to keep current.\n")
     for i, st in enumerate(stations):
         freq = st["freq"]; current = st.get("name_ru", "") or ""
@@ -1056,7 +1152,7 @@ def mode_merge(args):
     base_data = load_json(args.json or BASE_FILE)
     upd_file = args.update
     if not upd_file:
-        prefix = f"SDR_FM_RDS_Update_{CURRENT_REGION}_"
+        prefix = f"SDR_Update_{CURRENT_REGION}_"
         updates = sorted([f for f in os.listdir(str(DATA_DIR))
                           if f.startswith(prefix) and f.endswith(".json")])
         if not updates:
@@ -1089,30 +1185,37 @@ def mode_merge(args):
 # ═══════════════════════════════════════════════════════════════
 
 def main():
-    global CURRENT_REGION, BASE_FILE, STATIONS_FILE
+    global CURRENT_REGION, BASE_FILE, STATIONS_FILE, CURRENT_COUNTRY, CURRENT_SUBREGION
 
     p = argparse.ArgumentParser(
-        description="FM RDS Scanner v0.8 (rtl_power + rtl_fm + redsea) for RTL-SDR\n\n"
+        description="SDR-RTL Scanner v{__version__} (rtl_power + rtl_fm + redsea) for RTL-SDR\n\n"
                     "Quick start:\n"
-                    "  python3 SDR_RTL_FM_RDS_Scaner.py\n"
+                    "  python3 SDR_RTL_Scanner.py\n"
                     "  → fullscan 87–109 MHz, region 'default' (empty reference)\n\n"
-                    "  python3 SDR_RTL_FM_RDS_Scaner.py --region spb\n"
+                    "  python3 SDR_RTL_Scanner.py --region spb\n"
                     "  → fullscan with Saint Petersburg station reference\n\n"
-                    "  python3 SDR_RTL_FM_RDS_Scaner.py --region '?'\n"
+                    "  python3 SDR_RTL_Scanner.py --region '?'\n"
                     "  → interactive region selection\n\n"
                     "Files:\n"
                     "  regions/{region}.json            — station reference (per region)\n"
-                    "  data/SDR_FM_RDS_Base_{region}.json — base database\n"
-                    "  data/SDR_FM_RDS_Update_{region}_*.json — scan results",
+                    "  data/SDR_Base_{region}.json — base database\n"
+                    "  data/SDR_Update_{region}_*.json — scan results",
         formatter_class=argparse.RawTextHelpFormatter)
-    p.add_argument("--mode", choices=["fullscan", "update", "edit", "merge"],
+    p.add_argument("--mode", choices=["fullscan", "update", "edit", "merge", "manual"],
                    default="fullscan",
                    help="fullscan: scan + RDS (default)\n"
                         "update: re-decode RDS from base\n"
                         "edit: manual name_ru editing\n"
-                        "merge: merge update into base")
-    p.add_argument("--region", type=str, default="default",
-                   help="Region code, e.g. spb, msk, berlin (default: 'default' = empty).\n"
+                        "merge: merge update into base\n"
+                        "manual: scan some freqs + RDS (use with --freqs)")
+    p.add_argument('--freqs', type=str, default=None,
+                   help='Список частот для режима manual, например: "88.4,98.2,102.0,105.9"')
+    p.add_argument("--modulation", choices=["FM", "OIRT", "AM", "USB", "LSB"], default=None,
+                   help="Тип модуляции: FM, OIRT, AM, USB, LSB. Для FM/OIRT будет декодироваться RDS.")
+    p.add_argument("--group-delta", type=float, default=0.2,
+                   help="Расстояние между станциями для группировки (МГц)")
+    p.add_argument("--region", type=str, default="RU.spb",
+                   help="Region code in CC.city format, e.g. RU.spb, RU.msk, DE.berlin (default: RU.spb).\n"
                         "Use '?' for interactive selection.")
     p.add_argument("--ppm", type=int, default=DEFAULT_PPM, help="PPM correction (default: 0)")
     p.add_argument("--gain", type=float, default=DEFAULT_RDS_GAIN, help="Alias for --rds-gain (default: 50)")
@@ -1127,7 +1230,7 @@ def main():
     p.add_argument("--stop", type=float, default=DEFAULT_STOP,
                    help="Stop MHz (default: 109.0).\n"
                         "Note: narrow ranges (< 5 MHz) skip auto-threshold — set --threshold manually.")
-    p.add_argument("--step", type=float, default=DEFAULT_STEP, help="Step kHz for rtl_power (default: 100)")
+    p.add_argument("--step", type=float, default=None, help="Step kHz for rtl_power (default: 100)")
     p.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD,
                    help="Min dB (default: -25, auto-adjusted for wide ranges).\n"
                         "For narrow ranges (< 5 MHz) auto-threshold is skipped —\n"
@@ -1154,6 +1257,42 @@ def main():
     p.add_argument("--interference-notes", type=str, default="",
                    help="Notes about the interference")
     args = p.parse_args()
+
+    # Нормализация: OIRT считаем как FM с флагом
+    modulation = args.modulation
+
+    if modulation == "OIRT":
+        is_oirt = True
+        mode_rtl = "fm"          # rtl_fm всё равно использует -M fm
+        pilot_freq = 31250.0     # 31.25 кГц
+        rds_enabled = False      # RDS в OIRT нет
+    elif modulation in ("FM", "AM", "USB", "LSB"):
+        is_oirt = False
+        mode_rtl = modulation.lower()  # "fm", "am", "usb", "lsb"
+        pilot_freq = 19000.0
+        # RDS только для FM
+        rds_enabled = (modulation == "FM")
+    else:
+        # fallback: если None — пробуем угадать по диапазону (опционально)
+        modulation = "FM"
+        mode_rtl = "fm"
+        is_oirt = False
+        pilot_freq = 19000.0
+        rds_enabled = True
+
+    # Ручной ввод отдельной частоты
+    if args.mode == 'manual':
+        if not args.freqs:
+            p.error('Для режима --mode manual обязательно укажите --freqs с перечнем частот через запятую.')
+        try:
+            freq_list = [float(x.strip()) for x in args.freqs.split(',') if x.strip()]
+            if len(freq_list) == 0:
+                raise ValueError
+        except ValueError:
+            p.error('Некорректный формат --freqs: ожидается список чисел через запятую, например "88.4,98.2".')
+    else:
+        freq_list = None
+
     # ── Region selection ──
     ensure_dirs()
     region = args.region
@@ -1162,6 +1301,19 @@ def main():
     CURRENT_REGION = region
     ensure_region_file(region)
     ensure_base_file(region)
+
+    # --- НОВЫЙ БЛОК: парсим регион и получаем страну/субрегион ---
+    try:
+        region_info = parse_region_name(region)
+        CURRENT_COUNTRY = region_info["country"]
+        load_bands_reference()
+        CURRENT_SUBREGION = region_info.get("subregion")
+        print(f"[*] Region parsed: country={CURRENT_COUNTRY}, subregion={CURRENT_SUBREGION}")
+    except ValueError as e:
+        print(f"[!] Invalid region format: {e}")
+        sys.exit(1)
+    # -------------------------------------------------------------
+
     BASE_FILE = get_base_file(region)
     STATIONS_FILE = args.stations or get_stations_file(region)
 
@@ -1181,6 +1333,7 @@ def main():
         if args.interference:
             app_context.set_interference(args.interference, args.interference_notes)
 
+# ===================================================================================================
         # Запрос METAR
         metar_station = app_context.get_metar_station()
         if metar_station:
@@ -1188,14 +1341,19 @@ def main():
             wx = app_context.fetch_metar()
             if wx:
                 app_context.weather = wx
-                inv_str = f" | INVERSION: {wx['inversion_type']}" if wx.get("inversion") else ""
-                print(f"    METAR: {wx.get('raw', '?')[:60]}...")
-                print(f"    T={wx.get('temperature_c','?')}C, Td={wx.get('dewpoint_c','?')}C, "
-                      f"vis={wx.get('visibility_m','?')}m{inv_str}")
+                print(f"    {_format_metar_human(wx)}")
             else:
                 print(f"    [!] METAR fetch failed")
+
+        # Запрос космической погоды (NOAA SWPC)
+        print(f"[*] Fetching space weather (NOAA SWPC)...")
+        sw = app_context.fetch_space_weather()
+        if not sw:
+            print(f"    [!] Space weather fetch failed")
+
         print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, "
               f"Antenna: {app_context.get_antenna_model()}")
+# ===================================================================================================
     else:
         app_context = None
     print(f"[*] Region: {region}")
@@ -1220,16 +1378,24 @@ def main():
 
     # ── Check tools ──
     for tool in ["rtl_power", "rtl_fm", "redsea"]:
-        path = subprocess.run(["which", tool], capture_output=True, text=True).stdout.strip()
+        path = shutil.which(tool)
         if not path:
             print(f"[!] '{tool}' not found.")
-            if tool == "redsea": print("    https://github.com/windytan/redsea")
-            elif tool.startswith("rtl"): print("    sudo apt install rtl-sdr")
+            if tool == "redsea":
+                print("    https://github.com/windytan/redsea")
+            elif tool.startswith("rtl"):
+                print("    sudo apt install rtl-sdr   # или эквивалент для вашей ОС")
             sys.exit(1)
+        print(f"[*] Found {tool} at {path}")
 
-    if args.mode == "fullscan": mode_fullscan(args)
-    elif args.mode == "update": mode_update(args)
-    elif args.mode == "edit": mode_edit(args)
-    elif args.mode == "merge": mode_merge(args)
+    # ✅ Вызов нужного режима — теперь ВНЕ цикла, выполняется один раз
+    if args.mode == "fullscan":
+        mode_fullscan(args)
+    elif args.mode == "update":
+        mode_update(args)
+    elif args.mode == "edit":
+        mode_edit(args)
+    elif args.mode == "merge":
+        mode_merge(args)
 
 if __name__ == "__main__": main()
