@@ -105,6 +105,12 @@ To scan a different city or frequency range:
     .gitignore — configured to exclude temporary scan logs.
     LICENSE — MIT license.
 
+    /utils/test_gps_quality.py — research script for evaluating GPS reception quality.
+        Designed for receiver debugging and analyzing signal conditions in urban environments.
+        Does not include any functionality for generating interference or controlling radio hardware.
+
+
+
 🤝 How to Contribute
 
 The project is open to community contributions! You can:
