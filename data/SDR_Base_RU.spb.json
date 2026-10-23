@@ -5,13 +5,371 @@
   "mode": "init",
   "stations": [
     {
-      "freq": 7.053,
-      "signal": -36.53,
+      "freq": 0.126,
+      "signal": -33.46,
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "CW",
+      "band_name": "LF-marine"
+    },
+    {
+      "freq": 0.247,
+      "signal": -29.56,
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "LF-broadcast"
+    },
+    {
+      "freq": 0.288,
+      "signal": -26.47,
+      "_band": {
+        "freq_min": 281,
+        "freq_max": 526.5,
+        "name": "LF-misc",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 6000,
+        "step": 3000,
+        "description": "Морские, любительские (135.7–137.8 кГц), Beacon",
+        "notes": "Ham: 2200 м (135.7–137.8 кГц)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "LF-misc"
+    },
+    {
+      "freq": 0.393,
+      "signal": -37.58,
+      "_band": {
+        "freq_min": 281,
+        "freq_max": 526.5,
+        "name": "LF-misc",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 6000,
+        "step": 3000,
+        "description": "Морские, любительские (135.7–137.8 кГц), Beacon",
+        "notes": "Ham: 2200 м (135.7–137.8 кГц)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "LF-misc"
+    },
+    {
+      "freq": 0.696,
+      "signal": -35.61,
+      "_band": {
+        "freq_min": 526.5,
+        "freq_max": 1606.5,
+        "name": "MF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "СВ-вещание",
+        "notes": "РФ/Европа: шаг 9 кГц. США: шаг 10 кГц. DRM: COFDM, 9/10 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "MF-broadcast"
+    },
+    {
+      "freq": 1.71,
+      "signal": -40.32,
+      "_band": {
+        "freq_min": 1606.5,
+        "freq_max": 1800,
+        "name": "HF-marine",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская SSB, береговые станции",
+        "notes": "DSC: 2187.5 кГц, аварийный 2182 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-marine"
+    },
+    {
+      "freq": 1.916,
+      "signal": -39.38,
+      "_band": {
+        "freq_min": 1800,
+        "freq_max": 2000,
+        "name": "Ham-160m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 160 м",
+        "notes": "IARU R1: 1810–2000 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "Ham-160m"
+    },
+    {
+      "freq": 2.146,
+      "signal": -38.2,
+      "_band": {
+        "freq_min": 2000,
+        "freq_max": 2300,
+        "name": "HF-misc-120m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 3000,
+        "description": "Тропосферное вещание, маяки",
+        "notes": "Вещание 120 м: 2300–2498 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-misc-120m"
+    },
+    {
+      "freq": 2.163,
+      "signal": -38.36,
+      "_band": {
+        "freq_min": 2000,
+        "freq_max": 2300,
+        "name": "HF-misc-120m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 3000,
+        "description": "Тропосферное вещание, маяки",
+        "notes": "Вещание 120 м: 2300–2498 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-misc-120m"
+    },
+    {
+      "freq": 2.39,
+      "signal": -33.75,
+      "_band": {
+        "freq_min": 2300,
+        "freq_max": 2498,
+        "name": "HF-broadcast-120m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 120 м (тропики)",
+        "notes": "Наклонное отражение, тропики"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-broadcast-120m"
+    },
+    {
+      "freq": 2.743,
+      "signal": -40.35,
+      "_band": {
+        "freq_min": 2498,
+        "freq_max": 3200,
+        "name": "HF-misc-90m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиация, фиксированная связь",
+        "notes": "HF ACARS: 3.025–3.155 МГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-misc-90m"
+    },
+    {
+      "freq": 2.793,
+      "signal": -45.7,
+      "_band": {
+        "freq_min": 2498,
+        "freq_max": 3200,
+        "name": "HF-misc-90m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиация, фиксированная связь",
+        "notes": "HF ACARS: 3.025–3.155 МГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-misc-90m"
+    },
+    {
+      "freq": 3.335,
+      "signal": -36.96,
+      "_band": {
+        "freq_min": 3200,
+        "freq_max": 3500,
+        "name": "HF-broadcast-90m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 90 м (тропики)",
+        "notes": "Ночное прохождение, ближний тропик"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-broadcast-90m"
+    },
+    {
+      "freq": 3.668,
+      "signal": -37.02,
+      "_band": {
+        "freq_min": 3500,
+        "freq_max": 3800,
+        "name": "Ham-80m",
+        "modulation": "LSB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 80 м",
+        "notes": "IARU R1: 3500–3800 кГц (ночью — регионально)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "LSB",
+      "band_name": "Ham-80m"
+    },
+    {
+      "freq": 3.89,
+      "signal": -34.08,
+      "_band": {
+        "freq_min": 3800,
+        "freq_max": 4000,
+        "name": "HF-broadcast-75m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 75 м",
+        "notes": "Дневное вещание, Европа → Россия"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-broadcast-75m"
+    },
+    {
+      "freq": 4.783,
+      "signal": -46.83,
+      "_band": {
+        "freq_min": 4000,
+        "freq_max": 5900,
+        "name": "HF-misc-60m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиация, фиксированная",
+        "notes": "Ham 60 м (5.25–5.45 МГц, вторичка в РФ)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-misc-60m"
+    },
+    {
+      "freq": 6.05,
+      "signal": -37.21,
+      "_band": {
+        "freq_min": 5900,
+        "freq_max": 6200,
+        "name": "HF-broadcast-49m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 49 м",
+        "notes": "Вечер/ночь, высокая дальность, популярный"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-broadcast-49m"
+    },
+    {
+      "freq": 6.586,
+      "signal": -44.43,
       "_band": {
         "freq_min": 6200,
         "freq_max": 7100,
         "name": "HF-marine-2",
         "modulation": "USB",
+        "threshold": -40.0,
         "bandwidth": 2400,
         "step": 500,
         "description": "Морская SSB, DSC",
@@ -25,13 +383,35 @@
       "band_name": "HF-marine-2"
     },
     {
-      "freq": 7.194,
-      "signal": -37.44,
+      "freq": 7.145,
+      "signal": -37.46,
       "_band": {
         "freq_min": 7100,
         "freq_max": 7300,
         "name": "Ham-40m",
         "modulation": "LSB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 40 м",
+        "notes": "IARU R1: 7100–7200 кГц. Вещание до 7300 в США"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "LSB",
+      "band_name": "Ham-40m"
+    },
+    {
+      "freq": 7.195,
+      "signal": -38.38,
+      "_band": {
+        "freq_min": 7100,
+        "freq_max": 7300,
+        "name": "Ham-40m",
+        "modulation": "LSB",
+        "threshold": -40.0,
         "bandwidth": 2400,
         "step": 100,
         "description": "Любительский 40 м",
@@ -63,6 +443,342 @@
       "stereo": null,
       "modulation": "USB",
       "band_name": "HF-misc-41m"
+    },
+    {
+      "freq": 9.63,
+      "signal": -37.41,
+      "_band": {
+        "freq_min": 9400,
+        "freq_max": 9900,
+        "name": "HF-broadcast-31m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 31 м",
+        "notes": "Универсальный дневной/ночной, очень популярный"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-broadcast-31m"
+    },
+    {
+      "freq": 9.953,
+      "signal": -36.95,
+      "_band": {
+        "freq_min": 9900,
+        "freq_max": 10100,
+        "name": "HF-marine-NM",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская коротковолновая",
+        "notes": "NAVTEX 518 кГц (MF)"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-marine-NM"
+    },
+    {
+      "freq": 30.355,
+      "signal": -9.8,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 32.47,
+      "signal": -14.88,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 32.712,
+      "signal": -14.47,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 33.068,
+      "signal": -10.96,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 33.859,
+      "signal": -1.64,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 34.585,
+      "signal": -10.39,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 35.28,
+      "signal": -5.64,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 35.997,
+      "signal": -0.63,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 36.702,
+      "signal": -5.21,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 37.195,
+      "signal": -11.49,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 37.9,
+      "signal": -13.32,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 38.163,
+      "signal": -6.9,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 38.819,
+      "signal": -11.41,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 39.524,
+      "signal": -10.78,
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "HF-VHF-misc",
+      "stereo": false,
+      "rds": {}
     },
     {
       "freq": 50.4,
@@ -100,16 +816,86 @@
       "rds": {}
     },
     {
-      "freq": 56.0,
-      "signal": 2.33,
+      "freq": 55.047,
+      "signal": 1.61,
+      "_band": {
+        "freq_min": 54000,
+        "freq_max": 58000,
+        "name": "VHF-low-service",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебная связь 54–58 МГц",
+        "notes": "РФ: МЧС, МВД, лесное хозяйство"
+      },
+      "_is_oirt": false,
       "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-low-service",
       "stereo": false,
       "rds": {}
     },
     {
-      "freq": 57.6,
-      "signal": 4.69,
+      "freq": 55.75,
+      "signal": 2.87,
+      "_band": {
+        "freq_min": 54000,
+        "freq_max": 58000,
+        "name": "VHF-low-service",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебная связь 54–58 МГц",
+        "notes": "РФ: МЧС, МВД, лесное хозяйство"
+      },
+      "_is_oirt": false,
       "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-low-service",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 56.453,
+      "signal": 3.52,
+      "_band": {
+        "freq_min": 54000,
+        "freq_max": 58000,
+        "name": "VHF-low-service",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебная связь 54–58 МГц",
+        "notes": "РФ: МЧС, МВД, лесное хозяйство"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-low-service",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 57.602,
+      "signal": 7.62,
+      "_band": {
+        "freq_min": 54000,
+        "freq_max": 58000,
+        "name": "VHF-low-service",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебная связь 54–58 МГц",
+        "notes": "РФ: МЧС, МВД, лесное хозяйство"
+      },
+      "_is_oirt": false,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-low-service",
       "stereo": false,
       "rds": {}
     },
@@ -142,13 +928,14 @@
       "rds": {}
     },
     {
-      "freq": 66.296,
-      "signal": 15.64,
+      "freq": 66.283,
+      "signal": -4.73,
       "_band": {
         "freq_min": 65900,
         "freq_max": 74000,
         "name": "OIRT",
         "modulation": "WFM",
+        "threshold": -5.0,
         "bandwidth": 250000,
         "step": 30000,
         "country": "RU",
@@ -163,13 +950,14 @@
       "rds": {}
     },
     {
-      "freq": 69.452,
-      "signal": 13.94,
+      "freq": 69.468,
+      "signal": 1.74,
       "_band": {
         "freq_min": 65900,
         "freq_max": 74000,
         "name": "OIRT",
         "modulation": "WFM",
+        "threshold": -5.0,
         "bandwidth": 250000,
         "step": 30000,
         "country": "RU",
@@ -184,13 +972,36 @@
       "rds": {}
     },
     {
-      "freq": 73.095,
-      "signal": 18.2,
+      "freq": 71.989,
+      "signal": -2.36,
       "_band": {
         "freq_min": 65900,
         "freq_max": 74000,
         "name": "OIRT",
         "modulation": "WFM",
+        "threshold": -5.0,
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      },
+      "_is_oirt": true,
+      "name_ru": "",
+      "modulation": "WFM",
+      "band_name": "OIRT",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 73.103,
+      "signal": 11.85,
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "threshold": -5.0,
         "bandwidth": 250000,
         "step": 30000,
         "country": "RU",
@@ -199,6 +1010,28 @@
       },
       "_is_oirt": true,
       "name_ru": "Град Петров",
+      "modulation": "WFM",
+      "band_name": "OIRT",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 73.95,
+      "signal": -3.77,
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "threshold": -5.0,
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      },
+      "_is_oirt": true,
+      "name_ru": "",
       "modulation": "WFM",
       "band_name": "OIRT",
       "stereo": false,
@@ -239,9 +1072,23 @@
       "rds": {}
     },
     {
-      "freq": 77.6,
-      "signal": -2.11,
+      "freq": 77.633,
+      "signal": -5.52,
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      },
+      "_is_oirt": false,
       "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-misc",
       "stereo": false,
       "rds": {}
     },
@@ -407,12 +1254,13 @@
     },
     {
       "freq": 88.4,
-      "signal": 14.78,
+      "signal": 16.08,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -420,6 +1268,8 @@
       },
       "_is_oirt": false,
       "name_ru": "Авторадио",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7261",
@@ -427,19 +1277,21 @@
         "PTY": "Varied",
         "TP": false,
         "TA": false,
+        "RadioText": "Reklama",
         "gain_db": 25,
-        "rds_snr_db": 6.7,
+        "rds_snr_db": 2.2,
         "stereo": true
       }
     },
     {
       "freq": 89.3,
-      "signal": 8.42,
+      "signal": 12.54,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -447,25 +1299,29 @@
       },
       "_is_oirt": false,
       "name_ru": "Вести FM",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7840",
+        "PS": "STI FM",
         "PTY": "News",
         "TP": false,
         "TA": false,
         "gain_db": 25,
-        "rds_snr_db": 1.0,
+        "rds_snr_db": -0.3,
         "stereo": true
       }
     },
     {
       "freq": 89.7,
-      "signal": 12.08,
+      "signal": 15.32,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -473,15 +1329,49 @@
       },
       "_is_oirt": false,
       "name_ru": "Радио Зенит",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x7251",
+        "PS": "ZENIT",
+        "PTY": "Varied",
+        "TP": true,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 1.6,
+        "stereo": true
+      }
     },
     {
       "freq": 90.1,
-      "signal": 10.57,
+      "signal": 12.48,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -10,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
       "name_ru": "Радио Эрмитаж",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x785A",
+        "PS": "ERMITAG",
+        "PTY": "Jazz music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 0.7,
+        "stereo": true
+      }
     },
     {
       "freq": 90.6,
@@ -516,24 +1406,6 @@
       "signal": 12.16,
       "name_ru": "Новое радио",
       "stereo": true,
-      "rds": {}
-    },
-    {
-      "freq": 91.2,
-      "signal": 18.28,
-      "_band": {
-        "freq_min": 87500,
-        "freq_max": 108000,
-        "name": "FM-broadcast",
-        "modulation": "WFM",
-        "bandwidth": 200000,
-        "step": 100000,
-        "description": "FM-вещание (CCIR)",
-        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
-      },
-      "_is_oirt": false,
-      "name_ru": "Новое радио",
-      "stereo": false,
       "rds": {}
     },
     {
@@ -584,13 +1456,35 @@
       }
     },
     {
-      "freq": 93.7,
-      "signal": 20.95,
+      "freq": 93.3,
+      "signal": 14.0,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
+      "name_ru": "Радио Гордость",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "stereo": true,
+      "rds": {}
+    },
+    {
+      "freq": 93.7,
+      "signal": 20.13,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -10,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -598,15 +1492,17 @@
       },
       "_is_oirt": false,
       "name_ru": "Радио МИР",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7734",
-        "PS": "93,7 FM",
+        "PS": "Radi FM",
         "PTY": "Pop music",
         "TP": false,
         "TA": false,
         "gain_db": 25,
-        "rds_snr_db": 1.3,
+        "rds_snr_db": 1.4,
         "stereo": true
       }
     },
@@ -697,24 +1593,6 @@
       }
     },
     {
-      "freq": 95.8,
-      "signal": 17.54,
-      "_band": {
-        "freq_min": 87500,
-        "freq_max": 108000,
-        "name": "FM-broadcast",
-        "modulation": "WFM",
-        "bandwidth": 200000,
-        "step": 100000,
-        "description": "FM-вещание (CCIR)",
-        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
-      },
-      "_is_oirt": false,
-      "name_ru": "Comedy Radio",
-      "stereo": true,
-      "rds": {}
-    },
-    {
       "freq": 95.9,
       "signal": 23.07,
       "_band": {
@@ -744,28 +1622,33 @@
     },
     {
       "freq": 96.4,
-      "signal": 0.38,
-      "name_ru": "Radio Jazz",
-      "stereo": true,
-      "rds": {}
-    },
-    {
-      "freq": 96.7,
-      "signal": 4.07,
+      "signal": 12.13,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -10,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
         "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       },
       "_is_oirt": false,
-      "name_ru": "",
-      "stereo": false,
-      "rds": {}
+      "name_ru": "Radio Jazz",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "stereo": true,
+      "rds": {
+        "PI": "0x7720",
+        "PS": "JAZZ96.4",
+        "PTY": "Jazz music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": 0.3,
+        "stereo": true
+      }
     },
     {
       "freq": 97.0,
@@ -803,8 +1686,22 @@
     },
     {
       "freq": 98.1,
-      "signal": 13.33,
+      "signal": 11.66,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
       "name_ru": "",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7212",
@@ -812,7 +1709,9 @@
         "PTY": "Pop music",
         "TP": false,
         "TA": false,
-        "RadioText": "Reklama"
+        "gain_db": 25,
+        "rds_snr_db": 1.8,
+        "stereo": true
       }
     },
     {
@@ -843,31 +1742,14 @@
       }
     },
     {
-      "freq": 98.8,
-      "signal": 18.59,
-      "_band": {
-        "freq_min": 87500,
-        "freq_max": 108000,
-        "name": "FM-broadcast",
-        "modulation": "WFM",
-        "bandwidth": 200000,
-        "step": 100000,
-        "description": "FM-вещание (CCIR)",
-        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
-      },
-      "_is_oirt": false,
-      "name_ru": "",
-      "stereo": false,
-      "rds": {}
-    },
-    {
       "freq": 99.0,
-      "signal": 16.69,
+      "signal": 22.15,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -875,15 +1757,17 @@
       },
       "_is_oirt": false,
       "name_ru": "Радио России",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7848",
-        "PS": "99.0 FM",
+        "PS": "RADIORUS",
         "PTY": "No PTY",
         "TP": false,
         "TA": false,
         "gain_db": 25,
-        "rds_snr_db": 4.1,
+        "rds_snr_db": 11.8,
         "stereo": true
       }
     },
@@ -950,12 +1834,13 @@
     },
     {
       "freq": 102.0,
-      "signal": 16.78,
+      "signal": 21.44,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -963,6 +1848,8 @@
       },
       "_is_oirt": false,
       "name_ru": "Rock FM",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7201",
@@ -972,18 +1859,19 @@
         "TA": false,
         "RadioText": "Radio RBC",
         "gain_db": 50,
-        "rds_snr_db": 10.2,
+        "rds_snr_db": 7.9,
         "stereo": true
       }
     },
     {
       "freq": 102.4,
-      "signal": 13.21,
+      "signal": 10.09,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -991,6 +1879,8 @@
       },
       "_is_oirt": false,
       "name_ru": "Радио Метро",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7895",
@@ -999,18 +1889,19 @@
         "TP": false,
         "TA": false,
         "gain_db": 25,
-        "rds_snr_db": 12.5,
+        "rds_snr_db": 2.2,
         "stereo": true
       }
     },
     {
       "freq": 102.8,
-      "signal": 11.68,
+      "signal": 9.14,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -1018,6 +1909,8 @@
       },
       "_is_oirt": false,
       "name_ru": "Максимум",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7703",
@@ -1026,27 +1919,9 @@
         "TP": false,
         "TA": false,
         "gain_db": 50,
-        "rds_snr_db": 3.1,
+        "rds_snr_db": 1.1,
         "stereo": true
       }
-    },
-    {
-      "freq": 103.3,
-      "signal": 9.89,
-      "_band": {
-        "freq_min": 87500,
-        "freq_max": 108000,
-        "name": "FM-broadcast",
-        "modulation": "WFM",
-        "bandwidth": 200000,
-        "step": 100000,
-        "description": "FM-вещание (CCIR)",
-        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
-      },
-      "_is_oirt": false,
-      "name_ru": "DFM",
-      "stereo": true,
-      "rds": {}
     },
     {
       "freq": 103.4,
@@ -1095,12 +1970,13 @@
     },
     {
       "freq": 104.0,
-      "signal": 11.33,
+      "signal": 9.51,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -1108,8 +1984,19 @@
       },
       "_is_oirt": false,
       "name_ru": "Наше радио",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x7728",
+        "PS": "NASHE",
+        "PTY": "Rock music",
+        "TP": false,
+        "TA": false,
+        "gain_db": 50,
+        "rds_snr_db": 2.2,
+        "stereo": true
+      }
     },
     {
       "freq": 104.4,
@@ -1141,12 +2028,13 @@
     },
     {
       "freq": 105.3,
-      "signal": 8.88,
+      "signal": 11.89,
       "_band": {
         "freq_min": 87500,
         "freq_max": 108000,
         "name": "FM-broadcast",
         "modulation": "WFM",
+        "threshold": -35.0,
         "bandwidth": 200000,
         "step": 100000,
         "description": "FM-вещание (CCIR)",
@@ -1154,19 +2042,48 @@
       },
       "_is_oirt": false,
       "name_ru": "Love Радио",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x7733",
+        "PTY": "Pop music",
+        "TP": true,
+        "TA": false,
+        "gain_db": 25,
+        "rds_snr_db": -0.5,
+        "stereo": true
+      }
     },
     {
       "freq": 105.9,
-      "signal": 19.27,
+      "signal": 21.63,
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      },
+      "_is_oirt": false,
       "name_ru": "Монте-Карло",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
       "stereo": true,
       "rds": {
         "PI": "0x7719",
+        "PS": "M-CARLO",
         "PTY": "Pop music",
         "TP": false,
-        "TA": false
+        "TA": false,
+        "RadioText": "RECLAMA (812)244-30-04",
+        "gain_db": 50,
+        "rds_snr_db": 5.3,
+        "stereo": true
       }
     },
     {
@@ -1480,5 +2397,5 @@
       "rds": {}
     }
   ],
-  "last_merge": "2026-10-09T08:26:24.662118"
+  "last_merge": "2026-10-23T01:40:52.578660"
 }

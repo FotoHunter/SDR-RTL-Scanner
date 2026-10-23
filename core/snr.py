@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # core/snr.py
 import subprocess, select, json, config
-#import select
-#import json
 import numpy as np
 from typing import Optional, Tuple, Dict, Any, List
 #from config import DEFAULT_START, DEFAULT_STOP, ANTENNAS_CONFIG, DEFAULT_RDS_RATE

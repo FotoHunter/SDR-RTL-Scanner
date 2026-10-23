@@ -1,11 +1,13 @@
+#!/usr/bin/env python3
 # core/scanner.py
 import os, sys, subprocess, time
+from _version import __version__
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import numpy as np
 
-from config import DEFAULT_STEP, NARROW_RANGE_MHZ
+from config import DEFAULT_STEP, NARROW_RANGE_MHZ, MAX_DWELL_SEC
 
 def snap_freq(freq_mhz: float, snap_khz: float) -> float:
     if snap_khz <= 0:
@@ -135,6 +137,17 @@ def run_rtl_power(
     mode: str = "fm",
     dwell_override: Optional[int] = None
 ) -> Dict[float, float]:
+    """
+    Запускает rtl_power для заданного диапазона и возвращает словарь {freq_mhz: power_db}.
+
+    Логика времени (dwell_sec):
+      - Если задано явно (dwell_override) — используем его.
+      - Иначе:
+          * диапазон <= 0.2 МГц: 20 с (узкие КВ-поддиапазоны)
+          * 0.2 < диапазон <= 2.0 МГц: 30 с (средние КВ-поддиапазоны)
+          * диапазон > 2.0 МГц: считаем по числу бинов (bins_count), но не более MAX_DWELL_SEC.
+      - Это даёт предсказуемое время и защищает от «скачков» при мелких шагах.
+    """
 
 # Если snap больше шага — snap бессмысленен, отключаем
     if snap_khz > step_khz:
@@ -146,9 +159,14 @@ def run_rtl_power(
     range_mhz = stop_snapped - start_snapped
 # ==================================
     bins_count = int((stop_mhz - start_mhz) * 1000 / step_khz)
+
+    # ------------------------------------------------------------------
+    # Расчёт времени прохода (dwell_sec)
+    # ------------------------------------------------------------------
     # RTL-SDR делает ~1 проход/сек (-i 1). Число бинов не влияет
     # на время прохода — только на детальность. Нам нужно
     # фиксированное число проходов для усреднения.
+
     if dwell_override is not None:
         dwell_sec = dwell_override
     elif range_mhz <= 0.2:
@@ -156,8 +174,13 @@ def run_rtl_power(
     elif range_mhz <= 2.0:
         dwell_sec = 30              # средний КВ-кусок: 30 проходов
     else:
-        dwell_sec = max(bins_count * 2, 20)  # FM — как раньше
-# ==================================
+        # Широкие диапазоны: пропорционально числу бинов.
+        # 2 секунды на «проход» условно дают хорошее усреднение.
+        dwell_sec = bins_count * 2
+        # Защита от слишком долгих проходов при мелких шагах
+        if dwell_sec > MAX_DWELL_SEC:
+            print(f"[!] Dwell capped at {MAX_DWELL_SEC}s (bins={bins_count}, step={step_khz} kHz)")
+            dwell_sec = MAX_DWELL_SEC
 
     cmd = [
         "rtl_power",
@@ -175,7 +198,7 @@ def run_rtl_power(
             cmd,
             capture_output=True,
             text=True,
-            timeout=dwell_sec + 15
+            timeout=dwell_sec + 15  # небольшой запас на обработку
         )
     except subprocess.TimeoutExpired:
         print("[rtl_power] timeout!")
@@ -319,7 +342,17 @@ def multi_gain_scan(
 
     print(f"[*] Found {len(stations)} station(s):")
     for i, st in enumerate(stations):
-        print(f"    {i+1}. {st['freq']:.1f} MHz  ({st['signal']:.1f} dB)")
+#        print(f"    {i+1}. {st['freq']:.1f} MHz  ({st['signal']:.1f} dB)")
+        # Берём шаг из справочника диапазона этой станции. Если нет — считаем FM (100 кГц)
+        step_hz = st.get("_band", {}).get("step", 100000)
+
+        # Если шаг >= 100 кГц (УКВ/FM) → 2 знака, иначе (КВ и т.п.) → 3 знака
+        if step_hz >= 100000:
+            freq_str = f"{st['freq']:.2f}"
+        else:
+            freq_str = f"{st['freq']:.3f}"
+
+        print(f"    {i+1}. {freq_str} MHz  ({st['signal']:.1f} dB)")
     print()
     return stations
 

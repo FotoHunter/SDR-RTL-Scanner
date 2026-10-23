@@ -27,120 +27,114 @@ License: MIT
 import os, sys, json, argparse, subprocess, select, time, config, shutil
 import numpy as np
 from pathlib import Path
-from datetime import datetime
-from src.context import Context, _format_metar_human
+from datetime import datetime, timezone
+from core.context import Context, _format_metar_human
 from config import *
 from core.snr import auto_ppm_calibrate, check_rds_snr, decode_rds, decode_rds_multi
 from core.scanner import multi_gain_scan, bloom_split_scan, split_scan_ranges, snap_freq
 from config.styles import C_GREEN, C_RED, C_BLUE, C_YELLOW, C_RESET
 from config.system import DEFAULT_DWELL, DEFAULT_RDS_RATE, DEFAULT_PPM, PPM_REFERENCES
 
-# --- ФИЛЬТР ESCAPE-КОДОВ МЫШИ (для legacy-консоли Windows) ---
-# Если stdout подключён к терминалу и мы в Windows — оборачиваем sys.stdout
-if sys.stdout.isatty() and os.name == 'nt':
-    class MouseFilterWriter:
-        def __init__(self, target):
-            self.target = target
-            self.escape_seq = False
-            self.buffer = []
-
-        def write(self, text):
-            # Пропускаем любые последовательности, начинающиеся с ESC (\x1b)
-            # Это убирает xterm mouse reporting: 64;35;30M, M, C, D и т.п.
-            if not text:
-                return
-
-            # Простая эвристика: если видим ESC — игнорируем всё до конца последовательности
-            if '\x1b' in text:
-                # Разбиваем по ESC, оставляем только чистые куски
-                parts = text.split('\x1b')
-                clean = parts  # всё до первого ESC
-                # Если после ESC есть текст — он часть escape-последовательности, игнорируем
-                # (в редких случаях может быть смешанный вывод, но для логов это ок)
-                if clean:
-                    self.target.write(clean)
-                # Остатки после ESC игнорируем
-                return
-
-            self.target.write(text)
-
-        def flush(self):
-            self.target.flush()
-
-        def __getattr__(self, name):
-            # Пробрасываем остальные атрибуты (encoding, errors и т.п.)
-            return getattr(self.target, name)
-
-    sys.stdout = MouseFilterWriter(sys.stdout)
-    # При желании можно аналогично для stderr, если туда тоже сыпется мышь
-    # sys.stderr = MouseFilterWriter(sys.stderr)
-# ---------------------------------------------------------------
-
-
 # ═══════════════════════════════════════════════════════════════
 #  CONFIG
 # ═══════════════════════════════════════════════════════════════
-
+# Здесь определяются базовые пути к директориям проекта и загружаются
+# конфигурационные файлы (observer, antennas).
+# ВАЖНО: пути строятся относительно расположения самого скрипта,
+# чтобы не зависеть от текущей рабочей директории (cwd).
+# ===============================================================
+# -----------------------------------------------------------------------------
+# 1. ОПРЕДЕЛЕНИЕ ПУТЕЙ (сначала говорим, где лежат папки)
+# -----------------------------------------------------------------------------
 SCRIPT_DIR      = Path(__file__).parent
 REGIONS_DIR     = SCRIPT_DIR / "regions"
 DATA_DIR        = SCRIPT_DIR / "data"
 REPORTS_DIR     = SCRIPT_DIR / "reports"
-#
+
 # Определяем базовый путь к проекту (чтобы не зависеть от текущей рабочей директории)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(BASE_DIR, "config")
 OBSERVER_PATH = os.path.join(CONFIG_DIR, "observer.json")
 ANTENNAS_PATH = os.path.join(CONFIG_DIR, "antennas.json")
-#
-# --- НАЧАЛО НОВОГО БЛОКА: ЗАГРУЗКА КОНФИГУРАЦИИ ---
-try:
-    with open(OBSERVER_PATH, "r", encoding="utf-8") as f:
-        OBSERVER_CONFIG = json.load(f)
-    print(f"[*] Loaded observer config: {OBSERVER_PATH}")
-except FileNotFoundError:
-    print(f"[!] Warning: observer.json not found at {OBSERVER_PATH}. Using defaults.")
-    OBSERVER_CONFIG = {}
 
-try:
-    with open(ANTENNAS_PATH, "r", encoding="utf-8") as f:
-        ANTENNAS_CONFIG = json.load(f)
-    print(f"[*] Loaded antennas config: {ANTENNAS_PATH}")
-except FileNotFoundError:
-    print(f"[!] Warning: antennas.json not found at {ANTENNAS_PATH}. Using defaults.")
-    ANTENNAS_CONFIG = {}
-#
-#DEFAULT_START    = 87.0
-#DEFAULT_STOP     = 109.0
-#DEFAULT_STEP     = 100      # kHz
-#DEFAULT_THRESHOLD = -25.0   # dB (auto-adjusted if too low)
-#DEFAULT_PPM      = 0
-#DEFAULT_DWELL    = 20       # seconds per station for RDS
-#DEFAULT_GAINS    = "0,10,25,50"
-#DEFAULT_RDS_GAIN = 50
-#DEFAULT_RDS_GAINS = "-1,50,25,10,0"
-#DEFAULT_RDS_RATE = 228000   # Hz
-#DEFAULT_SNAP     = 100      # kHz
-#FM_MIN, FM_MAX   = 87.5, 108.0
-#NARROW_RANGE_MHZ = 5.0
-# ── ANSI colors ──
-#C_RED    = '\033[91m'
-#C_GREEN  = '\033[92m'
-#C_BLUE   = '\033[94m'
-#C_YELLOW = '\033[93m'
-#C_RESET  = '\033[0m'
+# === ПРОВЕРКА И СОЗДАНИЕ ДИРЕКТОРИЙ (CRITICAL FOR ASTRA LINUX / PROD) ===
+# Гарантируем, что папки для данных и отчётов существуют.
+# Если нет прав на создание — скрипт упадёт сразу с понятной ошибкой, а не позже.
+for dir_path in [DATA_DIR, REPORTS_DIR]:
+    try:
+        dir_path.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        print(f"[!] CRITICAL: No write permission for directory: {dir_path}")
+        sys.exit(1)
+    except OSError as e:
+        print(f"[!] CRITICAL: Failed to create directory {dir_path}: {e}")
+        sys.exit(1)
 
+# -----------------------------------------------------------------------------
+# 3. ЗАГРУЗКА КОНФИГУРАЦИЙ (теперь безопасно писать JSON-файлы в data/)
+# Используем универсальную функцию для чистоты кода (см. ниже)
+# -----------------------------------------------------------------------------
+
+def load_json_config(path: Path, default: dict = None) -> dict:
+    """
+    Безопасно загружает JSON-конфиг.
+    Если файла нет — возвращает default (по умолчанию пустой dict).
+    Если JSON битый — выводит ошибку и возвращает default.
+    """
+    if default is None:
+        default = {}
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+            print(f"[*] Loaded config: {path}")
+            return data
+    except FileNotFoundError:
+        # Это не ошибка, а ожидаемый сценарий (первый запуск, CI и т.д.)
+        print(f"[!] Warning: Config not found at {path}. Using defaults.")
+        return default
+    except json.JSONDecodeError as e:
+        # А вот битый JSON — это проблема. Лучше упасть или хотя бы громко предупредить.
+        print(f"[!] ERROR: Invalid JSON in {path}: {e}")
+        return default
+
+OBSERVER_CONFIG = load_json_config(Path(OBSERVER_PATH))
+ANTENNAS_CONFIG = load_json_config(Path(ANTENNAS_PATH))
+
+# -----------------------------------------------------------------------------
+# 4. ИНИЦИАЛИЗАЦИЯ КОНТЕКСТА
+# -----------------------------------------------------------------------------
 # Выбираем антенну по умолчанию (первый ключ из справочника)
-_default_antenna = ANTENNAS_CONFIG[list(ANTENNAS_CONFIG.keys())[0]] if ANTENNAS_CONFIG else {}
+# Если ANTENNAS_CONFIG пуст — будет пустой словарь, Context обработает это корректно.
+_default_antenna = (
+    ANTENNAS_CONFIG[list(ANTENNAS_CONFIG.keys())[0]]
+    if ANTENNAS_CONFIG else {}
+)
 app_context = Context(OBSERVER_CONFIG, _default_antenna)
-print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, Antenna: {app_context.get_antenna_model()}")
+print(
+    f"[*] Context ready. Observer: {app_context.get_observer_name()}, "
+    f"Antenna: {app_context.get_antenna_model()}"
+)
 
-# Устанавливаются в main() после выбора региона
+# Глобальные переменные для хранения состояния по региону.
+# Инициализируются в main() после выбора региона.
 CURRENT_REGION  = "default"
 CURRENT_COUNTRY = ""
 CURRENT_SUBREGION = None
 BASE_FILE       = ""
 STATIONS_FILE   = ""
 BANDS_REF       = None
+
+
+def get_git_hash():
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=os.path.dirname(__file__), stderr=subprocess.DEVNULL).decode().strip()
+    except Exception:
+        return "unknown"
+# =============================================================================
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С РЕГИОНАМИ
+# =============================================================================
+
 
 def parse_region_name(region_str: str) -> dict:
     """Разобрать имя региона в формате CC.city или CC.city.SUB.
@@ -154,6 +148,12 @@ def parse_region_name(region_str: str) -> dict:
       "RU.spb"     → {"country": "RU", "city": "spb", "subregion": None}
       "US.spb.FL"  → {"country": "US", "city": "spb", "subregion": "FL"}
       "JP.tokyo"   → {"country": "JP", "city": "tokyo", "subregion": None}
+
+    Зачем нужно:
+      - Унифицирует ввод пользователя: независимо от регистра и формата,
+        на выходе всегда нормализованные значения.
+      - Позволяет легко формировать имена файлов вида SDR_Base_RU.spb.json.
+      - Валидирует формат: если частей слишком мало/много — выбрасывает ValueError.
     """
 
     if region_str == "default":
@@ -182,15 +182,31 @@ def parse_region_name(region_str: str) -> dict:
     return result
 
 def get_base_file(region=None):
+    """
+    Возвращает путь к файлу базы станций для указанного региона.
+    Формат: data/SDR_Base_{region}.json
+    Если region не передан, используется CURRENT_REGION.
+    """
     r = region or CURRENT_REGION
     return str(DATA_DIR / f"SDR_Base_{r}.json")
 
 def get_update_file(region=None):
+    """
+    Возвращает путь к файлу обновлений для указанного региона.
+    Формат: data/SDR_Update_{region}_{timestamp}.json
+    Timestamp генерируется как YYYY.MM.DD_HH.MM.
+    Если region не передан, используется CURRENT_REGION.
+    """
     r = region or CURRENT_REGION
     ts = datetime.now().strftime("%Y.%m.%d_%H.%M")
     return str(DATA_DIR / f"SDR_Update_{r}_{ts}.json")
 
 def get_stations_file(region=None):
+    """
+    Возвращает путь к справочному JSON-файлу региона (диапазоны, пороги и т.д.).
+    Формат: regions/{region}.json
+    Если region не передан, используется CURRENT_REGION.
+    """
     r = region or CURRENT_REGION
     return str(REGIONS_DIR / f"{r}.json")
 
@@ -396,33 +412,129 @@ def json_safe(obj):
         return obj.item()
     return obj
 
-def save_results(stations, args, mode, filename=None, scan_min=None, scan_max=None):
-    global app_context
+def save_results(stations, args, mode, ctx, filename=None, scan_min=None, scan_max=None):
+    """
+    Сохраняет результаты сканирования в JSON-файл.
+
+    Что делает:
+      - Формирует имя файла (update или BASE_FILE).
+      - Фильтрует станции по диапазону FQ_MIN–FQ_MAX при сохранении в BASE_FILE.
+      - Считает количество станций вне диапазона (для метрики качества сканирования).
+      - Добавляет в JSON:
+          * параметры сканирования (start, stop, step и т.д.)
+          * диапазон и полосу (FM/OIRT)
+          * станции (отфильтрованные)
+          * погоду (METAR) из app_context.weather
+          * космическую погоду из app_context.space_weather
+          * контекст наблюдения (observer, antenna, артефакты, помехи)
+      - Выводит в консоль путь к файлу и количество станций вне диапазона.
+
+    Аргументы:
+      stations: список станций (dict) — сырые данные до фильтрации.
+      args: аргументы командной строки (Namespace).
+      ctx: dict с контекстом наблюдения (observer, antenna, metar, space_weather и т.п.)
+      mode: режим сканирования ("fullscan", "update", и т.п.).
+      filename: имя файла (опционально). Если None — выбирается автоматически.
+      scan_min, scan_max: границы диапазона сканирования (МГц).
+
+    Возвращает:
+      Путь к сохранённому файлу (str).
+    """
+#    global app_context
+
+    # ── Выбор имени файла ──
     if filename is None:
         if mode in ("fullscan", "update"):
             filename = make_update_filename()
         else:
             filename = args.output or BASE_FILE
+
+    # ── Фильтрация по диапазону только для BASE_FILE ──
+    # Для update-файлов сохраняем всё, чтобы не терять данные вне диапазона.
     if filename == BASE_FILE:
-        filtered = [s for s in stations if is_in_fq_range(s["freq"])]
-        if len(filtered) < len(stations):
-            print(f"[!] {len(stations)-len(filtered)} station(s) outside {FM_MIN}-{FM_MAX} MHz not saved to {BASE_FILE}.")
+        filtered = [s for s in stations if is_in_fq_range(s.get("freq",0))]
+        outside_count = len(stations) - len(filtered)
+        if outside_count > 0:
+            print(f"[!] {outside_count} station(s) outside {FQ_MIN}-{FQ_MAX} MHz not saved to {BASE_FILE}.")
     else:
+        # Для update-файла сохраняем полный список — это нужно для diff/merge
         filtered = stations
-    scan_band = "OIRT" if (scan_min and scan_min >= 65.0 and scan_max and scan_max <= 74.5) else "FM"
-    data = {"scan_date": datetime.now().isoformat(), "mode": mode, "band": scan_band,
-            "scan_range": {"min": scan_min, "max": scan_max},
-            "params": {"start": args.start, "stop": args.stop, "step": args.step,
-                       "threshold": args.threshold, "ppm": args.ppm, "gains": args.gains,
-                       "rds_gains": args.rds_gains, "rds_rate": DEFAULT_RDS_RATE,
-                       "dwell": args.dwell, "snap_khz": args.snap},
-            "stations": filtered}
-    # ── Add observation context if available ──
-    if app_context is not None:
-        data["observation_context"] = app_context.to_dict()
+        outside_count = 0
+
+    # ── Определение полосы (FM / OIRT) ──
+#    scan_band = "OIRT" if (scan_min and scan_min >= 65.0 and scan_max and scan_max <= 74.5) else "FM"
+
+#    scan_band = ctx.get("band", "FM")  # Если вдруг забыли положить — дефолт FM
+
+    # ── Времена (понятные имена) ──
+#    scan_start_utc = ctx.get("scan_date")
+#    scan_end_utc = datetime.now(timezone.utc).isoformat()
+
+    # ── Сбор данных для JSON ──
+    data = {
+        "scan_date_start_utc": ctx.get("scan_date"),
+        "scan_date_end_utc": datetime.now(timezone.utc).isoformat(),
+        "timezone": "UTC",
+        "mode": mode,
+#        "band": scan_band,
+        "scan_range": {"min": scan_min, "max": scan_max},
+        "params": {
+            "start_mhz": args.start,
+            "stop_mhz": args.stop,
+            "step": args.step,
+            "threshold": args.threshold,
+            "ppm": args.ppm,
+            "gains": args.gains,
+            "rds_gains": args.rds_gains,
+            "rds_rate": DEFAULT_RDS_RATE,
+            "dwell": args.dwell,
+            "snap_khz": args.snap,
+        },
+        "stations": filtered,
+        # Метрика: сколько станций было найдено вне рабочего диапазона
+        "outside_range_count": outside_count,
+    }
+
+    # Теперь берём из ctx, а не из app_context
+    if ctx is not None:
+        # Погода
+#        data["weather"] = ctx.get("metar")
+
+        # Космическая погода
+#        data["space_weather"] = ctx.get("space_weather")
+
+        # observation_context — можно либо брать целиком из ctx, либо делать отдельный блок
+        # Если хочешь сохранить формат observation_context как раньше, можно сделать:
+        data["observation_context"] = {
+#            "scan_datetime": ctx.get("scan_date"),
+            "observer": ctx.get("observer"),
+            "antenna": ctx.get("antenna"),
+            "weather": ctx.get("metar"),
+            "space_weather": ctx.get("space_weather"),
+            "artifact": ctx.get("artifact"),
+            "interference": ctx.get("interference"),
+        }
+
+    # ── Погода (METAR) ──
+    # app_context.weather — это распарсенный METAR в виде dict (температура, ветер, видимость и т.д.)
+#    if app_context is not None and hasattr(app_context, "weather"):
+#        data["weather"] = app_context.weather
+
+    # ── Космическая погода (SWPC) ──
+    # app_context.space_weather — Kp, F10.7, Bz, состояние и т.п.
+#    if app_context is not None and hasattr(app_context, "space_weather"):
+#        data["space_weather"] = app_context.space_weather
+
+    # ── Контекст наблюдения (observer, antenna, артефакты, помехи) ──
+    # to_dict() возвращает всё в человекочитаемом виде для аудита
+#    if app_context is not None:
+#        data["observation_context"] = app_context.to_dict()
+
+    # ── Запись JSON ──
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(json_safe(data), f, ensure_ascii=False, indent=2)
-    print(f"\n[*] Saved: {filename}")
+
+    print(f"\n[*] Saved: {filename} | Вне диапазона: {outside_count}")
     return filename
 
 def load_json(fname):
@@ -450,11 +562,14 @@ def interactive_select(prompt, items, default_all=False):
 def show_diff(base_data, update_data, scan_min, scan_max):
     base_sts = {round(s["freq"], 1): s for s in base_data.get("stations", [])}
     upd_sts  = {round(s["freq"], 1): s for s in update_data.get("stations", [])}
+
     new_f = sorted(set(upd_sts) - set(base_sts))
     gone_all = sorted(set(base_sts) - set(upd_sts))
     common_f = sorted(set(base_sts) & set(upd_sts))
+
     gone_in_range = [f for f in gone_all if scan_min and scan_max and scan_min <= f <= scan_max]
     gone_outside = [f for f in gone_all if not (scan_min and scan_max and scan_min <= f <= scan_max)]
+
     changed = []
     for f in common_f:
         b, u, diffs = base_sts[f], upd_sts[f], []
@@ -464,31 +579,39 @@ def show_diff(base_data, update_data, scan_min, scan_max):
         for key in ["PI", "PS", "PTY", "RadioText", "Stereo", "TP", "TA"]:
             if br.get(key) != ur.get(key): diffs.append((f"rds.{key}", br.get(key), ur.get(key)))
         if diffs: changed.append((f, diffs))
+
     print("\n" + "=" * 70)
     print("СРАВНЕНИЕ: Base vs Update")
     print("=" * 70)
+
     if new_f:
         print(f"\n  Новые станции ({len(new_f)}):")
         for i, f in enumerate(new_f):
             s = upd_sts[f]; ps = s.get("rds", {}).get("PS", "?")
             print(f"    {i+1}. + {f:.1f} MHz  ({s.get('signal', 0):.1f} dB)  PS={ps}")
+
     if gone_in_range:
         print(f"\n  Потерянные в диапазоне сканирования ({len(gone_in_range)}):")
         for i, f in enumerate(gone_in_range):
             s = base_sts[f]; ps = s.get("rds", {}).get("PS", "?")
             print(f"    {i+1}. - {f:.1f} MHz  PS={ps}")
+
     if gone_outside:
-        print(f"\n  Вне диапазона сканирования (не трогаются, {len(gone_outside)}):")
-        for f in gone_outside:
-            s = base_sts[f]; ps = s.get("rds", {}).get("PS", "?")
-            print(f"    ~ {f:.1f} MHz  PS={ps}")
+        print(f"\n  Вне диапазона сканирования (не трогаются, {len(gone_outside)})")
+#        for f in gone_outside:
+#            s = base_sts[f]; ps = s.get("rds", {}).get("PS", "?")
+#            print(f"    ~ {f:.1f} MHz  PS={ps}")
+
     if changed:
         print(f"\n  Изменены ({len(changed)}):")
         for i, (f, diffs) in enumerate(changed):
             print(f"    {i+1}. ~ {f:.1f} MHz:")
             for key, old, new in diffs: print(f"        {key}: {old} -> {new}")
+
     if not new_f and not gone_in_range and not changed: print("\n  Нет различий.")
+
     print("=" * 70)
+
     return {"new": new_f, "new_sts": upd_sts, "gone": gone_in_range, "gone_sts": base_sts,
             "changed": [f for f, _ in changed], "changed_sts": upd_sts}
 
@@ -592,7 +715,7 @@ def print_summary(stations, ppm=0, snap=0):
         if rt != "—": n_rt += 1
         if name_ru != "—": n_ru += 1
         # Выводим Mod и Band
-        print(f"{freq:>6.1f}M | {signal:>6.1f} | {name_ru:<22} | {mod:>5} | {band:<12} | "
+        print(f"{freq:>7.3f}M | {signal:>7.1f} | {name_ru:<22} | {mod:>5} | {band:<12} | "
               f"{pi_str:>8} | {ps:<24} | {pty:<16} | {ster_str:>5} | {str(tp):>4} | {str(ta):>4} | {rt_str}")
     print("=" * 155)
     print(f"\nВсего станций: {len(stations)} | PPM: {ppm} | Snap: {snap} kHz")
@@ -602,13 +725,72 @@ def print_summary(stations, ppm=0, snap=0):
 #  Export to html
 # ═══════════════════════════════════════════════════════════════
 
+def export_html(data: dict, region: str | None, output_path: str | Path | None = None) -> str | None:
+    """
+    Экспортирует отчёт в HTML.
+    region: всегда непустая строка (нормализуется в main()).
+    """
+    if output_path is None:
+        print("[!] export_html: output_path не передан, HTML не сохранён.")
+        return None
 
-# ══════════════════════════════
-def export_html(data, region="RU.spb", output_path=None):
-    stations = data.get("stations", )
+    # Нормализуем в Path, даже если передали строку
+#    p = Path(output_path)
+
+    # Создаём родительскую директорию, если её нет
+#    p.parent.mkdir(parents=True, exist_ok=True)
+
+#    with p.open("w", encoding="utf-8") as f:
+#        f.write(html)
+
+#    print(f"[*] HTML report: {p}")
+#    return str(p)
+# =================================
+    # Защита от None
+    region_display = region.upper() if region else "UNKNOWN"
+    stations = data.get("stations", [])
     scan_date = data.get("scan_date", "")
     ppm = data.get("ppm", "?")
     mode = data.get("mode", "?")
+
+    def format_metar(m) -> str:
+        if not m:
+            return "<p class='warn'>METAR: данные недоступны</p>"
+        # Конвертируем видимость в км для отображения (если в метрах)
+        vis = m.get("visibility_m")
+        vis_display = "?"
+        if vis is not None:
+            if vis >= 9999:
+                vis_display = ">10 км"
+            elif vis >= 1000:
+                vis_display = f"{vis / 1000:.1f} км"
+            else:
+                vis_display = f"{vis} м"
+        return f"""
+        <h3>Погода (METAR): {m.get('station', '?')}</h3>
+        <ul>
+          <li>Температура: {m.get('temperature_c', '?')}°C</li>
+          <li>Точка росы: {m.get('dewpoint_c', '?')}°C</li>
+          <li>Ветер: {m.get('wind_dir', '?')}° ({m.get('wind_speed_kt', '?')} уз)</li>
+          <li>Видимость: {vis_display}</li>
+          <li>Давление: {m.get('qnh_hpa', '?')} гПа</li>
+        </ul>
+        """
+
+    def format_space_weather(s) -> str:
+        if not s:
+            return "<p class='warn'>Космическая погода: данные недоступны</p>"
+        return f"""
+        <h3>Космическая погода (SWPC)</h3>
+        <ul>
+          <li>Kp индекс: {s.get('kp_index', '?')} ({s.get('storm_scale', '?')})</li>
+          <li>F10.7: {s.get('f107', '?')} sfu</li>
+          <li>Bz: {s.get('bz', '?')} nT</li>
+          <li>Скорость солнечного ветра: {s.get('solar_wind_speed', '?')} км/с</li>
+          <li>Состояние: {s.get('condition', '?')}</li>
+        </ul>
+        """
+
 
     n_total = len(stations)
     n_rds = sum(1 for s in stations if s.get("rds", {}).get("PI"))
@@ -740,6 +922,8 @@ function sortTable(col) {
 <div class="meta">
   Scan: {scan_date[:19]} | Mode: {mode} | PPM: {ppm}
 </div>
+        {format_metar(data.get("metar"))}
+        {format_space_weather(data.get("space_weather"))}
 <div class="stats">
   <div class="stat">Всего: <b>{n_total}</b></div>
   <div class="stat">С RDS (PI): <b>{n_rds}</b></div>
@@ -771,13 +955,27 @@ function sortTable(col) {
   <tbody>
 {rows}  </tbody>
 </table>
-<div class="footer">Generated by SDR-RTL-Scanner v{__version__} | {scan_date[:19]}</div>
+<div class="footer">Generated by SDR-RTL-Scanner v{__version__} (git {get_git_hash()}) | {scan_date[:19]}</div>
 {js_code}
 </body>
 </html>"""
 
+    # --- 2. Теперь безопасно пишем в файл ---
+    p = Path(output_path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+
+    with p.open("w", encoding="utf-8") as f:
+        f.write(html)
+
+    print(f"[*] HTML report: {p}")
+    return str(p)
+
     if output_path is None:
-        output_path = os.path.join(REPORTS_DIR, f"Last_Report_SDR_RTL_{region}.html")
+        # Функция не должна сама решать, куда писать. Пусть решает main().
+        print("[!] export_html: output_path не передан, HTML не сохранён.")
+        return None
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"[*] HTML report: {output_path}")
@@ -785,15 +983,29 @@ function sortTable(col) {
 
 # ═══════════════════════════════════════════════════════════════
 #  MODE 1: FULLSCAN
+#  NOTE:
+#    - Все расчёты ведутся в Гц (int).
+#    - Freq в JSON/аргументах — МГц (float) для удобства ввода.
+#    - Для ДВ/СВ (≤3 МГц) вывод в кГц с 3 знаками; для КВ — МГц с 3; VHF+ — МГц с 1.
+#    - Дедупликация и маппинг по имени — по ключу в кГц (int), без округления.
 # ═══════════════════════════════════════════════════════════════
 
-def mode_fullscan(args):
-    print("=" * 60 + f"\nSDR-RTL Scanner v{__version__} — Mode 1: Full Scan\n" + "=" * 60)
+def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str | None = None) -> None:
+    if ctx is None:
+        raise RuntimeError("mode_fullscan: обязательный аргумент ctx не передан")
+    if region is None:
+        raise RuntimeError("mode_fullscan: обязательный аргумент region не передан")
+
+    print("=" * 60 + f"\nSDR-RTL Scanner v{__version__} (git {get_git_hash()}) — Mode 1: Full Scan\n" + "=" * 60)
     prev_names = {}
+
+    # ── Загрузка предыдущей базы: маппинг по частоте в кГц (без потерь) ──
     if os.path.exists(BASE_FILE):
         prev = load_json(BASE_FILE)
         if prev:
             for st in prev.get("stations", []):
+                # Храним ключ в кГц как int — это сохраняет точность для ДВ/СВ
+                freq_khz_key = int(st["freq"] * 1000)
                 if st.get("name_ru"):
                     prev_names[round(st["freq"], 1)] = st["name_ru"]
 
@@ -806,32 +1018,66 @@ def mode_fullscan(args):
     print(f"[*] Scan range {args.start}–{args.stop} MHz → {len(sub_ranges)} sub-range(s):")
     for sr in sub_ranges:
         tag = "OIRT" if sr["is_oirt"] else sr["modulation"]
+        # Вывод границ поддиапазонов тоже лучше адаптивно, но пока оставим как было
         print(f"    {sr['start_mhz']:.1f}–{sr['stop_mhz']:.1f} MHz | "
               f"{sr['band_name']} | {tag} | step={sr['step_khz']:.0f} kHz")
 
     # ── Сканируем каждый поддиапазон ──
     all_stations = []
     for sr in sub_ranges:
-        # Если юзер задал --step явно — используем его, иначе берём из справочника
-        step = args.step if args.step is not None else sr["step_khz"]
-        if not isinstance(step, (int, float)) or step <= 0:
-            step = DEFAULT_STEP
+        # --- ШАГ СКАНИРОВАНИЯ: явные единицы и защита от мусора ---
+        # Если пользователь задал --step явно — используем его (в кГц).
+        # Иначе берём из справочника (тоже в кГц).
+        step_khz = args.step if args.step is not None else sr["step_khz"]
 
+        # Валидация шага: должен быть числом > 0
+        if not isinstance(step_khz, (int, float)) or step_khz <= 0:
+            step_khz = DEFAULT_STEP
+            print(f"[!] Step invalid or missing for band {sr['band_name']}; using default {DEFAULT_STEP} kHz")
 
-        # Порог: из справочника, или --threshold, или дефолт
+        # --- ПОРОГ СИГНАЛА ---
         band_threshold = sr.get("threshold")
-        if band_threshold is not None:
-            effective_threshold = band_threshold
-        else:
-            effective_threshold = args.threshold
+        effective_threshold = band_threshold if band_threshold is not None else args.threshold
 
+        if not isinstance(effective_threshold, (int, float)):
+            effective_threshold = DEFAULT_THRESHOLD
+            print(f"[!] Threshold invalid for band {sr['band_name']}; using default {DEFAULT_THRESHOLD} dB")
 
-        print(f"\n[*] Multi-gain scan: {sr['start_mhz']:.1f}–{sr['stop_mhz']:.1f} MHz "
-              f"({sr['band_name']}, step={step:.0f} kHz, threshold={effective_threshold:.1f} dB)")
+        # --- ЛОГИРОВАНИЕ: понятные единицы и точность ---
+        print(
+            f"\n[*] Multi-gain scan: {sr['start_mhz']:.3f}–{sr['stop_mhz']:.3f} MHz "
+            f"({sr['band_name']}, step={step_khz:.1f} kHz ({int(step_khz*1000)} Hz), "
+            f"threshold={effective_threshold:.1f} dB)"
+        )
 
-        found = bloom_split_scan(sr["start_mhz"], sr["stop_mhz"], step,
-                                 args.gains, effective_threshold, args.ppm, args.snap,
-                                 antennas_config=ANTENNAS_CONFIG)
+        # --- ВЫЗОВ СКАНЕРА: строго под сигнатуру bloom_split_scan ---
+        # ВАЖНО: bloom_split_scan ожидает шаг (step) в кГц, а не в Гц.
+        # Не передавай step_hz и не используй именованный аргумент step_hz.
+        # ==============================================================================
+        # ЕДИНИЦЫ ИЗМЕРЕНИЯ ДЛЯ bloom_split_scan (СТРОГО!)
+        # ------------------------------------------------------------------------------
+        # start_mhz, stop_mhz: float, МГц (границы диапазона)
+        # step:               float/int, кГц (шаг сканирования)  <-- КРИТИЧНО: НЕ Гц!
+        # gains:              list или int, dB (усиление)
+        # threshold_db:       float, dB (порог обнаружения)
+        # ppm, snap:          int, bool (параметры SDR)
+        # antennas_config:    dict (конфигурация антенн)
+        #
+        # ВНИМАНИЕ:
+        # Если передать step в Гц (например, 1000 вместо 1), сканирование станет
+        # в 1000 раз грубее — все станции на ДВ/СВ будут пропущены.
+        # ==============================================================================
+        found = bloom_split_scan(
+            sr["start_mhz"],          # float, МГц
+            sr["stop_mhz"],           # float, МГц
+            step_khz,                 # число, кГц (именно это функция реально ждёт)
+            args.gains,               # список/значение усиления
+            effective_threshold,      # float, дБ
+            args.ppm,                 # int, ppm
+            args.snap,                # bool
+            antennas_config=ANTENNAS_CONFIG
+        )
+
         if found:
             all_stations.extend(found)
 
@@ -852,8 +1098,6 @@ def mode_fullscan(args):
         print_summary([], args.ppm, args.snap)
         return
 
-# ================================================================
-    # ── Тип сессии (для лога) ──
     # ── Тип сессии (для лога) ──
     HF_THRESHOLD_MHZ = 30.0
     has_oirt = any(sr["is_oirt"] for sr in sub_ranges)
@@ -887,7 +1131,7 @@ def mode_fullscan(args):
         st["_band"] = lookup_band(st["freq"] * 1000, BANDS_REF,
                                    country=CURRENT_COUNTRY, subregion=CURRENT_SUBREGION)
         st["_is_oirt"] = st["_band"] and "OIRT" in st["_band"].get("name", "").upper()
-# ================================================================
+
     # ── Универсальная автокалибровка PPM ──
     from config.system import PPM_REFERENCES
     from core.snr import auto_ppm_calibrate, auto_ppm_calibrate_carrier
@@ -902,24 +1146,44 @@ def mode_fullscan(args):
         st_mod = st_band.get("modulation", "WFM") if st_band else "WFM"
         is_hf = freq < HF_THRESHOLD_MHZ
 
+        # ==========================================================================
+        # FORMAT NOTES:
+        #   - HF/ДВ/СВ (< HF_THRESHOLD): .3f → критично для точного позиционирования
+        #     в узких диапазонах с мелким шагом (1–9 кГц).
+        #   - Остальные диапазоны: .1f → достаточно для широкой сетки.
+        # ==========================================================================
+
         # ── Частота для вывода: на КВ — больше знаков ──
         if is_hf:
-            freq_str = f"{freq:.3f} MHz ({freq*1000:.1f} kHz)"
+#            freq_str = f"{freq:.3f} MHz ({freq*1000:.1f} kHz)"
+            freq_str = f"{freq:.3f} MHz"
         else:
             freq_str = f"{freq:.1f} MHz"
 
+        # Фиксируем ширину колонок для ровного вывода
+        freq_col = f"{freq_str:>11}"        # колонка частоты: 8 символов, по правому краю
+        sig_col = f"{st.get('signal', 0):5.1f}"  # колонка сигнала: 5 символов
+
         # ── HF: пропускаем RDS и PPM, просто записываем сигнал ──
         if is_hf:
-            print(f"[*] {i+1}/{len(stations)}: {freq_str} "
-                  f"({st['signal']:.1f} dB) [{st_mod}]")
+
+            print(f"[*] {i+1:3}/{len(stations):3}: {freq_col} ({sig_col} dB) [{st_mod}]")
             st["name_ru"] = prev_names.get(round(freq, 1)) or ""
             st["rds"] = {}
             st["stereo"] = None
             st["modulation"] = st_mod
             st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
-            print()
             continue
 
+        # Для FM/OIRT: сначала общий статус
+        print(f"[*] {i+1:3}/{len(stations):3}: {freq_col} ({sig_col} dB)")
+        st["name_ru"] = prev_names.get(round(freq, 1)) or lookup_name_ru(freq) or ""
+        st["modulation"] = st_mod
+        st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
+
+        # Дальше идёт твоя существующая логика калибровки и декодирования RDS
+        # (блок с calibrated_band_type, auto_ppm_calibrate, decode_rds_multi и т.п.)
+        # её не трогай, она остаётся как была
         # ── Определяем тип для калибровки (только для FM/OIRT) ──
         if st_is_oirt:
             band_type = "OIRT"
@@ -1045,7 +1309,7 @@ def mode_fullscan(args):
     # Сохраняем итоговый PPM
     args.ppm = current_ppm
 # ================================================================
-    fname = save_results(stations, args, "fullscan", scan_min=args.start, scan_max=args.stop)
+    fname = save_results(stations, args, "fullscan", ctx, scan_min=args.start, scan_max=args.stop)
     print_summary(stations, args.ppm, args.snap)
 
     final_stations = stations
@@ -1066,14 +1330,24 @@ def mode_fullscan(args):
     # ── Band label для export_html ──
     band_labels = sorted(set(sr["band_name"] for sr in sub_ranges))
     band = " + ".join(band_labels)
-
-    export_html({
-        "stations": final_stations,
-        "scan_date": datetime.now().isoformat(),
-        "ppm": args.ppm,
-        "mode": args.mode,
-        "band": band
-    }, region=args.region)
+    export_html(
+        data={
+            "stations": final_stations,
+            "scan_date": ctx.get("scan_date"),
+            "observer": ctx.get("observer"),
+            "antenna": ctx.get("antenna"),
+            "metar": ctx.get("metar"),
+            "space_weather": ctx.get("space_weather"),
+            "artifact": ctx.get("artifact"),
+            "interference": ctx.get("interference"),
+            "ppm": args.ppm,                  # исправлено: у тебя в конце функции ты делаешь args.ppm = current_ppm
+            "mode": "fullscan",
+            "band": band,
+        },
+        region=region,
+#        output_path=html_path
+        output_path=output_path
+    )
 
 # ═══════════════════════════════════════════════════════════════
 #  MODE 2: UPDATE
@@ -1104,7 +1378,7 @@ def mode_update(args):
         print()
     scan_min = data.get("scan_range", {}).get("min")
     scan_max = data.get("scan_range", {}).get("max")
-    upd_file = save_results(stations, args, "update", scan_min=scan_min, scan_max=scan_max)
+    upd_file = save_results(stations, args, "update", ctx, scan_min=scan_min, scan_max=scan_max)
     print_summary(stations, args.ppm, args.snap)
     if src == BASE_FILE:
         print(f"\n[*] Update file: {upd_file}")
@@ -1214,9 +1488,10 @@ def main():
                    help="Тип модуляции: FM, OIRT, AM, USB, LSB. Для FM/OIRT будет декодироваться RDS.")
     p.add_argument("--group-delta", type=float, default=0.2,
                    help="Расстояние между станциями для группировки (МГц)")
-    p.add_argument("--region", type=str, default="RU.spb",
-                   help="Region code in CC.city format, e.g. RU.spb, RU.msk, DE.berlin (default: RU.spb).\n"
-                        "Use '?' for interactive selection.")
+    p.add_argument("--region", type=str, default=None,
+                   help="Region code in CC.city format, e.g. RU.spb, RU.msk, DE.berlin.\n"
+                        "Use '?' for interactive selection.\n"
+                        "Default is taken from config/user.py (DEFAULT_REGION).")
     p.add_argument("--ppm", type=int, default=DEFAULT_PPM, help="PPM correction (default: 0)")
     p.add_argument("--gain", type=float, default=DEFAULT_RDS_GAIN, help="Alias for --rds-gain (default: 50)")
     p.add_argument("--rds-gain", type=float, default=None, help="Single RDS gain dB, or -1 for auto (overrides --rds-gains)")
@@ -1295,12 +1570,44 @@ def main():
 
     # ── Region selection ──
     ensure_dirs()
+    # ==============================================================================
+    # ЗАЩИТА: DEFAULT_REGION из конфига как fallback
+    #   - Если флаг --region не передан, используем DEFAULT_REGION.
+    #   - Это позволяет менять дефолт без изменения кода (удобно для площадок/контрактов).
+    #   - Для аудита: явная валидация входных данных на границе CLI.
+    # ==============================================================================
+    # Приоритет 1: CLI
     region = args.region
+
+    # Приоритет 2: observer.json (если CLI не задан)
+    if not region and OBSERVER_CONFIG:
+        region_from_config = OBSERVER_CONFIG.get("region")
+        if region_from_config:
+            region = region_from_config
+            print(f"[*] Region not specified in CLI; using from observer.json: {region}")
+
+    # Приоритет 3: жёсткий дефолт (только если вообще ничего нет)
+    if not region:
+        region = "RU.spb"
+        print(f"[!] Region not found (CLI + config); falling back to hardcoded default: {region}")
+
+# ============================================================================================
+#    if region is None or region == "":
+#        region = DEFAULT_REGION
+#        print(f"[*] Region not specified; using default from config: {region}")
+# =============================================================================================
     if region == "?":
         region = interactive_region_select()
+        if region is None:
+            print("[!] Interactive region selection cancelled.")
+            sys.exit(1)
+
     CURRENT_REGION = region
     ensure_region_file(region)
     ensure_base_file(region)
+    ts = datetime.now().strftime("%Y.%m.%d_%H.%M.%S")
+    html_path_obj = REPORTS_DIR / f"SDR_Report_{region}_{ts}.html"
+    html_path = str(html_path_obj)
 
     # --- НОВЫЙ БЛОК: парсим регион и получаем страну/субрегион ---
     try:
@@ -1312,6 +1619,10 @@ def main():
     except ValueError as e:
         print(f"[!] Invalid region format: {e}")
         sys.exit(1)
+        print(f"[DEBUG] args.region={args.region!r}")
+        print(f"[DEBUG] OBSERVER_CONFIG['region']={OBSERVER_CONFIG.get('region')!r}")
+        print(f"[DEBUG] Final region used={region!r}")
+
     # -------------------------------------------------------------
 
     BASE_FILE = get_base_file(region)
@@ -1348,14 +1659,22 @@ def main():
         # Запрос космической погоды (NOAA SWPC)
         print(f"[*] Fetching space weather (NOAA SWPC)...")
         sw = app_context.fetch_space_weather()
-        if not sw:
+
+        if sw:
+            app_context.space_weather = sw   # <-- ЭТА СТРОКА ОБЯЗАТЕЛЬНА
+            print("[*] Space weather fetched successfully")
+        else:
             print(f"    [!] Space weather fetch failed")
+
+#        if not sw:
+#            print(f"    [!] Space weather fetch failed")
 
         print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, "
               f"Antenna: {app_context.get_antenna_model()}")
 # ===================================================================================================
     else:
         app_context = None
+
     print(f"[*] Region: {region}")
     print(f"[*] Base:   {BASE_FILE}")
     print(f"[*] Ref:    {STATIONS_FILE}")
@@ -1388,9 +1707,30 @@ def main():
             sys.exit(1)
         print(f"[*] Found {tool} at {path}")
 
+    # ── CONTEXT: единая точка истины для запуска (время, погода, условия приёма) ──
+    # Description: все временные метки — в UTC (ISO 8601). Это критично для:
+    #   - привязки к METAR/космической погоде (они в UTC);
+    #   - воспроизводимости и аудита (гос. контракт, отчёты, CI/CD);
+    #   - сопоставления нескольких сканов по времени.
+    # Если погода недоступна — кладём None, отчёт остаётся валидным.
+    scan_date_utc = datetime.now(timezone.utc).isoformat()
+
+    ctx = {
+        "scan_date": scan_date_utc,
+        "observer": app_context.get_observer_name() if app_context else None,
+        "antenna": app_context.get_antenna_model() if app_context else None,
+        "region": region,
+        "metar": app_context.weather if app_context else None,
+        "space_weather": app_context.space_weather if app_context else None,
+        "artifact": app_context.artifact if app_context else None,
+        "interference": app_context.interference if app_context else None,
+    }
+
     # ✅ Вызов нужного режима — теперь ВНЕ цикла, выполняется один раз
     if args.mode == "fullscan":
-        mode_fullscan(args)
+#        mode_fullscan(args)
+        mode_fullscan(args, ctx=ctx, region=region, output_path=html_path)
+#        mode_fullscan(args, ctx=ctx, region=region)
     elif args.mode == "update":
         mode_update(args)
     elif args.mode == "edit":
