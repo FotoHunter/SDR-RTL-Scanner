@@ -1,0 +1,17 @@
+{
+  "panel_lf": "LW/MW",
+  "panel_hf": "HF",
+  "panel_fm": "VHF/FM",
+  "gq_label": "GQ",
+  "stereo_yes": "YES",
+  "stereo_no": "NO",
+  "rds_available": "data available",
+  "rds_unavailable": "data unavailable",
+  "meteo_prefix": "WEATHER",
+  "gps_prefix": "GPS",
+  "stations_prefix": "STATIONS",
+  "marker_clear": "OK",
+  "marker_indoor": "INDOR",
+  "marker_anomaly": "Anomaly"
+}
+

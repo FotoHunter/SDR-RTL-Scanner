@@ -1,0 +1,17 @@
+{
+  "panel_lf": "ДВ/СВ",
+  "panel_hf": "КВ",
+  "panel_fm": "УКВ/FM",
+  "gq_label": "GQ",
+  "stereo_yes": "ДА",
+  "stereo_no": "НЕТ",
+  "rds_available": "данные доступны",
+  "rds_unavailable": "данные недоступны",
+  "meteo_prefix": "МЕТЕО",
+  "gps_prefix": "GPS",
+  "stations_prefix": "СТАНЦИИ",
+  "marker_clear": "✓",
+  "marker_indoor": "⚠",
+  "marker_anomaly": "✗"
+}
+
