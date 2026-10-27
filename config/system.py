@@ -17,8 +17,7 @@ NARROW_RANGE_MHZ = 2.0             # МГц
 # Пороговые значения (логика работы)
 STEREO_THRESHOLD_DB = 10.0
 STEREO_SNR_THRESHOLD = 10.0
-#DEFAULT_THRESHOLD = -25.0          # dB
-DEFAULT_THRESHOLD = None          # dB
+DEFAULT_THRESHOLD = -25.0          # dB
 
 # Защитные лимиты
 MAX_DWELL_SEC = 120                # макс. время ожидания rtl_power

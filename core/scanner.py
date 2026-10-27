@@ -9,6 +9,18 @@ import numpy as np
 
 from config import DEFAULT_STEP, NARROW_RANGE_MHZ, MAX_DWELL_SEC
 
+def format_freq_mhz(freq_mhz: float, step_hz: Optional[float] = None) -> str:
+    """Форматирует частоту в МГц с числом знаков, зависящим от шага сетки.
+    step_hz=None → 100 кГц (FM-дефолт).
+    """
+    if step_hz is None or step_hz <= 0:
+        step_hz = 100_000
+    if step_hz >= 100_000:
+        return f"{freq_mhz:.2f}"
+    if step_hz >= 1_000:
+        return f"{freq_mhz:.3f}"
+    return f"{freq_mhz:.4f}"
+
 def snap_freq(freq_mhz: float, snap_khz: float) -> float:
     if snap_khz <= 0:
         return freq_mhz
@@ -82,44 +94,48 @@ def split_scan_ranges(
 
     # Добавляем перекрытие на стыках: каждый диапазон расширяется на 2 шага в обе стороны
     OVERLAP_STEPS = 2
+    MAX_OVERLAP_MHZ = 0.5
+
     for sr in sub_ranges:
-        overlap_mhz = (sr["step_khz"] * OVERLAP_STEPS) / 1000.0
+        overlap_mhz = min((sr["step_khz"] * OVERLAP_STEPS) / 1000.0, MAX_OVERLAP_MHZ)
         sr["start_mhz"] = max(start_mhz, sr["start_mhz"] - overlap_mhz)
         sr["stop_mhz"] = min(stop_mhz, sr["stop_mhz"] + overlap_mhz)
 
-    # Заполняем дыры между диапазонами
+    # Заполняем дыры между диапазонами, наследуя параметры предыдущего реального бэнда
     filled = []
     cursor = start_mhz
+    last_real: Optional[Dict[str, Any]] = None  # последний не-Gap бэнд
+
     for sr in sorted(sub_ranges, key=lambda x: x["start_mhz"]):
-        # Если после перекрытия предыдущий диапазон уже покрывает курсор — не добавляем дыру
         if sr["start_mhz"] > cursor + 0.001:
-            # Проверяем, не перекрыт ли уже этот участок соседями
             if not filled or filled[-1]["stop_mhz"] < sr["start_mhz"] - 0.001:
-                filled.append(
-                    {
-                        "start_mhz": cursor,
-                        "stop_mhz": sr["start_mhz"],
-                        "step_khz": DEFAULT_STEP,
-                        "band_name": "Gap",
-                        "is_oirt": False,
-                        "modulation": "WFM",
-                    }
-                )
+                gap = {
+                    "start_mhz": cursor,
+                    "stop_mhz": sr["start_mhz"],
+                    "step_khz": last_real["step_khz"] if last_real else DEFAULT_STEP,
+                    "band_name": "Gap",
+                    "is_oirt": False,
+                    "modulation": last_real["modulation"] if last_real else "WFM",
+                    # ← наследуем threshold с предыдущего реального бэнда
+                    "threshold": last_real.get("threshold") if last_real else None,
+                }
+                filled.append(gap)
         filled.append(sr)
         cursor = max(cursor, sr["stop_mhz"])
+        if sr["band_name"] != "Gap":
+            last_real = sr
 
     if cursor < stop_mhz - 0.001:
-        last_step = sub_ranges[-1]["step_khz"] if sub_ranges else DEFAULT_STEP
-        filled.append(
-            {
-                "start_mhz": cursor,
-                "stop_mhz": stop_mhz,
-                "step_khz": last_step,
-                "band_name": "Gap",
-                "is_oirt": False,
-                "modulation": "WFM",
-            }
-        )
+        filled.append({
+            "start_mhz": cursor,
+            "stop_mhz": stop_mhz,
+            "step_khz": last_real["step_khz"] if last_real else DEFAULT_STEP,
+            "band_name": "Gap",
+            "is_oirt": False,
+            "modulation": last_real["modulation"] if last_real else "WFM",
+            "threshold": last_real.get("threshold") if last_real else None,
+        })
+
     # Ограничение минимального шага для сканирования
     MIN_SCAN_STEP_KHZ = 1.0
     for sr in filled:
@@ -232,7 +248,7 @@ def run_rtl_power(
             except ValueError:
                 continue
             freq = round((start_hz + (i - 6) * step_hz) / 1e6, 3)
-            freq_snapped = snap_freq(freq, snap_khz) if snap_khz > 0 else freq
+            freq_snapped = snap_freq(freq, step_khz) if step_khz > 0 else freq
             if freq_snapped not in freq_power or pwr > freq_power[freq_snapped]:
                 freq_power[freq_snapped] = pwr
     return freq_power
@@ -327,31 +343,49 @@ def multi_gain_scan(
         print(f"  [scan] No bins above {effective_threshold:.1f} dB.")
         return []
 
+# ==================================
+
     stations = []
     group = []
     for freq, pwr in candidates:
         if group and (freq - group[-1][0]) > 0.2:
             best = max(group, key=lambda x: x[1])
-            stations.append({"freq": best[0], "signal": best[1]})
+            stations.append({
+                "freq": best[0],
+                "signal": best[1],
+                "_step_khz": step_khz,   # ← шаг сканирования, с которым нашли станцию
+            })
             group = []
         group.append((freq, pwr))
 
     if group:
         best = max(group, key=lambda x: x[1])
-        stations.append({"freq": best[0], "signal": best[1]})
+        stations.append({
+            "freq": best[0],
+            "signal": best[1],
+            "_step_khz": step_khz,
+        })
+
+# ==================================
 
     print(f"[*] Found {len(stations)} station(s):")
     for i, st in enumerate(stations):
-#        print(f"    {i+1}. {st['freq']:.1f} MHz  ({st['signal']:.1f} dB)")
-        # Берём шаг из справочника диапазона этой станции. Если нет — считаем FM (100 кГц)
-        step_hz = st.get("_band", {}).get("step", 100000)
+        # ── Формат частоты ──
+        # Приоритет 1: шаг сетки эфира из справочника (_band), если он уже заполнен
+        # Приоритет 2: шаг сканирования (step_khz) — всегда доступен
+        # Приоритет 3: 100 кГц (FM-дефолт) — если всё остальное отсутствует
+        band = st.get("_band") or {}
+        band_step_hz = band.get("step")
+        scan_step_hz = step_khz * 1000  # step_khz — в кГц, переводим в Гц
 
-        # Если шаг >= 100 кГц (УКВ/FM) → 2 знака, иначе (КВ и т.п.) → 3 знака
-        if step_hz >= 100000:
-            freq_str = f"{st['freq']:.2f}"
+        if isinstance(band_step_hz, (int, float)) and band_step_hz > 0:
+            step_hz = band_step_hz
+        elif scan_step_hz > 0:
+            step_hz = scan_step_hz
         else:
-            freq_str = f"{st['freq']:.3f}"
+            step_hz = 100_000
 
+        freq_str = format_freq_mhz(st["freq"], step_hz)
         print(f"    {i+1}. {freq_str} MHz  ({st['signal']:.1f} dB)")
     print()
     return stations

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # core/snr.py
-import subprocess, select, json, config
+import subprocess, select, json, config, re
 import numpy as np
 from typing import Optional, Tuple, Dict, Any, List
 #from config import DEFAULT_START, DEFAULT_STOP, ANTENNAS_CONFIG, DEFAULT_RDS_RATE
@@ -9,17 +9,84 @@ from .bands import RadioBands
 
 # Инициализация один раз при старте приложения
 BANDS_CONFIG = RadioBands("regions/radio_bands_reference.json")
+RE_FREQ = re.compile(r'^\d{2,3}[.,]\d{1,2}\s*(FM|fm|МГц)?$')
+RE_PHONE = re.compile(r'^[\(\)\d\s\-]{7,}$')
 
 def _is_oirt(freq_mhz: float) -> bool:
     band = BANDS_CONFIG.get_band_for_freq(freq_mhz)
     return band is not None and band.get("name") == "OIRT"
 
+def classify_ps_variant(s: str) -> str:
+    """'name' | 'freq' | 'phone' | 'unknown'."""
+    s = s.strip()
+    if not s:
+        return "unknown"
+    if RE_FREQ.match(s):
+        return "freq"
+    if RE_PHONE.match(s):
+        return "phone"
+    return "name"
+
+def _hamming_distance(s1: str, s2: str) -> int:
+    """Hamming distance: различие по позициям. Разная длина — penalty."""
+    if len(s1) != len(s2):
+        return max(len(s1), len(s2))   # сильный штраф за разную длину
+    return sum(1 for a, b in zip(s1, s2) if a != b)
+
+
+def _consensus_ps(names: list) -> tuple:
+    """names: [(variant, count), ...] — name-варианты PS.
+
+    Кластеризует по Hamming distance ≤ 2, внутри кластера — консенсус по позициям.
+    Возвращает (consensus, confidence_str) или (None, None).
+    """
+    if not names:
+        return None, None
+
+    # Сортируем по частоте (убывание) — самые частые первыми
+    names_sorted = sorted(names, key=lambda x: x[1], reverse=True)
+
+    # Кластеризация: первый (самый частый) — центр, остальные — если Hamming ≤ 2
+    cluster = [names_sorted[0]]
+    for variant, count in names_sorted[1:]:
+        if _hamming_distance(cluster[0][0], variant) <= 2:
+            cluster.append((variant, count))
+
+    # Консенсус по позициям
+    max_len = max(len(v) for v, _ in cluster)
+    consensus_chars = []
+    for i in range(max_len):
+        # Голоса по символу на позиции i
+        votes = {}
+        for variant, count in cluster:
+            if i < len(variant):
+                ch = variant[i]
+                votes[ch] = votes.get(ch, 0) + count
+        if votes:
+            best_ch = max(votes, key=votes.get)
+            consensus_chars.append(best_ch)
+
+    consensus = "".join(consensus_chars)
+
+    # Confidence: сколько вариантов совпало с консенсусом / всего в кластере
+    matched = sum(1 for v, _ in cluster if v == consensus)
+    confidence = f"{matched}/{len(cluster)}"
+
+    return consensus, confidence
+
 def _parse_rds_json(data: dict, result: dict) -> None:
     """Парсит JSON от redsea и заполняет словарь result."""
     if "pi" in data:
         result["PI"] = data["pi"]
+
+    # PS: собираем ВСЕ варианты (redsea отдаёт последнее, теряя название)
     if "ps" in data and isinstance(data["ps"], str):
-        result["PS"] = data["ps"].strip()
+        ps = data["ps"].strip()
+        if ps:
+            if "PS_variants" not in result:
+                result["PS_variants"] = {}
+            result["PS_variants"][ps] = result["PS_variants"].get(ps, 0) + 1
+
     if "prog_type" in data:
         result["PTY"] = data["prog_type"]
     if "stereo" in data:
@@ -30,10 +97,17 @@ def _parse_rds_json(data: dict, result: dict) -> None:
         result["TA"] = data["ta"]
     if "af" in data:
         result["AF"] = data["af"]
+
+    # RadioText: собираем все варианты
+    rt = None
     if "radiotext" in data and isinstance(data["radiotext"], str):
-        result["RadioText"] = data["radiotext"].strip()
+        rt = data["radiotext"].strip()
     elif "rt" in data and isinstance(data["rt"], str):
-        result["RadioText"] = data["rt"].strip()
+        rt = data["rt"].strip()
+    if rt:
+        if "RadioText_variants" not in result:
+            result["RadioText_variants"] = {}
+        result["RadioText_variants"][rt] = result["RadioText_variants"].get(rt, 0) + 1
 
 def auto_ppm_calibrate_carrier(
     ref_freq_mhz: float,
@@ -43,7 +117,6 @@ def auto_ppm_calibrate_carrier(
     search_range_khz: float = 10.0
 ) -> Tuple[int, Optional[bool]]:
     """Калибровка PPM по несущей AM-станции (для КВ/HF/Air-band).
-    
     Сканирует узкий диапазон вокруг ref_freq_mhz, находит пик несущей
     и вычисляет PPM. Не требует пилот-тона.
     """
@@ -286,8 +359,10 @@ def decode_rds(freq_mhz: float, gain_db: int, ppm: int, dwell_sec: float, rate: 
         return {}
 
     result = {
-        "PI": None, "PS": None, "PTY": None, "Stereo": None,
-        "TP": None, "TA": None, "AF": None, "RadioText": None
+        "PI": None, "PS": None, "PS_variants": {},
+        "PS_plus": None, "PS_full": None,"PTY": None,
+        "Stereo": None, "TP": None, "TA": None, "AF": None,
+        "AF": None, "RadioText": None, "RadioText_variants": {},
     }
 
 # ==================================================================
@@ -333,6 +408,61 @@ def decode_rds(freq_mhz: float, gain_db: int, ppm: int, dwell_sec: float, rate: 
                 pass
     except Exception:
         pass
+
+# ========================================================
+    # ── Собираем PS из вариантов (консенсус + majority vote) ──
+    if result.get("PS_variants"):
+        names, freqs, phones = [], [], []
+        for variant, count in result["PS_variants"].items():
+            kind = classify_ps_variant(variant)
+            if kind == "name":
+                names.append((variant, count))
+            elif kind == "freq":
+                freqs.append((variant, count))
+            elif kind == "phone":
+                phones.append((variant, count))
+
+        if names:
+            # Пытаемся консенсус (восстановление из битых)
+            consensus, confidence = _consensus_ps(names)
+            if consensus and confidence:
+                result["PS"] = consensus
+                result["PS_confidence"] = confidence
+            else:
+                # Fallback: majority vote
+                best_name, best_count = max(names, key=lambda x: x[1])
+                result["PS"] = best_name
+                result["PS_confidence"] = f"{best_count}/{len(names)}"
+        elif result["PS_variants"]:
+            result["PS"] = max(result["PS_variants"].items(), key=lambda x: x[1])[0]
+            result["PS_confidence"] = "?"
+
+        # PS+ (частота или телефон)
+        if freqs:
+            result["PS_plus"] = max(freqs, key=lambda x: x[1])[0]
+        elif phones:
+            result["PS_plus"] = max(phones, key=lambda x: x[1])[0]
+
+        # PS_full = PS + PS+ (если PS+ не дублирует PS)
+        ps = result.get("PS") or ""
+        plus = result.get("PS_plus") or ""
+        if ps and plus and plus not in ps and ps not in plus:
+            result["PS_full"] = f"{ps} [{plus}]"
+        elif ps:
+            result["PS_full"] = ps
+
+    # ── RadioText (самый длинный) ──
+    if result.get("RadioText_variants"):
+        variants = sorted(
+            result["RadioText_variants"].items(),
+            key=lambda x: (len(x[0]), x[1]),
+            reverse=True,
+        )
+        best_rt, best_count = variants[0]
+        result["RadioText"] = best_rt
+        result["RadioText_confidence"] = f"{best_count}/{len(variants)}"
+
+# ====================================================
 
     if result["PI"]:
         return {k: v for k, v in result.items() if v is not None}

@@ -31,7 +31,7 @@ from config.weather_constants import (
     ARTIFACT_TYPES,
     INTERFERENCE_TYPES,
 )
-
+from core.gq_adapter import read_gps_quality
 
 
 def _format_metar_human(wx: Dict) -> str:
@@ -153,6 +153,7 @@ class Context:
         self.state = "idle"
         self.weather = {}
         self.space_weather = {}
+        self.gps_quality = {}          # ← новое: результат read_gps_quality()
         self.artifact = None
         self.interference = None
         self.artifact_notes = ""
@@ -732,6 +733,46 @@ class Context:
         }
         return self.space_weather
 
+    # ── GPS Quality ──
+    def fetch_gps_quality(self) -> dict:
+        """Считывает качество GPS-приёма (локально, gpsd).
+
+        Возвращает dict в едином формате (см. core/gq_adapter.read_gps_quality).
+        Не падает: если gpsd недоступен — вернёт {"available": False, ...}.
+        """
+        gps_cfg = self.observer.get("gps", {}) or {}
+        try:
+            gq = read_gps_quality(
+                host=gps_cfg.get("host", "127.0.0.1"),
+                port=int(gps_cfg.get("port", 2947)),
+                timeout=float(gps_cfg.get("timeout", 5.0)),
+            )
+        except Exception as e:
+            print(f"[!] GPS quality read error: {e}")
+            gq = {"available": False, "source": "error", "error": str(e)}
+
+        self.gps_quality = gq
+
+        # Лог в стиле METAR/SWPC — только общие метки, без разбора группировок
+        if gq.get("available"):
+            m = gq.get("metrics", {}) or {}
+            a = gq.get("anomaly", {}) or {}
+            jam = m.get("jam")
+            jam_part = f" jam={jam}/255" if jam is not None else " jam=—"
+            print(
+                f"    GPS: status={gq.get('gq_status')} "
+                f"fix={m.get('mode_text', '?')} "
+                f"sats={m.get('used', '?')}/{m.get('seen', '?')} "
+                f"SNR_avg={m.get('avg_snr', 0):.1f} dBHz"
+                f"{jam_part} "
+                f"anomaly={a.get('severity', 'none')}"
+            )
+        else:
+            print(f"    [!] GPS quality unavailable ({gq.get('error', '?')})")
+
+        return self.gps_quality
+
+    # ── Export ──
     # ── Export ──
 
     def to_dict(self) -> dict:
@@ -758,6 +799,7 @@ class Context:
             },
             "weather": self.weather,
             "space_weather": self.space_weather,
+            "gps_quality": self.gps_quality,
             "artifact": {
                 "type": self.artifact,
                 "notes": self.artifact_notes,

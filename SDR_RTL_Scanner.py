@@ -23,15 +23,15 @@ Author: Andrey E. Smirnov
 Email: aes222ripn@gmail.com
 License: MIT
 """
-
-import os, sys, json, argparse, subprocess, select, time, config, shutil
+import os, sys, json, argparse, subprocess, select, time, config, shutil, html
 import numpy as np
 from pathlib import Path
 from datetime import datetime, timezone
 from core.context import Context, _format_metar_human
 from config import *
 from core.snr import auto_ppm_calibrate, check_rds_snr, decode_rds, decode_rds_multi
-from core.scanner import multi_gain_scan, bloom_split_scan, split_scan_ranges, snap_freq
+from core.scanner import multi_gain_scan, bloom_split_scan, split_scan_ranges, snap_freq, format_freq_mhz
+from core.region_detect import resolve_region, save_region_to_observer
 from config.styles import C_GREEN, C_RED, C_BLUE, C_YELLOW, C_RESET
 from config.system import DEFAULT_DWELL, DEFAULT_RDS_RATE, DEFAULT_PPM, PPM_REFERENCES
 
@@ -506,29 +506,26 @@ def save_results(stations, args, mode, ctx, filename=None, scan_min=None, scan_m
         # observation_context — можно либо брать целиком из ctx, либо делать отдельный блок
         # Если хочешь сохранить формат observation_context как раньше, можно сделать:
         data["observation_context"] = {
-#            "scan_datetime": ctx.get("scan_date"),
             "observer": ctx.get("observer"),
             "antenna": ctx.get("antenna"),
             "weather": ctx.get("metar"),
             "space_weather": ctx.get("space_weather"),
+            "gps_quality": ctx.get("gps_quality"),
             "artifact": ctx.get("artifact"),
             "interference": ctx.get("interference"),
         }
 
-    # ── Погода (METAR) ──
-    # app_context.weather — это распарсенный METAR в виде dict (температура, ветер, видимость и т.д.)
-#    if app_context is not None and hasattr(app_context, "weather"):
-#        data["weather"] = app_context.weather
+        # ── Приватность: координаты НЕ пишем в JSON (только локально в observer.json) ──
+        gq = data["observation_context"].get("gps_quality")
+        if gq and isinstance(gq, dict) and gq.get("position"):
+            gq["position"] = {"lat": None, "lon": None, "alt_m": None}
 
-    # ── Космическая погода (SWPC) ──
-    # app_context.space_weather — Kp, F10.7, Bz, состояние и т.п.
-#    if app_context is not None and hasattr(app_context, "space_weather"):
-#        data["space_weather"] = app_context.space_weather
+    # ── Чистим служебные поля (только для записи, не мутируем исходный список) ──
+    # Копируем, чтобы не портить данные, которые ещё пригодятся в print_summary/export_html.
+    def _clean(st):
+        return {k: v for k, v in st.items() if not k.startswith("_")}
 
-    # ── Контекст наблюдения (observer, antenna, артефакты, помехи) ──
-    # to_dict() возвращает всё в человекочитаемом виде для аудита
-#    if app_context is not None:
-#        data["observation_context"] = app_context.to_dict()
+    data["stations"] = [_clean(st) for st in data.get("stations", [])]
 
     # ── Запись JSON ──
     with open(filename, "w", encoding="utf-8") as f:
@@ -559,26 +556,57 @@ def interactive_select(prompt, items, default_all=False):
             if 0 <= idx < len(items): selected.add(idx)
     return selected
 
-def show_diff(base_data, update_data, scan_min, scan_max):
-    base_sts = {round(s["freq"], 1): s for s in base_data.get("stations", [])}
-    upd_sts  = {round(s["freq"], 1): s for s in update_data.get("stations", [])}
+# ==========================================================================
+def show_diff(base_data, update_data, scan_min, scan_max, tolerance_mhz=0.1):
+    # Сортируем обе базы по частоте
+    base_list = sorted(base_data.get("stations", []), key=lambda s: s["freq"])
+    upd_list  = sorted(update_data.get("stations", []), key=lambda s: s["freq"])
 
-    new_f = sorted(set(upd_sts) - set(base_sts))
-    gone_all = sorted(set(base_sts) - set(upd_sts))
-    common_f = sorted(set(base_sts) & set(upd_sts))
+    # Сопоставление с допуском ±tolerance_mhz
+    matched_base = [False] * len(base_list)
+    matched_upd  = [False] * len(upd_list)
+    pairs = []  # (upd_st, base_st) — для changed
+
+    for i, u in enumerate(upd_list):
+        # Ищем ближайшую base-станцию в пределах tolerance
+        best_j = None
+        best_d = None
+        for j, b in enumerate(base_list):
+            if matched_base[j]:
+                continue
+            d = abs(u["freq"] - b["freq"])
+            if d <= tolerance_mhz and (best_d is None or d < best_d):
+                best_d = d
+                best_j = j
+        if best_j is not None:
+            matched_upd[i] = True
+            matched_base[best_j] = True
+            pairs.append((u, base_list[best_j]))
+
+    new_f = [u["freq"] for i, u in enumerate(upd_list) if not matched_upd[i]]
+    gone_all = [b["freq"] for j, b in enumerate(base_list) if not matched_base[j]]
+    common = [(u, b) for u, b in pairs]
+
+    new_sts = {u["freq"]: u for i, u in enumerate(upd_list) if not matched_upd[i]}
+
+    base_sts_all = {round(b["freq"], 2): b for b in base_list}
+    upd_sts_all  = {round(u["freq"], 2): u for u in upd_list}
 
     gone_in_range = [f for f in gone_all if scan_min and scan_max and scan_min <= f <= scan_max]
     gone_outside = [f for f in gone_all if not (scan_min and scan_max and scan_min <= f <= scan_max)]
 
     changed = []
-    for f in common_f:
-        b, u, diffs = base_sts[f], upd_sts[f], []
+    for u, b in common:
+        diffs = []
         for key in ["signal", "name_ru"]:
-            if b.get(key) != u.get(key): diffs.append((key, b.get(key), u.get(key)))
+            if b.get(key) != u.get(key):
+                diffs.append((key, b.get(key), u.get(key)))
         br, ur = b.get("rds", {}), u.get("rds", {})
         for key in ["PI", "PS", "PTY", "RadioText", "Stereo", "TP", "TA"]:
-            if br.get(key) != ur.get(key): diffs.append((f"rds.{key}", br.get(key), ur.get(key)))
-        if diffs: changed.append((f, diffs))
+            if br.get(key) != ur.get(key):
+                diffs.append((f"rds.{key}", br.get(key), ur.get(key)))
+        if diffs:
+            changed.append((u["freq"], diffs, u, b))
 
     print("\n" + "=" * 70)
     print("СРАВНЕНИЕ: Base vs Update")
@@ -587,33 +615,49 @@ def show_diff(base_data, update_data, scan_min, scan_max):
     if new_f:
         print(f"\n  Новые станции ({len(new_f)}):")
         for i, f in enumerate(new_f):
-            s = upd_sts[f]; ps = s.get("rds", {}).get("PS", "?")
-            print(f"    {i+1}. + {f:.1f} MHz  ({s.get('signal', 0):.1f} dB)  PS={ps}")
+            s = upd_sts_all.get(round(f, 2), {})
+            ps = s.get("rds", {}).get("PS", "?")
+            print(f"    {i+1}. + {f:.3f} MHz  ({s.get('signal', 0):.1f} dB)  PS={ps}")
 
     if gone_in_range:
         print(f"\n  Потерянные в диапазоне сканирования ({len(gone_in_range)}):")
         for i, f in enumerate(gone_in_range):
-            s = base_sts[f]; ps = s.get("rds", {}).get("PS", "?")
-            print(f"    {i+1}. - {f:.1f} MHz  PS={ps}")
+            s = base_sts_all.get(round(f, 2), {})
+            ps = s.get("rds", {}).get("PS", "?")
+            print(f"    {i+1}. - {f:.3f} MHz  PS={ps}")
 
     if gone_outside:
         print(f"\n  Вне диапазона сканирования (не трогаются, {len(gone_outside)})")
-#        for f in gone_outside:
-#            s = base_sts[f]; ps = s.get("rds", {}).get("PS", "?")
-#            print(f"    ~ {f:.1f} MHz  PS={ps}")
 
     if changed:
         print(f"\n  Изменены ({len(changed)}):")
-        for i, (f, diffs) in enumerate(changed):
-            print(f"    {i+1}. ~ {f:.1f} MHz:")
-            for key, old, new in diffs: print(f"        {key}: {old} -> {new}")
+        for i, (f, diffs, u, b) in enumerate(changed):
+            # Показываем и base, и update частоты, если они различаются
+            if abs(u["freq"] - b["freq"]) > 0.001:
+                print(f"    {i+1}. ~ {b['freq']:.3f} → {u['freq']:.3f} MHz:")
+            else:
+                print(f"    {i+1}. ~ {f:.3f} MHz:")
+            for key, old, new in diffs:
+                print(f"        {key}: {old} -> {new}")
 
-    if not new_f and not gone_in_range and not changed: print("\n  Нет различий.")
+    if not new_f and not gone_in_range and not changed:
+        print("\n  Нет различий.")
 
     print("=" * 70)
 
-    return {"new": new_f, "new_sts": upd_sts, "gone": gone_in_range, "gone_sts": base_sts,
-            "changed": [f for f, _ in changed], "changed_sts": upd_sts}
+    # Возвращаем структуру, совместимую с interactive_merge
+    # changed: список (f, diffs, u, b) — 4 элемента
+    changed_freqs = [f for f, _, _, _ in changed]
+    changed_sts = {f: u for f, _, u, _ in changed}
+    # gone_sts — только потерянные в диапазоне (не все base)
+    gone_sts = {b["freq"]: b for b in base_list if b["freq"] in gone_in_range}
+    return {
+        "new": new_f, "new_sts": new_sts,
+        "gone": gone_in_range, "gone_sts": gone_sts,
+        "changed": changed_freqs, "changed_sts": changed_sts,
+    }
+
+# ==========================================================================
 
 def interactive_merge(base_data, diff_info, scan_min, scan_max):
     base_sts = {round(s["freq"], 1): s for s in base_data.get("stations", [])}
@@ -690,14 +734,17 @@ def print_summary(stations, ppm=0, snap=0):
     print("-" * 155)
     n_pi = n_ps = n_rt = n_ru = 0
     for st in stations:
-        freq = st.get("freq", 0); signal = st.get("signal", 0)
+        freq = st.get("freq", 0)
+        signal = st.get("signal", 0)
         name_ru = st.get("name_ru", "") or "—"
         mod = st.get("modulation", "") or "—"
         band = st.get("band_name", "") or "—"
         rds = st.get("rds", {})
-        pi = rds.get("PI", "—"); ps = rds.get("PS", "—") or "—"
+        pi = rds.get("PI", "—")
+        ps = rds.get("PS_full") or rds.get("PS", "—") or "—"
         pty = rds.get("PTY", "—") or "—"
-        tp = rds.get("TP", "—"); ta = rds.get("TA", "—")
+        tp = rds.get("TP", "—")
+        ta = rds.get("TA", "—")
         rt = rds.get("RadioText", "—") or "—"
         stereo = st.get("stereo")
         if stereo is None:
@@ -715,6 +762,10 @@ def print_summary(stations, ppm=0, snap=0):
         if rt != "—": n_rt += 1
         if name_ru != "—": n_ru += 1
         # Выводим Mod и Band
+        # Формат частоты — по шагу (та же логика, что в mode_fullscan)
+        band_info = st.get("_band") or {}
+        step_hz_sum = band_info.get("step") or (st.get("_step_khz", 100) * 1000)
+        freq_sum = format_freq_mhz(freq, step_hz_sum)
         print(f"{freq:>7.3f}M | {signal:>7.1f} | {name_ru:<22} | {mod:>5} | {band:<12} | "
               f"{pi_str:>8} | {ps:<24} | {pty:<16} | {ster_str:>5} | {str(tp):>4} | {str(ta):>4} | {rt_str}")
     print("=" * 155)
@@ -790,7 +841,66 @@ def export_html(data: dict, region: str | None, output_path: str | Path | None =
           <li>Состояние: {s.get('condition', '?')}</li>
         </ul>
         """
+    def format_gps_quality(g) -> str:
+        """Блок «Условия приёма» для HTML.
 
+        Принцип: только факты, без интерпретаций.
+        - «норма» / «слабый сигнал» / «нет сигнала» / «GPS недоступен»
+        """
+        if not g or not g.get("available"):
+            return (
+                "<div style='border-left:4px solid #888; padding:8px 12px; "
+                "margin:10px 0; background:#16213e'>"
+                "<b>Условия приёма:</b> "
+                "<span style='color:#888'>⚪ GPS недоступен</span>"
+                "</div>"
+            )
+
+        m = g.get("metrics", {}) or {}
+        gq = g.get("gq_status", "")
+
+        # Только факты — без «подавлены», «помехи», «группировки».
+        status_label = {
+            "CLEAR":            "✅ норма",
+            "INDOOR":           "⚠️ слабый сигнал",
+            "ANOMALY":          "🚨 нет сигнала (все видимые спутники без сигнала)",
+            "NO_GPS_HARDWARE":  "⚪ GPS недоступен",
+        }.get(gq, "?")
+
+        color = {
+            "CLEAR": "#6f6",
+            "INDOOR": "#ff6",
+            "ANOMALY": "#f66",
+            "NO_GPS_HARDWARE": "#888",
+        }.get(gq, "#888")
+
+        # Детали — минимум общих меток, без разбивки по группировкам.
+        detail_rows = []
+        mode_text = m.get("mode_text", "?")
+        detail_rows.append(f"<li>Fix: {html.escape(str(m.get('mode_text', '?')))}</li>")
+        detail_rows.append(
+            f"<li>Спутников: {m.get('seen', '?')} "
+            f"(используется: {m.get('used', '?')})</li>"
+        )
+        detail_rows.append(
+            f"<li>Средний SNR: {m.get('avg_snr', 0):.1f} dBHz</li>"
+        )
+        if m.get("jam") is not None:
+            detail_rows.append(
+                f"<li>Индикатор помех: {m['jam']}/255</li>"
+            )
+
+        return f"""
+        <div style="border-left:4px solid {color}; padding:8px 12px; margin:10px 0; background:#16213e">
+          <b>Условия приёма:</b> <span style="color:{color}">{html.escape(status_label)}</span>
+          <details style="margin-top:6px">
+            <summary style="cursor:pointer;color:#888">Детали</summary>
+            <ul style="margin:4px 0 0 16px;color:#aaa">
+              {''.join(detail_rows)}
+            </ul>
+          </details>
+        </div>
+        """
 
     n_total = len(stations)
     n_rds = sum(1 for s in stations if s.get("rds", {}).get("PI"))
@@ -826,6 +936,12 @@ def export_html(data: dict, region: str | None, output_path: str | Path | None =
         status = st.get("status", "active")
         last_seen = st.get("last_seen", "")[:10] if st.get("last_seen") else ""
 
+        # ── Формат частоты по шагу сетки (согласовано с логом и print_summary) ──
+        # Приоритет: _band["step"] → _step_khz → 100 кГц (FM-дефолт)
+        band_info = st.get("_band") or {}
+        step_hz_html = band_info.get("step") or (st.get("_step_khz", 100) * 1000)
+        freq_str_html = format_freq_mhz(freq, step_hz_html)
+
         row_class = ""
         if status == "lost":
             row_class = ' class="row-lost"'
@@ -834,7 +950,7 @@ def export_html(data: dict, region: str | None, output_path: str | Path | None =
 
         rows += (
             f"      <tr{row_class}>\n"
-            f"        <td>{freq:.1f}</td>\n"
+            f"        <td>{freq_str_html}</td>\n"
             f"        <td>{signal:.1f}</td>\n"
             f"        <td>{name_ru}</td>\n"
             f"        <td>{mod}</td>\n"
@@ -871,7 +987,7 @@ function sortTable(col) {
 </script>
 """
 
-    html = f"""<!DOCTYPE html>
+    html_doc = f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -924,6 +1040,7 @@ function sortTable(col) {
 </div>
         {format_metar(data.get("metar"))}
         {format_space_weather(data.get("space_weather"))}
+        {format_gps_quality(data.get("gps_quality"))}
 <div class="stats">
   <div class="stat">Всего: <b>{n_total}</b></div>
   <div class="stat">С RDS (PI): <b>{n_rds}</b></div>
@@ -965,7 +1082,7 @@ function sortTable(col) {
     p.parent.mkdir(parents=True, exist_ok=True)
 
     with p.open("w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(html_doc)
 
     print(f"[*] HTML report: {p}")
     return str(p)
@@ -975,11 +1092,11 @@ function sortTable(col) {
         print("[!] export_html: output_path не передан, HTML не сохранён.")
         return None
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"[*] HTML report: {output_path}")
-    return output_path
+#    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+#    with open(output_path, "w", encoding="utf-8") as f:
+#        f.write(html_doc)
+#    print(f"[*] HTML report: {output_path}")
+#    return output_path
 
 # ═══════════════════════════════════════════════════════════════
 #  MODE 1: FULLSCAN
@@ -998,7 +1115,8 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
 
     print("=" * 60 + f"\nSDR-RTL Scanner v{__version__} (git {get_git_hash()}) — Mode 1: Full Scan\n" + "=" * 60)
     prev_names = {}
-
+    # Жёсткий fallback: если ни справочник, ни CLI не дали порог
+    FALLBACK_THRESHOLD = -40
     # ── Загрузка предыдущей базы: маппинг по частоте в кГц (без потерь) ──
     if os.path.exists(BASE_FILE):
         prev = load_json(BASE_FILE)
@@ -1015,12 +1133,18 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
         country=CURRENT_COUNTRY, subregion=CURRENT_SUBREGION
     )
 
+# ==================================
     print(f"[*] Scan range {args.start}–{args.stop} MHz → {len(sub_ranges)} sub-range(s):")
     for sr in sub_ranges:
         tag = "OIRT" if sr["is_oirt"] else sr["modulation"]
-        # Вывод границ поддиапазонов тоже лучше адаптивно, но пока оставим как было
-        print(f"    {sr['start_mhz']:.1f}–{sr['stop_mhz']:.1f} MHz | "
+        # Границы поддиапазона печатаем с числом знаков, зависящим от его шага.
+        # Это важно: для HF (шаг 1 кГц) 10.1–11.6 смотрится грубо, нужно 10.100–11.600.
+        step_hz = sr["step_khz"] * 1000
+        start_str = format_freq_mhz(sr["start_mhz"], step_hz)
+        stop_str  = format_freq_mhz(sr["stop_mhz"],  step_hz)
+        print(f"    {start_str}–{stop_str} MHz | "
               f"{sr['band_name']} | {tag} | step={sr['step_khz']:.0f} kHz")
+# ==================================
 
     # ── Сканируем каждый поддиапазон ──
     all_stations = []
@@ -1035,19 +1159,35 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
             step_khz = DEFAULT_STEP
             print(f"[!] Step invalid or missing for band {sr['band_name']}; using default {DEFAULT_STEP} kHz")
 
-        # --- ПОРОГ СИГНАЛА ---
+        # ── Порог сигнала: приоритеты ──
+        #   1. sr["threshold"] (уже наследуется для Gap в split_scan_ranges)
+        #   2. args.threshold из CLI
+        #   3. FALLBACK_THRESHOLD (жёсткий дефолт)
         band_threshold = sr.get("threshold")
-        effective_threshold = band_threshold if band_threshold is not None else args.threshold
 
-        if not isinstance(effective_threshold, (int, float)):
-            effective_threshold = DEFAULT_THRESHOLD
-            print(f"[!] Threshold invalid for band {sr['band_name']}; using default {DEFAULT_THRESHOLD} dB")
+        if isinstance(band_threshold, (int, float)):
+            effective_threshold = float(band_threshold)
+        elif isinstance(args.threshold, (int, float)):
+            effective_threshold = float(args.threshold)
+        else:
+            effective_threshold = FALLBACK_THRESHOLD
+            print(f"[!] Threshold invalid for band {sr['band_name']}; using fallback {FALLBACK_THRESHOLD} dB")
 
         # --- ЛОГИРОВАНИЕ: понятные единицы и точность ---
+        # ── Защита форматирования: None → "auto" ──
+        thr_str = f"{effective_threshold:.1f}" if effective_threshold is not None else "auto"
+
+        # ── Границы диапазона: формат по шагу (согласовано с multi_gain_scan) ──
+        # Было бы {:.3f} всегда → для FM печаталось бы 87.500–108.000,
+        # а хочется 87.50–108.00. Для HF (.3f) остаётся 10.000–10.101.
+        _step_hz_band = step_khz * 1000
+        _start_str = format_freq_mhz(sr["start_mhz"], _step_hz_band)
+        _stop_str  = format_freq_mhz(sr["stop_mhz"],  _step_hz_band)
+
         print(
-            f"\n[*] Multi-gain scan: {sr['start_mhz']:.3f}–{sr['stop_mhz']:.3f} MHz "
+            f"\n[*] Multi-gain scan: {_start_str}–{_stop_str} MHz "
             f"({sr['band_name']}, step={step_khz:.1f} kHz ({int(step_khz*1000)} Hz), "
-            f"threshold={effective_threshold:.1f} dB)"
+            f"threshold={thr_str} dB)"
         )
 
         # --- ВЫЗОВ СКАНЕРА: строго под сигнатуру bloom_split_scan ---
@@ -1094,7 +1234,7 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
 
     stations = all_stations
     if not stations:
-        save_results([], args, "fullscan", scan_min=args.start, scan_max=args.stop)
+        save_results([], args, "fullscan", ctx=ctx, scan_min=args.start, scan_max=args.stop)
         print_summary([], args.ppm, args.snap)
         return
 
@@ -1192,96 +1332,62 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
         else:
             band_type = "WFM"
 
-        # Калибруем ТОЛЬКО при смене типа диапазона
-        if band_type != calibrated_band_type and band_type in PPM_REFERENCES:
+# ==========================================================
+
+        # ── HF/AM калибровка (один раз при смене band_type) ──
+        # Для HF используется калибровка по несущей (RWM/WWV).
+        # Она НЕ per-station: несущая одна, ppm один.
+        if band_type in ("AM", "AM_AIR") and band_type != calibrated_band_type:
             ref_config = PPM_REFERENCES[band_type]
             method = ref_config["method"]
-
-            print(f"\n[*] Calibrating PPM for new band type: {band_type}...")
-
-            if method == "pilot":
-                # Калибровка по пилот-тону (FM или OIRT)
-                if band_type == "WFM":
-                    same_type = [s for s in stations if not s.get("_is_oirt") and s["freq"] >= HF_THRESHOLD_MHZ]
-                elif band_type == "OIRT":
-                    same_type = [s for s in stations if s.get("_is_oirt")]
-                else:
-                    same_type = []
-
-                if same_type:
-                    # --- ЗАЩИТА ОТ ШУМА ---
-                    valid_stations = [
-                        s for s in same_type
-                        if s.get("signal", -99) > -30 and s.get("freq") is not None
-                    ]
-
-                    if not valid_stations:
-                        print(f"[!] No strong stations found for PPM calibration "
-                              f"in band {band_type} (threshold > -30 dB). "
-                              f"Keeping current PPM.")
-                    else:
-                        strongest = max(valid_stations, key=lambda x: x["signal"])
-
-                        print(f"[*] Calibrating PPM on strongest valid station: "
-                              f"{strongest['freq']:.3f} MHz, "
-                              f"Signal: {strongest['signal']:.1f} dB")
-
-                        ppm_cal, stereo_cal = auto_ppm_calibrate(
-                            strongest["freq"], -1, DEFAULT_RDS_RATE, 2.0
-                        )
-
-                        if ppm_cal != 0:
-                            print(f"    {C_GREEN}Pilot tone detected → "
-                                  f"PPM = {ppm_cal} (was {current_ppm}){C_RESET}")
-                            current_ppm = ppm_cal
-                        elif stereo_cal is False:
-                            print(f"    No pilot tone (mono) → "
-                                  f"keeping PPM = {current_ppm}")
-                        else:
-                            print(f"    No pilot tone detected → "
-                                  f"keeping PPM = {current_ppm}")
-                else:
-                    print(f"    No stations of type {band_type} "
-                          f"found for pilot calibration.")
-# ======================================================================================
-            elif method == "carrier":
-                # Калибровка по несущей (AM/HF/Air) — перебор эталонов из PPM_REFERENCES
+            if method == "carrier":
                 ref_found = False
                 for ref in ref_config.get("references", []):
                     ref_freq = ref["freq"]
                     print(f"[*] PPM calibration (carrier): {ref['name']} on "
                           f"{ref_freq} MHz ({ref.get('desc', '')})...")
-
                     ppm_cal, ok = auto_ppm_calibrate_carrier(
                         ref_freq, -1, DEFAULT_RDS_RATE, 3.0, 10.0
                     )
-
                     if ok:
                         current_ppm = ppm_cal
                         print(f"    → PPM = {current_ppm}")
                         ref_found = True
                         break
-
                 if not ref_found:
                     print(f"    No reference signal found for {band_type} — "
                           f"keeping PPM = {current_ppm}")
-# =============================================================
-            else:
-                print(f"    Unknown calibration method '{method}' "
-                      f"for {band_type}")
-
             calibrated_band_type = band_type
 
-        # ── Декодирование RDS / определение стерео (только FM/OIRT) ──
-        print(f"[*] {i+1}/{len(stations)}: {freq_str} "
-              f"({st['signal']:.1f} dB)")
-        st["name_ru"] = prev_names.get(round(freq, 1)) or lookup_name_ru(freq) or ""
-        st["modulation"] = st_mod
-        st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
+        # ── Per-station PPM (FM/OIRT) ──
+        # Для FM/OIRT — свой ppm на каждую станцию (многолучёвка).
+        # Калибровка по пилот-тону ЭТОЙ станции, а не «самой сильной в диапазоне».
+        if st_is_oirt or band_type == "WFM":
+            if st.get("signal", -99) > -30:
+                ppm_st, stereo_st = auto_ppm_calibrate(
+                    st["freq"], -1, DEFAULT_RDS_RATE, 1.5
+                )
+                # Первая успешная калибровка — всегда принимаем
+                if ppm_st != 0 and (current_ppm == 0 or abs(ppm_st - current_ppm) <= 15):
+                    st_ppm = ppm_st
+                    current_ppm = ppm_st
+                    print(f"    [PPM] {st['freq']:.1f} MHz: calibration ppm={ppm_st} (per-station)")
+                else:
+                    st_ppm = current_ppm
+                    print(f"    [PPM] {st['freq']:.1f} MHz: calibration failed "
+                          f"(ppm={ppm_st}), using {current_ppm}")
+            else:
+                st_ppm = current_ppm
+                print(f"    [PPM] {st['freq']:.1f} MHz: signal too weak "
+                      f"({st['signal']:.1f} dB), using {current_ppm}")
+        else:
+            st_ppm = current_ppm
+
+# ==========================================================
 
         if st_is_oirt:
             rds, used_gain, snr, stereo = decode_rds_multi(
-                st["freq"], rds_gains, current_ppm, args.dwell, DEFAULT_RDS_RATE)
+                st["freq"], rds_gains, st_ppm, args.dwell, DEFAULT_RDS_RATE)
             if stereo is not None:
                 st["stereo"] = stereo
             snr_str = f" | SNR={snr}dB" if snr is not None else ""
@@ -1291,14 +1397,14 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
             st["rds"] = {}
         else:
             rds, used_gain, snr, stereo = decode_rds_multi(
-                st["freq"], rds_gains, current_ppm, args.dwell, DEFAULT_RDS_RATE)
+                st["freq"], rds_gains, st_ppm, args.dwell, DEFAULT_RDS_RATE)
             if stereo is not None:
                 st["stereo"] = stereo
             if rds:
                 extra = f" | PS={rds.get('PS', '')}" if rds.get('PS') else ""
                 snr_str = f" | SNR={snr}dB" if snr is not None else ""
                 print(f"    -> {C_BLUE}PI={rds.get('PI', '?')}{extra}{snr_str}{C_RESET} "
-                      f"(gain={used_gain})")
+                      f"(gain={used_gain}, ppm={st_ppm})")
                 st["rds"] = rds
             else:
                 snr_str = f" | SNR={snr}dB" if snr is not None else ""
@@ -1309,6 +1415,9 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
     # Сохраняем итоговый PPM
     args.ppm = current_ppm
 # ================================================================
+    # ── Чистим служебные поля перед сохранением в JSON ──
+    # _band и _step_khz нужны только во время сканирования и печати,
+    # в файлы они попадать не должны.
     fname = save_results(stations, args, "fullscan", ctx, scan_min=args.start, scan_max=args.stop)
     print_summary(stations, args.ppm, args.snap)
 
@@ -1338,6 +1447,7 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
             "antenna": ctx.get("antenna"),
             "metar": ctx.get("metar"),
             "space_weather": ctx.get("space_weather"),
+            "gps_quality": ctx.get("gps_quality"),
             "artifact": ctx.get("artifact"),
             "interference": ctx.get("interference"),
             "ppm": args.ppm,                  # исправлено: у тебя в конце функции ты делаешь args.ppm = current_ppm
@@ -1345,7 +1455,6 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
             "band": band,
         },
         region=region,
-#        output_path=html_path
         output_path=output_path
     )
 
@@ -1353,7 +1462,7 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
 #  MODE 2: UPDATE
 # ═══════════════════════════════════════════════════════════════
 
-def mode_update(args):
+def mode_update(args, ctx=None):
     src = args.json or BASE_FILE
     data = load_json(src)
     if not data: print(f"[!] File not found: {src}"); return
@@ -1492,6 +1601,10 @@ def main():
                    help="Region code in CC.city format, e.g. RU.spb, RU.msk, DE.berlin.\n"
                         "Use '?' for interactive selection.\n"
                         "Default is taken from config/user.py (DEFAULT_REGION).")
+    p.add_argument("--yes", "-y", action="store_true",
+                   help="Auto-confirm detected region (non-interactive)")
+    p.add_argument("--no-detect", action="store_true",
+                   help="Disable automatic region detection (use only --region / observer.json)")
     p.add_argument("--ppm", type=int, default=DEFAULT_PPM, help="PPM correction (default: 0)")
     p.add_argument("--gain", type=float, default=DEFAULT_RDS_GAIN, help="Alias for --rds-gain (default: 50)")
     p.add_argument("--rds-gain", type=float, default=None, help="Single RDS gain dB, or -1 for auto (overrides --rds-gains)")
@@ -1570,32 +1683,87 @@ def main():
 
     # ── Region selection ──
     ensure_dirs()
-    # ==============================================================================
-    # ЗАЩИТА: DEFAULT_REGION из конфига как fallback
-    #   - Если флаг --region не передан, используем DEFAULT_REGION.
-    #   - Это позволяет менять дефолт без изменения кода (удобно для площадок/контрактов).
-    #   - Для аудита: явная валидация входных данных на границе CLI.
-    # ==============================================================================
-    # Приоритет 1: CLI
+    # ── Выбор региона: приоритеты ──
+    #  1. --region из CLI            (явное указание — всегда главное)
+    #  2. observer.json → region     (пользователь сказал в конфиге)
+    #  3. GPS (если mode >= 2)       (точные координаты)
+    #  4. IPv4                       (если есть сеть; VPN может врать)
+    #  5. Cell ID                    (потом)
+    #  6. fallback "RU.spb"
+    from core.region_detect import resolve_region, save_region_to_observer
+
     region = args.region
+    region_source = "cli" if args.region else None
 
-    # Приоритет 2: observer.json (если CLI не задан)
-    if not region and OBSERVER_CONFIG:
-        region_from_config = OBSERVER_CONFIG.get("region")
-        if region_from_config:
-            region = region_from_config
-            print(f"[*] Region not specified in CLI; using from observer.json: {region}")
+    # Если CLI не задан — пробуем детект
+    if not region:
+        # Загружаем GPS-качество ДО выбора региона (нужно для шага 3)
+        gps_for_region = None
+        if args.with_context:
+            try:
+                from core.gq_adapter import read_gps_quality
+                gps_for_region = read_gps_quality(
+                    host=OBSERVER_CONFIG.get("gps", {}).get("host", "127.0.0.1"),
+                    port=int(OBSERVER_CONFIG.get("gps", {}).get("port", 2947)),
+                    timeout=float(OBSERVER_CONFIG.get("gps", {}).get("timeout", 5.0)),
+                )
+            except Exception:
+                gps_for_region = None
 
-    # Приоритет 3: жёсткий дефолт (только если вообще ничего нет)
+        detected = resolve_region(
+            observer_cfg=OBSERVER_CONFIG,
+            gps_quality=gps_for_region,
+            allow_network=not args.no_detect,
+        )
+
+        if detected:
+            region = detected["region"]
+            source = detected["source"]
+            region_source = source
+            print(f"[*] Region detected: {region} (source: {source})")
+
+            # Спрашиваем только если регион НЕ из config и не --yes
+            if not args.yes and region_source != "config":
+                try:
+                    ans = input(f"    Confirm region '{region}'? [Y/n/region]: ").strip().lower()
+                except (EOFError, UnicodeDecodeError):
+                    ans = "y"
+
+                if ans in ("n", "no"):
+                    # Пользователь отверг детект — не сохраняем, пойдём к fallback
+                    region = None
+                    region_source = None
+                elif ans and ans not in ("y", "yes", ""):
+                    # Пользователь ввёл свой регион — сохраняем его выбор
+                    region = ans
+                    region_source = "user"
+                    print(f"[*] Using user-specified region: {region}")
+                    save_region_to_observer(region)
+                else:
+                    # Пользователь подтвердил детект — сохраняем
+                    if region_source != "config":
+                        save_region_to_observer(region)
+
+            elif args.yes and region_source != "config":
+                # --yes: авто-подтверждение, сохраняем детект
+                print(f"[*] Using detected region: {region} (--yes, auto-saved)")
+                save_region_to_observer(region)
+
+            elif region_source == "config":
+                # Регион из config — используем как есть, без сохранения
+                print(f"[*] Using region from config: {region}")
+        else:
+            print("[!] Region could not be detected (no config, no GPS fix, no network).")
+
+    # Финальный fallback
     if not region:
         region = "RU.spb"
-        print(f"[!] Region not found (CLI + config); falling back to hardcoded default: {region}")
+        region_source = "fallback"
+        print(f"[!] Region not determined; falling back to hardcoded default: {region}")
 
-# ============================================================================================
-#    if region is None or region == "":
-#        region = DEFAULT_REGION
-#        print(f"[*] Region not specified; using default from config: {region}")
-# =============================================================================================
+    print(f"[*] Using region: {region} (source: {region_source})")
+
+    # =============================================================================================
     if region == "?":
         region = interactive_region_select()
         if region is None:
@@ -1666,8 +1834,13 @@ def main():
         else:
             print(f"    [!] Space weather fetch failed")
 
-#        if not sw:
-#            print(f"    [!] Space weather fetch failed")
+        # Считывание GPS-качества (локально, для контекста приёма)
+        print(f"[*] Reading GPS quality...")
+        gq = app_context.fetch_gps_quality()
+        if gq.get("available"):
+            print("[*] GPS quality read successfully")
+        else:
+            print(f"    [!] GPS quality unavailable")
 
         print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, "
               f"Antenna: {app_context.get_antenna_model()}")
@@ -1721,6 +1894,7 @@ def main():
         "antenna": app_context.get_antenna_model() if app_context else None,
         "region": region,
         "metar": app_context.weather if app_context else None,
+        "gps_quality": app_context.gps_quality if app_context else None,
         "space_weather": app_context.space_weather if app_context else None,
         "artifact": app_context.artifact if app_context else None,
         "interference": app_context.interference if app_context else None,
@@ -1732,7 +1906,7 @@ def main():
         mode_fullscan(args, ctx=ctx, region=region, output_path=html_path)
 #        mode_fullscan(args, ctx=ctx, region=region)
     elif args.mode == "update":
-        mode_update(args)
+        mode_update(args, ctx=ctx)
     elif args.mode == "edit":
         mode_edit(args)
     elif args.mode == "merge":
