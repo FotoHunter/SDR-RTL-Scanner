@@ -1,0 +1,16 @@
+{
+  "name": "my_observer",
+  "region": "RU.spb",
+  "location": {
+    "city": "Saint Petersburg",
+    "lat": 0.0,
+    "lon": 0.0,
+    "altitude_m": 0
+  },
+  "metar_station": "ULLI",
+  "gps": {
+    "host": "127.0.0.1",
+    "port": 2947,
+    "timeout": 5.0
+  }
+}
