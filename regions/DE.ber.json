@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "region": "DE.ber",
+  "city": "Berlin",
+  "country": "DE",
+  "description": "FM stations in Berlin (KAUPERTS + mabb, 2026; includes 2026 frequency changes)",
+  "stations": {
+    "87.9": "Star FM",
+    "88.4": "ByteFM",
+    "88.8": "rbb 88.8",
+    "91.0": "jazz fm",
+    "91.4": "Berliner Rundfunk",
+    "92.4": "Radio Teddy",
+    "93.6": "JAM FM",
+    "94.3": "94.3 rs2",
+    "94.8": "Deutschlandfunk Kultur",
+    "95.8": "Radio Eins",
+    "96.3": "Radio Paradiso",
+    "97.2": "Deutschlandfunk",
+    "98.2": "Radio Paradiso",
+    "98.8": "KISS FM",
+    "100.6": "FluxFM",
+    "101.3": "Fritz",
+    "101.9": "inforadio",
+    "103.4": "ENERGY",
+    "104.1": "Radio Orient",
+    "104.6": "104.6 RTL",
+    "105.5": "Spreeradio",
+    "106.8": "pure fm",
+    "107.5": "Radio B2"
+  }
+}
+

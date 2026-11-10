@@ -181,6 +181,39 @@ def parse_region_name(region_str: str) -> dict:
 
     return result
 
+def normalize_region(region_str: str) -> str:
+    """Приводит регион к каноническому виду: RU.spb (country UPPER, city lower).
+
+    Примеры:
+        "RU.spb"   -> "RU.spb"
+        "ru.spb"   -> "RU.spb"
+        "Ru.SPB"   -> "RU.spb"
+        "US.spb.FL" -> "US.spb.FL"
+    """
+    if not region_str:
+        return region_str
+    parts = region_str.strip().split(".")
+    if len(parts) < 2:
+        return region_str
+    country = parts[0].upper()
+    city = parts[1].lower()
+    if len(parts) == 3:
+        subregion = parts[2].upper()
+        return f"{country}.{city}.{subregion}"
+    return f"{country}.{city}"
+
+
+def find_region_file(region: str) -> "Path | None":
+    """Ищет regions/{region}.json без учёта регистра.
+
+    Возвращает Path, если найден, иначе None.
+    """
+    target = region.lower()
+    for f in REGIONS_DIR.glob("*.json"):
+        if f.stem.lower() == target:
+            return f
+    return None
+
 def get_base_file(region=None):
     """
     Возвращает путь к файлу базы станций для указанного региона.
@@ -188,6 +221,11 @@ def get_base_file(region=None):
     Если region не передан, используется CURRENT_REGION.
     """
     r = region or CURRENT_REGION
+    target = f"sdr_base_{r.lower()}.json"
+    for f in DATA_DIR.glob("*.json"):
+        if f.name.lower() == target:
+            return str(f)
+    # fallback: если файла нет, вернуть предполагаемый путь
     return str(DATA_DIR / f"SDR_Base_{r}.json")
 
 def get_update_file(region=None):
@@ -208,6 +246,10 @@ def get_stations_file(region=None):
     Если region не передан, используется CURRENT_REGION.
     """
     r = region or CURRENT_REGION
+    found = find_region_file(r)
+    if found:
+        return str(found)
+    # fallback: если файла нет, вернуть предполагаемый путь
     return str(REGIONS_DIR / f"{r}.json")
 
 # ═══════════════════════════════════════════════════════════════
@@ -332,13 +374,13 @@ def interactive_region_select():
         if choice.isdigit():
             idx = int(choice) - 1
             if 0 <= idx < len(names):
-                return names[idx]
+                return normalize_region(names[idx])   # ← нормализация
             if idx == len(names):
-                new = input("Имя нового региона: ").strip().lower()
+                new = input("Имя нового региона: ").strip()
                 if new:
-                    return new
+                    return normalize_region(new)   # ← нормализация (без .lower())
         elif choice:
-            return choice.lower()
+            return normalize_region(choice)   # ← нормализация
 
 def ensure_region_file(region):
     path = REGIONS_DIR / f"{region}.json"
@@ -1725,22 +1767,20 @@ def main():
             # Спрашиваем только если регион НЕ из config и не --yes
             if not args.yes and region_source != "config":
                 try:
-                    ans = input(f"    Confirm region '{region}'? [Y/n/region]: ").strip().lower()
+                    ans = input(f"    Confirm region '{region}'? [Y/n/region]: ").strip()
                 except (EOFError, UnicodeDecodeError):
                     ans = "y"
 
-                if ans in ("n", "no"):
-                    # Пользователь отверг детект — не сохраняем, пойдём к fallback
+
+                if ans.lower() in ("n", "no"):
                     region = None
                     region_source = None
-                elif ans and ans not in ("y", "yes", ""):
-                    # Пользователь ввёл свой регион — сохраняем его выбор
-                    region = ans
+                elif ans and ans.lower() not in ("y", "yes", ""):
+                    region = normalize_region(ans)   # ← нормализация (не .lower())
                     region_source = "user"
                     print(f"[*] Using user-specified region: {region}")
-                    save_region_to_observer(region)
+                    save_region_to_observer(region)   # ← уже нормализованный
                 else:
-                    # Пользователь подтвердил детект — сохраняем
                     if region_source != "config":
                         save_region_to_observer(region)
 
@@ -1761,7 +1801,9 @@ def main():
         region_source = "fallback"
         print(f"[!] Region not determined; falling back to hardcoded default: {region}")
 
-    print(f"[*] Using region: {region} (source: {region_source})")
+    # ── Нормализация региона ──
+    # Приводим к каноническому виду: RU.spb (country UPPER, city lower).
+    region = normalize_region(region)
 
     # =============================================================================================
     if region == "?":
@@ -1769,6 +1811,10 @@ def main():
         if region is None:
             print("[!] Interactive region selection cancelled.")
             sys.exit(1)
+        region = normalize_region(region)
+
+    # 4. Финальный print
+    print(f"[*] Using region: {region} (source: {region_source})")
 
     CURRENT_REGION = region
     ensure_region_file(region)

@@ -570,15 +570,15 @@
     },
     {
       "freq_min": 76000,
-      "freq_max": 90000,
+      "freq_max": 99000,
       "name": "FM-broadcast-JP",
       "modulation": "WFM",
       "threshold": -35.0,
       "bandwidth": 200000,
-      "step": 200000,
+      "step": 100000,
       "country": "JP",
-      "description": "FM-вещание (Япония 76–90 МГц)",
-      "notes": "Япония: FM 76–90 МГц. Шаг 200 кГц. Pilot 19 кГц"
+      "description": "FM-вещание (Япония 76–99 МГц, расширен с 2025)",
+      "notes": "Япония: FM 76–99 МГц. Шаг 100 кГц. Pilot 19 кГц, девиация 75 кГц"
     },
     {
       "freq_min": 87500,

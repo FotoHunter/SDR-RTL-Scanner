@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "region": "US.nyc",
+  "city": "New York",
+  "country": "US",
+  "description": "Major FM stations in New York City (Radio Station Hub, 2026)",
+  "stations": {
+    "88.3": "WBGO (Jazz/NPR)",
+    "89.9": "WKCR (Columbia University)",
+    "92.3": "WINS (All news)",
+    "93.9": "WNYC (NPR)",
+    "97.1": "WQHT Hot 97",
+    "98.7": "WEPN ESPN Radio",
+    "100.3": "WHTZ Z100",
+    "101.1": "WCBS-FM",
+    "101.9": "WFAN Sports Radio",
+    "103.5": "WKTU",
+    "104.3": "WAXQ Q104.3",
+    "105.1": "WWPR Power 105.1",
+    "106.7": "WLTW Lite FM",
+    "107.5": "WBLS"
+  }
+}
+

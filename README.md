@@ -4,11 +4,19 @@ SDR-RTL Scanner (English Version)
 
 **Документация на русском языке:** [README.RU.md](./README.RU.md)
 
-# SDR-RTL Scanner v0.8.7
+# SDR-RTL Scanner v0.8.8
 
 **A research tool** for automatic scanning of radio bands (FM, OIRT, HF, VHF) using RTL-SDR. It collects RDS data, weather, space weather, and GPS quality context for the research station. The project is focused on building a station database (default: Saint Petersburg) and is easily adaptable to any region.
 
 > **This is not commercial monitoring.** It's a tool for exploring the airwaves, where "Reception conditions" is a measurement context, not a verdict on the causes.
+
+## 🆕 What's new in v0.8.8
+
+*   **Region normalization**: `ru.spb`, `RU.SPB`, `ru.SPB` → `RU.spb`.
+*   **Case-insensitive file search**: `regions/RU.spb.json` and `data/SDR_Base_RU.spb.json` are found even if user entered `ru.spb`.
+*   **`--yes` only for `config`**: IPv4/GPS detection requires confirmation (providers often wrong).
+*   **New regions**: `RU.msk` (Moscow, 52), `RU.perm` (Perm, 34), `FI.hel` (Helsinki, 32), `DE.ber` (Berlin, 23), `CN.pek` (Beijing, 24, partial), `US.nyc` (New York, 14, major).
+*   **JP band**: `FM-broadcast-JP` extended to 76–99 MHz (since 2025), step 100 kHz.
 
 ## 🆕 What's new in v0.8.7
 
