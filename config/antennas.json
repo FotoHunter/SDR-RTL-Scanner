@@ -1,14 +1,14 @@
 {
   "ant_001": {
-    "model": "RTL-FM-Dipole-V1",
-    "type": "dipole",
+    "model": "RTL-FM-Monopole-V1",
+    "type": "monopole",
     "gain_dbi": 2.15,
     "azimuth_deg": 0,
     "polarization": "vertical",
     "height_m": 10,
     "frequency_range_mhz": [87.5, 108.0],
     "impedance_ohm": 75,
-    "notes": "Default dipole for RTL-SDR FM band"
+    "notes": "Default Monopole for RTL-SDR FM band"
   },
   "ant_002": {
     "model": "LogPeriodic-FM-Pro",

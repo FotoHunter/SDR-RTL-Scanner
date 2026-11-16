@@ -1169,26 +1169,22 @@
       "rds": {}
     },
     {
-      "freq": 66.283,
-      "signal": -4.73,
-      "_band": {
-        "freq_min": 65900,
-        "freq_max": 74000,
-        "name": "OIRT",
-        "modulation": "WFM",
-        "threshold": -5.0,
-        "bandwidth": 250000,
-        "step": 30000,
-        "country": "RU",
-        "description": "УКВ-вещание (OIRT, СССР)",
-        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
-      },
-      "_is_oirt": true,
+      "freq": 66.3,
+      "signal": 17.59,
       "name_ru": "Радио России",
       "modulation": "WFM",
       "band_name": "OIRT",
+      "ppm_measured": 0,
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "site": "Ольгино (ЛРТПЦ)",
+      "site_id": "olgino",
+      "site_geo": {
+        "lat": 59.98387,
+        "lon": 30.13541
+      },
+      "site_source": "auto",
+      "site_confidence": "medium"
     },
     {
       "freq": 69.468,
@@ -1211,6 +1207,24 @@
       "band_name": "OIRT",
       "stereo": false,
       "rds": {}
+    },
+    {
+      "freq": 71.28,
+      "signal": -0.95,
+      "name_ru": "",
+      "modulation": "WFM",
+      "band_name": "OIRT",
+      "ppm_measured": 0,
+      "stereo": false,
+      "rds": {},
+      "site": "Ольгино (ЛРТПЦ)",
+      "site_id": "olgino",
+      "site_geo": {
+        "lat": 59.98387,
+        "lon": 30.13541
+      },
+      "site_source": "auto",
+      "site_confidence": "medium"
     },
     {
       "freq": 71.989,
@@ -1405,8 +1419,10 @@
     },
     {
       "freq": 84.7,
-      "signal": 13.42,
+      "signal": -0.84,
       "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-misc",
       "stereo": false,
       "rds": {}
     },
@@ -1418,6 +1434,15 @@
       "rds": {}
     },
     {
+      "freq": 85.4,
+      "signal": 7.78,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
       "freq": 86.0,
       "signal": 6.13,
       "name_ru": "",
@@ -1425,16 +1450,29 @@
       "rds": {}
     },
     {
-      "freq": 86.4,
-      "signal": 11.81,
+      "freq": 86.1,
+      "signal": -1.97,
       "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-misc",
+      "stereo": false,
+      "rds": {}
+    },
+    {
+      "freq": 86.4,
+      "signal": 12.33,
+      "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-misc",
       "stereo": false,
       "rds": {}
     },
     {
       "freq": 86.8,
-      "signal": -0.43,
+      "signal": -1.34,
       "name_ru": "",
+      "modulation": "NFM",
+      "band_name": "VHF-mid-misc",
       "stereo": false,
       "rds": {}
     },
@@ -1520,12 +1558,32 @@
     },
     {
       "freq": 88.9,
-      "signal": 11.12,
+      "signal": 8.28,
       "name_ru": "Юмор FM",
       "modulation": "WFM",
       "band_name": "FM-broadcast",
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x7205",
+        "PS": "HUMOR FM",
+        "PS_variants": {
+          "HUMOR FM": 8
+        },
+        "PS_full": "HUMOR FM",
+        "PTY": "Pop music",
+        "TP": false,
+        "TA": false,
+        "RadioText": "REALITY CRIMINALITY",
+        "RadioText_variants": {
+          "REALITY CRIMINALITY": 1,
+          "REKLAMA": 1
+        },
+        "PS_confidence": "1/1",
+        "RadioText_confidence": "1/2",
+        "gain_db": -1,
+        "rds_snr_db": 1.9,
+        "stereo": true
+      }
     },
     {
       "freq": 89.3,
@@ -1648,17 +1706,57 @@
     },
     {
       "freq": 91.5,
-      "signal": 9.64,
+      "signal": 17.01,
       "name_ru": "Радио Sputnik",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "ppm_measured": -75,
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x770A",
+        "PS": "SPUTNIK",
+        "PS_variants": {
+          "SPUTNIK": 11
+        },
+        "PS_full": "SPUTNIK",
+        "PTY": "News",
+        "TP": false,
+        "TA": false,
+        "RadioText": "RADIO SPUTNIK +7 495 95 95 912",
+        "RadioText_variants": {
+          "RADIO SPUTNIK +7 495 95 95 912": 1
+        },
+        "PS_confidence": "1/1",
+        "RadioText_confidence": "1/1",
+        "gain_db": 25,
+        "rds_snr_db": 1.5,
+        "stereo": true
+      }
     },
     {
       "freq": 92.0,
-      "signal": 7.92,
+      "signal": 17.65,
       "name_ru": "Радио Комсомольская Правда",
-      "stereo": false,
-      "rds": {}
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "ppm_measured": -75,
+      "stereo": true,
+      "rds": {
+        "PI": "0x7742",
+        "PS": "RADIO KP",
+        "PS_variants": {
+          "RADIO KP": 10
+        },
+        "PS_full": "RADIO KP",
+        "PTY": "Current affairs",
+        "TP": false,
+        "TA": false,
+        "RadioText_variants": {},
+        "PS_confidence": "1/1",
+        "gain_db": 50,
+        "rds_snr_db": 3.8,
+        "stereo": true
+      }
     },
     {
       "freq": 92.4,
@@ -1669,28 +1767,32 @@
     },
     {
       "freq": 92.9,
-      "signal": 22.6,
-      "_band": {
-        "freq_min": 87500,
-        "freq_max": 108000,
-        "name": "FM-broadcast",
-        "modulation": "WFM",
-        "bandwidth": 200000,
-        "step": 100000,
-        "description": "FM-вещание (CCIR)",
-        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
-      },
-      "_is_oirt": false,
+      "signal": 19.75,
       "name_ru": "Радио Вера",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "ppm_measured": -76,
       "stereo": true,
       "rds": {
         "PI": "0x7721",
+        "PS": "VERA",
+        "PS_variants": {
+          "VERA": 10
+        },
+        "PS_full": "VERA",
         "PTY": "Culture",
         "TP": false,
         "TA": false,
+        "RadioText_variants": {},
+        "PS_confidence": "1/1",
         "gain_db": 25,
-        "rds_snr_db": 0.1,
+        "rds_snr_db": 1.1,
         "stereo": true
+      },
+      "site": "Ольгино",
+      "site_geo": {
+        "lat": 59.9833,
+        "lon": 30.1333
       }
     },
     {
@@ -1858,6 +1960,16 @@
       }
     },
     {
+      "freq": 96.0,
+      "signal": 4.23,
+      "name_ru": "Comedy Radio",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "ppm_measured": -75,
+      "stereo": false,
+      "rds": {}
+    },
+    {
       "freq": 96.4,
       "signal": 12.13,
       "_band": {
@@ -1889,29 +2001,32 @@
     },
     {
       "freq": 97.0,
-      "signal": 11.64,
-      "_band": {
-        "freq_min": 87500,
-        "freq_max": 108000,
-        "name": "FM-broadcast",
-        "modulation": "WFM",
-        "bandwidth": 200000,
-        "step": 100000,
-        "description": "FM-вещание (CCIR)",
-        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
-      },
-      "_is_oirt": false,
+      "signal": 14.46,
       "name_ru": "Радио Дача",
+      "modulation": "WFM",
+      "band_name": "FM-broadcast",
+      "ppm_measured": -77,
       "stereo": true,
       "rds": {
         "PI": "0x7724",
-        "PS": "97,0FM",
+        "PS": "DACHA",
+        "PS_variants": {
+          "DACHA": 7
+        },
+        "PS_full": "DACHA",
         "PTY": "Pop music",
         "TP": false,
         "TA": false,
-        "gain_db": 50,
-        "rds_snr_db": 2.4,
+        "RadioText_variants": {},
+        "PS_confidence": "1/1",
+        "gain_db": 25,
+        "rds_snr_db": 2.5,
         "stereo": true
+      },
+      "site": "Ольгино",
+      "site_geo": {
+        "lat": 59.9833,
+        "lon": 30.1333
       }
     },
     {
@@ -2055,12 +2170,28 @@
     },
     {
       "freq": 101.4,
-      "signal": 11.96,
+      "signal": 11.89,
       "name_ru": "Эльдорадио",
       "modulation": "WFM",
       "band_name": "FM-broadcast",
+      "ppm_measured": -75,
       "stereo": true,
-      "rds": {}
+      "rds": {
+        "PI": "0x7891",
+        "PS": "ELDO",
+        "PS_variants": {
+          "ELDO": 5
+        },
+        "PS_full": "ELDO",
+        "PTY": "Easy listening",
+        "TP": false,
+        "TA": false,
+        "RadioText_variants": {},
+        "PS_confidence": "1/1",
+        "gain_db": 50,
+        "rds_snr_db": 1.4,
+        "stereo": true
+      }
     },
     {
       "freq": 102.0,
@@ -2113,21 +2244,33 @@
     },
     {
       "freq": 102.8,
-      "signal": 12.44,
+      "signal": 19.72,
       "name_ru": "Максимум",
       "modulation": "WFM",
       "band_name": "FM-broadcast",
+      "ppm_measured": -81,
       "stereo": true,
       "rds": {
         "PI": "0x7703",
         "PS": "MAXIMUM",
+        "PS_variants": {
+          "MAXIMUM": 3
+        },
+        "PS_full": "MAXIMUM",
         "PTY": "Rock music",
         "TP": false,
         "TA": false,
-        "gain_db": 25,
-        "rds_snr_db": 2.1,
+        "RadioText": "DISTURBED - LAND OF CONFUSION",
+        "RadioText_variants": {
+          "DISTURBED - LAND OF CONFUSION": 1
+        },
+        "PS_confidence": "1/1",
+        "RadioText_confidence": "1/1",
+        "gain_db": 50,
+        "rds_snr_db": 3.1,
         "stereo": true
-      }
+      },
+      "site": ""
     },
     {
       "freq": 103.4,
@@ -2613,5 +2756,5 @@
       "rds": {}
     }
   ],
-  "last_merge": "2026-11-10T11:24:39.813825"
+  "last_merge": "2026-11-16T16:07:22.459450"
 }

@@ -1,0 +1,47 @@
+{
+  "region": "RU.spb",
+  "updated": "2026-11-16",
+  "status": "beta",
+  "sites": {
+    "olgino": {
+      "name_ru": "Ольгино (ЛРТПЦ)",
+      "aliases": ["Ольгино", "СЗРТПЦ", "Радиопередающий центр СПб"],
+      "lat": 59.98387,
+      "lon": 30.13541,
+      "height_m": 210,
+      "erp_kw": null,
+      "osm_id": null,
+      "sources": [
+        {"type": "osm", "confidence": "medium"},
+        {"type": "community", "confidence": "low"}
+      ],
+      "note": "Основная вышка СЗРТПЦ"
+    },
+    "krasny_bor": {
+      "name_ru": "Красный Бор",
+      "aliases": ["Красный Бор"],
+      "lat": 59.6667,
+      "lon": 30.6667,
+      "height_m": 180,
+      "erp_kw": null,
+      "osm_id": null,
+      "sources": [
+        {"type": "community", "confidence": "low"}
+      ],
+      "note": "Мощный передатчик на юг"
+    }
+  },
+  "assignments": [
+    {"freq_mhz": 90.6,  "site": "olgino",      "pi": "0x7850", "ps": "BAHR",     "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 92.0,  "site": "olgino",      "pi": "0x7742", "ps": "RADIO KP", "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 92.9,  "site": "olgino",      "pi": "0x7721", "ps": "VERA",     "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 93.7,  "site": "olgino",      "pi": "0x7734", "ps": "RadioMir", "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 95.0,  "site": "olgino",      "pi": "0x7202", "ps": "ENERGY",   "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 95.9,  "site": "olgino",      "pi": "0x7244", "ps": "COMEDY",   "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 97.0,  "site": "olgino",      "pi": "0x7724", "ps": "DACHA",    "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 98.1,  "site": "olgino",      "pi": "0x7212", "ps": "LikeFM",   "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 101.4, "site": "krasny_bor",  "pi": "0x7891", "ps": "ELDO",     "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 102.4, "site": "krasny_bor",  "pi": "0x7895", "ps": "METRO",    "source": "measured", "confidence": "official", "first_seen": "2026-11-16"},
+    {"freq_mhz": 102.8, "site": "krasny_bor",  "pi": "0x7703", "ps": "MAXIMUM",  "source": "measured", "confidence": "official", "first_seen": "2026-11-16"}
+  ]
+}

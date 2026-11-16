@@ -251,7 +251,6 @@ class Context:
         self.interference_notes = notes
 
     # ── METAR ──
-
     def fetch_metar(self, station_code: str = "") -> dict:
         """
         Получает METAR-данные для станции.
@@ -259,41 +258,42 @@ class Context:
           1. Пытается взять JSON из AWC (Primary).
           2. При ошибке — берёт сырую строку из NOAA NWS (Backup).
         Возвращает распарсенный dict или пустой dict при ошибке.
-        Зачем: устойчивая работа даже при нестабильной сети или недоступности API.
-        Это критично для полевых/автономных сценариев.
         """
+        # 1. Явно заданный код имеет приоритет
         station = station_code or self.get_metar_station()
+
+        # 2. Если кода нет — пробуем через справочник по региону/координатам
+        if not station:
+            region = self.observer.get("region", "")
+            lat, lon = self.get_observer_coords()
+            if region or (lat and lon):
+                from core.metar_registry import resolve
+                entry = resolve(region, lat, lon, allow_network=True)
+                if entry:
+                    station = entry["icao"]
+                    # Кэшируем обратно в конфиг, чтобы следующий запуск был мгновенным
+                    self.observer["metar_station"] = station
+
         if not station:
             return {}
 
         # ── Primary: AWC JSON API ──
-
         url = self.METAR_URL_PRIMARY.format(station=station)
         try:
-            # Формируем запрос с корректным User-Agent — это требование AWC и хорошая практика.
-            # Зачем: многие API блокируют запросы без User-Agent или с дефолтным python-urllib.
             req = urllib.request.Request(url, headers={"User-Agent": f"SDR-Scanner/{__version__}"})
             with urllib.request.urlopen(req, timeout=10) as resp:
-                # Читаем тело ответа, декодируем в UTF-8 (стандарт для JSON), убираем лишние пробелы.
-                # Зачем: гарантирует, что даже при случайных пробелах/пустых строках код не ломается.
                 raw = resp.read().decode("utf-8").strip()
         except Exception as e:
-            # Первичный источник недоступен (сеть, таймаут, DNS, 5xx) — логируем и идём на запасной.
-            # Зачем: отказоустойчивость. В полевых/автономных сценариях нельзя терять погоду целиком.
             print(f"[!] METAR primary fetch error: {e}")
             raw = ""
 
         if raw:
             try:
                 data = json.loads(raw)
-                # AWC возвращает список METAR-отчётов; берём самый свежий (первый).
-                # Зачем: структура API — список, а нам нужен один актуальный отчёт.
                 if isinstance(data, list) and len(data) > 0:
                     metar_json = data[0]
                     return self._metar_from_json(metar_json)
             except (json.JSONDecodeError, KeyError, IndexError) as e:
-                # Невалидный JSON, нет нужных полей или пустой список — логируем, пробуем запасной источник.
-                # Зачем: защита от «битых» ответов API и явное указание, что мы не теряем данные.
                 print(f"[!] METAR JSON parse error: {e}, trying backup...")
 
         # ── Backup: NOAA NWS raw text ──
@@ -303,26 +303,18 @@ class Context:
             with urllib.request.urlopen(req, timeout=10) as resp:
                 raw_text = resp.read().decode("utf-8").strip()
         except Exception as e:
-            # Запасной источник тоже недоступен — нет смысла продолжать.
-            # Зачем: если оба источника не работают, возвращаем пустой dict, чтобы не ломать логику выше.
             print(f"[!] METAR backup fetch error: {e}")
             return {}
 
         if not raw_text:
             return {}
 
-        # raw_text может содержать пустую строку + METAR, берём последнюю непустую.
-        # Зачем: формат NWS допускает пустые строки/заголовки; нам нужен именно METAR.
         lines = [l.strip() for l in raw_text.split("\n") if l.strip()]
         if not lines:
             return {}
-        # Последняя строка — свежий METAR (NWS отдаёт по одной строке на станцию).
         metar_raw = lines[-1]
 
-        # Проверка на успешное получение данных
         if metar_raw:
-            # Парсим сырой METAR в тот же формат, что и JSON-источник.
-            # Зачем: единый формат данных для всего модуля, чтобы логика выше не зависела от источника.
             return self.parse_metar(metar_raw)
         else:
             print("[!] METAR: no data received")

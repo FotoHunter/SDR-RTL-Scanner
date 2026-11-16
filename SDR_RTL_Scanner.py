@@ -32,6 +32,7 @@ from config import *
 from core.snr import auto_ppm_calibrate, check_rds_snr, decode_rds, decode_rds_multi
 from core.scanner import multi_gain_scan, bloom_split_scan, split_scan_ranges, snap_freq, format_freq_mhz
 from core.region_detect import resolve_region, save_region_to_observer
+from core.station_metadata import enrich_station
 from config.styles import C_GREEN, C_RED, C_BLUE, C_YELLOW, C_RESET
 from config.system import DEFAULT_DWELL, DEFAULT_RDS_RATE, DEFAULT_PPM, PPM_REFERENCES
 
@@ -135,6 +136,24 @@ def get_git_hash():
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С РЕГИОНАМИ
 # =============================================================================
 
+def log_weather_snapshot(ctx):
+    """Сохраняет текущий снимок погоды и GPS в data/weather_history.jsonl."""
+    log_path = DATA_DIR / "weather_history.jsonl"
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "scan_region": CURRENT_REGION,
+        "observer": {
+            "name": ctx.get_observer_name(),
+            "lat": ctx.get_observer_coords()[0],
+            "lon": ctx.get_observer_coords()[1],
+        },
+        "metar": ctx.weather,
+        "space_weather": ctx.space_weather,
+        "gps": ctx.gps_quality,
+    }
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    print(f"[*] Weather snapshot appended to {log_path}")
 
 def parse_region_name(region_str: str) -> dict:
     """Разобрать имя региона в формате CC.city или CC.city.SUB.
@@ -768,9 +787,9 @@ def interactive_merge(base_data, diff_info, scan_min, scan_max):
 # ═══════════════════════════════════════════════════════════════
 
 def print_summary(stations, ppm=0, snap=0):
-    print("\n" + "=" * 155)
+    print("\n" + "=" * 175)
     # Добавлены колонки Mod и Band
-    hdr = (f"{'Freq':>7} | {'Signal':>7} | {'Name RU':<22} | {'Mod':>5} | {'Band':<12} | "
+    hdr = (f"{'Freq':>7} | {'Signal':>7} | {'PPM':>4} | {'Site':<22}  | {'Name RU':<22} | {'Mod':>5} | {'Band':<12} | "
            f"{'PI':>8} | {'PS':<24} | {'PTY':<16} | {'Ster':>5} | {'TP':>4} | {'TA':>4} | RadioText")
     print(hdr)
     print("-" * 155)
@@ -778,6 +797,9 @@ def print_summary(stations, ppm=0, snap=0):
     for st in stations:
         freq = st.get("freq", 0)
         signal = st.get("signal", 0)
+        site = st.get("site", "") or "—"
+        ppm_val = st.get("ppm_measured")
+        ppm_str = str(ppm_val) if ppm_val is not None else "—"
         name_ru = st.get("name_ru", "") or "—"
         mod = st.get("modulation", "") or "—"
         band = st.get("band_name", "") or "—"
@@ -808,9 +830,9 @@ def print_summary(stations, ppm=0, snap=0):
         band_info = st.get("_band") or {}
         step_hz_sum = band_info.get("step") or (st.get("_step_khz", 100) * 1000)
         freq_sum = format_freq_mhz(freq, step_hz_sum)
-        print(f"{freq:>7.3f}M | {signal:>7.1f} | {name_ru:<22} | {mod:>5} | {band:<12} | "
+        print(f"{freq:>7.3f}M | {signal:>7.1f} | {ppm_str:>4} | {site:<22}  | {name_ru:<22} | {mod:>5} | {band:<12} | "
               f"{pi_str:>8} | {ps:<24} | {pty:<16} | {ster_str:>5} | {str(tp):>4} | {str(ta):>4} | {rt_str}")
-    print("=" * 155)
+    print("=" * 175)
     print(f"\nВсего станций: {len(stations)} | PPM: {ppm} | Snap: {snap} kHz")
     print(f"С RDS (PI): {n_pi} | С PS: {n_ps} | С RT: {n_rt} | С русским названием: {n_ru}")
 
@@ -989,11 +1011,16 @@ def export_html(data: dict, region: str | None, output_path: str | Path | None =
             row_class = ' class="row-lost"'
         elif status == "new":
             row_class = ' class="row-new"'
-
+        # берём ppm из станции, если есть, иначе прочерк
+        ppm_val = st.get("ppm_measured")
+        ppm_str = str(ppm_val) if ppm_val is not None else "—"
+        site_val = st.get("site", "") or "—"
         rows += (
             f"      <tr{row_class}>\n"
             f"        <td>{freq_str_html}</td>\n"
             f"        <td>{signal:.1f}</td>\n"
+            f"        <td>{ppm_str}</td>\n"
+            f"        <td>{site_val}</td>\n"
             f"        <td>{name_ru}</td>\n"
             f"        <td>{mod}</td>\n"
             f"        <td>{band}</td>\n"
@@ -1078,7 +1105,7 @@ function sortTable(col) {
 <body>
 <h1>FM RDS Scanner — {region.upper()}</h1>
 <div class="meta">
-  Scan: {scan_date[:19]} | Mode: {mode} | PPM: {ppm}
+  Scan: {scan_date[:19]} | Mode: {mode}
 </div>
         {format_metar(data.get("metar"))}
         {format_space_weather(data.get("space_weather"))}
@@ -1097,18 +1124,20 @@ function sortTable(col) {
     <tr>
       <th onclick="sortTable(0)">Freq (MHz)</th>
       <th onclick="sortTable(1)">Signal (dB)</th>
-      <th onclick="sortTable(2)">Name RU</th>
-      <th onclick="sortTable(3)">Mod</th>
-      <th onclick="sortTable(4)">Band</th>
-      <th onclick="sortTable(5)">PI</th>
-      <th onclick="sortTable(6)">PS</th>
-      <th onclick="sortTable(7)">PTY</th>
-      <th onclick="sortTable(8)">Ster</th>
-      <th onclick="sortTable(9)">TP</th>
-      <th onclick="sortTable(10)">TA</th>
-      <th onclick="sortTable(11)">RadioText</th>
-      <th onclick="sortTable(12)">Status</th>
-      <th onclick="sortTable(13)">Last Seen</th>
+      <th onclick="sortTable(2)">PPM</th>
+      <th onclick="sortTable(3)">Site</th>
+      <th onclick="sortTable(4)">Name RU</th>
+      <th onclick="sortTable(5)">Mod</th>
+      <th onclick="sortTable(6)">Band</th>
+      <th onclick="sortTable(7)">PI</th>
+      <th onclick="sortTable(8)">PS</th>
+      <th onclick="sortTable(9)">PTY</th>
+      <th onclick="sortTable(10)">Ster</th>
+      <th onclick="sortTable(11)">TP</th>
+      <th onclick="sortTable(12)">TA</th>
+      <th onclick="sortTable(13)">RadioText</th>
+      <th onclick="sortTable(14)">Status</th>
+      <th onclick="sortTable(15)">Last Seen</th>
     </tr>
   </thead>
   <tbody>
@@ -1355,6 +1384,9 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
             st["stereo"] = None
             st["modulation"] = st_mod
             st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
+            # Обогащаем станцию метаданными (site, ppm и т.д.) перед сохранением
+            enrich_station(st, CURRENT_REGION, REGIONS_DIR,
+            observer_coords=(ctx or {}).get("observer_coords"),)
             continue
 
         # Для FM/OIRT: сначала общий статус
@@ -1410,7 +1442,8 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
                     st["freq"], -1, DEFAULT_RDS_RATE, 1.5
                 )
                 # Первая успешная калибровка — всегда принимаем
-                if ppm_st != 0 and (current_ppm == 0 or abs(ppm_st - current_ppm) <= 15):
+                if ppm_st != 0 and abs(ppm_st) <= 150 and (current_ppm == 0 or abs(ppm_st - current_ppm) <= 15):
+#                if ppm_st != 0 and (current_ppm == 0 or abs(ppm_st - current_ppm) <= 15):
                     st_ppm = ppm_st
                     current_ppm = ppm_st
                     print(f"    [PPM] {st['freq']:.1f} MHz: calibration ppm={ppm_st} (per-station)")
@@ -1425,6 +1458,7 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
         else:
             st_ppm = current_ppm
 
+        st["ppm_measured"] = st_ppm
 # ==========================================================
 
         if st_is_oirt:
@@ -1432,7 +1466,7 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
                 st["freq"], rds_gains, st_ppm, args.dwell, DEFAULT_RDS_RATE)
             if stereo is not None:
                 st["stereo"] = stereo
-            snr_str = f" | SNR={snr}dB" if snr is not None else ""
+                snr_str = f" | SNR={snr}dB" if snr is not None else ""
             ster_str = f" | {C_GREEN}STEREO{C_RESET}" if stereo else \
                        " | mono" if stereo is not None else ""
             print(f"    -> {C_YELLOW}OIRT{ster_str}{snr_str}{C_RESET}")
@@ -1452,6 +1486,9 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
                 snr_str = f" | SNR={snr}dB" if snr is not None else ""
                 print(f"    -> {C_RED}no RDS{snr_str}{C_RESET}")
                 st["rds"] = {}
+        # Обогащаем станцию метаданными (site, ppm и т.д.) перед сохранением
+        enrich_station(st, CURRENT_REGION, REGIONS_DIR,
+            observer_coords=(ctx or {}).get("observer_coords"))
         print()
 # ================================================================
     # Сохраняем итоговый PPM
@@ -1888,6 +1925,7 @@ def main():
         else:
             print(f"    [!] GPS quality unavailable")
 
+        log_weather_snapshot(app_context)
         print(f"[*] Context ready. Observer: {app_context.get_observer_name()}, "
               f"Antenna: {app_context.get_antenna_model()}")
 # ===================================================================================================
@@ -1937,6 +1975,10 @@ def main():
     ctx = {
         "scan_date": scan_date_utc,
         "observer": app_context.get_observer_name() if app_context else None,
+        "observer_coords": (
+            OBSERVER_CONFIG.get("location", {}).get("lat"),
+            OBSERVER_CONFIG.get("location", {}).get("lon"),
+        ),
         "antenna": app_context.get_antenna_model() if app_context else None,
         "region": region,
         "metar": app_context.weather if app_context else None,

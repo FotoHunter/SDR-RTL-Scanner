@@ -1,0 +1,68 @@
+{
+  "region": "RU.msk",
+  "updated": "2026-11-16",
+  "status": "beta",
+  "sites": {
+    "ostankino": {
+      "name_ru": "Останкинская телебашня",
+      "aliases": ["Останкино", "Московский региональный центр РТРС"],
+      "lat": 55.8197,
+      "lon": 37.6117,
+      "height_m": 540,
+      "erp_kw": null,
+      "osm_id": null,
+      "sources": [
+        {"type": "osm", "confidence": "medium"}
+      ],
+      "note": "Главный передающий центр Москвы"
+    },
+    "balashikha": {
+      "name_ru": "Балашиха (ОРТПЦ)",
+      "aliases": ["Балашиха"],
+      "lat": 55.8094,
+      "lon": 37.9581,
+      "height_m": 210,
+      "erp_kw": null,
+      "osm_id": null,
+      "sources": [
+        {"type": "osm", "confidence": "medium"}
+      ],
+      "note": "Мощный передатчик на восток"
+    },
+    "krasnaya_pahra": {
+      "name_ru": "Красная Пахра (ОРТПЦ)",
+      "aliases": ["Красная Пахра"],
+      "lat": 55.4639,
+      "lon": 37.2547,
+      "height_m": 200,
+      "erp_kw": null,
+      "osm_id": null,
+      "sources": [
+        {"type": "community", "confidence": "low"}
+      ],
+      "note": "Южное направление"
+    }
+  },
+  "assignments": [
+    {"freq_mhz": 87.7,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 88.1,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 89.0,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 89.4,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 89.8,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 90.8,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 91.2,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 92.0,  "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 100.1, "site": "balashikha", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 100.5, "site": "balashikha", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 101.2, "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 102.5, "site": "balashikha", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 103.0, "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 103.4, "site": "balashikha", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 104.1, "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 104.9, "site": "balashikha", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 105.2, "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 106.2, "site": "balashikha", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 107.4, "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 107.8, "site": "ostankino", "pi": null, "ps": null, "source": "community", "confidence": "low"}
+  ]
+}

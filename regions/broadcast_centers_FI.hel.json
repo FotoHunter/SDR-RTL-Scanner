@@ -1,0 +1,28 @@
+{
+  "region": "FI.hel",
+  "updated": "2026-11-16",
+  "status": "beta",
+  "sites": {
+    "espoo": {
+      "name_ru": "Espoon radio- ja tv-asema",
+      "aliases": ["Espoo", "Лахти"],
+      "lat": 60.1833,
+      "lon": 24.6333,
+      "sources": [{"type": "community", "confidence": "low"}],
+      "note": "Координаты приблизительные"
+    },
+    "helsinki": {
+      "name_ru": "Helsingin lähetysasema",
+      "aliases": ["Helsinki"],
+      "lat": 60.1667,
+      "lon": 24.9333,
+      "sources": [{"type": "community", "confidence": "low"}],
+      "note": "Координаты приблизительные"
+    }
+  },
+  "assignments": [
+    {"freq_mhz": 91.1, "site": "helsinki", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 94.0, "site": "espoo",    "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 106.2, "site": "espoo",   "pi": null, "ps": null, "source": "community", "confidence": "low"}
+  ]
+}

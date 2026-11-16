@@ -1,0 +1,43 @@
+{
+  "region": "RU.omsk",
+  "updated": "2026-11-16",
+  "status": "beta",
+  "sites": {
+    "omsk_tower": {
+      "name_ru": "Омская телебашня (ОРТПЦ)",
+      "aliases": ["Омский ОРТПЦ"],
+      "lat": 55.0217,
+      "lon": 73.3072,
+      "sources": [{"type": "community", "confidence": "low"}],
+      "note": "Координаты приблизительные"
+    }
+  },
+  "assignments": [
+    {"freq_mhz": 87.7, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 88.1, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 88.6, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 89.1, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 89.5, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 90.1, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 90.5, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 90.9, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 91.4, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 91.8, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 92.3, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 100.6, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 101.0, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 101.5, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 101.9, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 102.5, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 103.0, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 103.5, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 103.9, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 104.4, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 105.0, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 105.7, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 106.2, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 106.8, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 107.3, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"},
+    {"freq_mhz": 107.8, "site": "omsk_tower", "pi": null, "ps": null, "source": "community", "confidence": "low"}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "updated_at": "2026-11-16",
+  "stations": {
+    "RU.spb": {
+      "icao": "ULLI",
+      "name": "Pulkovo",
+      "lat": 59.8003,
+      "lon": 30.2625,
+      "last_verified": "2026-11-16",
+      "source": "manual"
+    },
+    "RU.msk": {
+      "icao": "UUEE",
+      "name": "Sheremetyevo",
+      "lat": 55.9726,
+      "lon": 37.4146,
+      "last_verified": "2026-11-16",
+      "source": "manual"
+    }
+  }
+}

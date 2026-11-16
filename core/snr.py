@@ -183,6 +183,10 @@ def auto_ppm_calibrate_carrier(
 
     ppm = round((peak_freq / ref_freq_mhz - 1) * 1e6)
 
+    # ── ЗАЩИТА: физический предел (±150 ppm) ──
+    if not (-150 <= ppm <= 150):
+        return 0, None
+
     print(f"    Carrier peak: {peak_freq:.4f} MHz (ref: {ref_freq_mhz:.4f}), "
           f"SNR={snr:.1f} dB → PPM = {ppm}")
 
@@ -268,6 +272,11 @@ def auto_ppm_calibrate(freq_mhz: float, gain_db: int = -1, rate: int = DEFAULT_R
 
     peak_val = float(peak_freq)  # ← скаляр, .item() не нужен
     ppm = round((peak_val / ref_freq - 1) * 1e6)
+
+    # ── ЗАЩИТА: физический предел для RTL-SDR (±150 ppm) ──
+    # Всё, что вылазит за пределы — мусор от помех или битого пилота.
+    if not (-150 <= ppm <= 150):
+        return 0, None
 
     return ppm, True
 
