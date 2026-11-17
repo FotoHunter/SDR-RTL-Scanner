@@ -616,6 +616,71 @@ def interactive_select(prompt, items, default_all=False):
             idx = int(part) - 1
             if 0 <= idx < len(items): selected.add(idx)
     return selected
+# ==========================================================================
+# ═══════════════════════════════════════════════════════════════
+#  Soft merge: политика полей при обновлении станции
+# ═══════════════════════════════════════════════════════════════
+
+MANUAL_SITE_KEYS = ("site", "site_id", "site_geo", "site_source", "site_confidence")
+RDS_KEYS = ("PI", "PS", "PTY", "RadioText", "Stereo", "TP", "TA", "AF")
+
+def _band_tol_mhz(st) -> float:
+    """Толеранс мачтинга = один шаг сетки диапазона, зажатый в [10 кГц, 150 кГц].
+    УКВ (step 100 кГц) → 0.1 МГц, как и раньше; КВ (step 5–9 кГц) → 0.01 МГц,
+    чтобы соседние каналы 31-метрового не склеивались."""
+    band = st.get("_band") or {}
+    step = band.get("step") if isinstance(band, dict) else None
+    if not step:
+        # записи без _band: шаг для известных УКВ-вещательных диапазонов
+        step = {"FM-broadcast": 100, "OIRT": 30}.get(st.get("band_name") or "")
+    if step:
+        return min(max(step / 1000.0, 0.01), 0.15)
+    return 0.1
+
+def soft_merge_station(new: dict, old: dict) -> dict:
+    """Мягкое наложение нового скана на старую запись.
+    A. Ручные данные (name_ru, site при site_source != auto) — не затирать.
+    B. Метаданные диапазона — переносить из старой, если в новой нет.
+    C. Данные наблюдения (signal, freq) — обновлять; RDS/stereo — не терять."""
+    merged = dict(new)
+
+    # A: ручное имя не затирается пустым
+    if not merged.get("name_ru") and old.get("name_ru"):
+        merged["name_ru"] = old["name_ru"]
+        print(f"    [preserved] {merged.get('freq', 0):.3f} MHz: name_ru сохранён "
+              f"('{old['name_ru']}')")
+
+    # A: ручной site (внесён не автопоиском) — не затирать
+    if old.get("site_source") not in (None, "", "auto"):
+        for k in MANUAL_SITE_KEYS:
+            if k in old and not merged.get(k):
+                merged[k] = old[k]
+        print(f"    [preserved] {merged.get('freq', 0):.3f} MHz: site сохранён "
+              f"('{old.get('site', '')}', source={old.get('site_source')})")
+
+    # B: перенос метаданных диапазона
+    for k in ("_band", "_is_oirt", "band_name", "modulation"):
+        if not merged.get(k) and old.get(k):
+            merged[k] = old[k]
+
+    # C: RDS — не терять накопленное (слабый прогон не стирает PI/PS/RT)
+    old_rds = old.get("rds") or {}
+    new_rds = merged.get("rds") or {}
+    if old_rds and not new_rds:
+        merged["rds"] = dict(old_rds)
+        print(f"    [preserved] {merged.get('freq', 0):.3f} MHz: RDS сохранён целиком "
+              f"(PI={old_rds.get('PI', '?')})")
+    elif old_rds and new_rds:
+        for k in RDS_KEYS:
+            if not new_rds.get(k) and old_rds.get(k):
+                new_rds[k] = old_rds[k]
+        merged["rds"] = new_rds
+
+    # C: stereo — аналогично RDS
+    if merged.get("stereo") is None and old.get("stereo") is not None:
+        merged["stereo"] = old["stereo"]
+
+    return merged
 
 # ==========================================================================
 def show_diff(base_data, update_data, scan_min, scan_max, tolerance_mhz=0.1):
@@ -629,14 +694,15 @@ def show_diff(base_data, update_data, scan_min, scan_max, tolerance_mhz=0.1):
     pairs = []  # (upd_st, base_st) — для changed
 
     for i, u in enumerate(upd_list):
-        # Ищем ближайшую base-станцию в пределах tolerance
+        # Ищем ближайшую base-станцию в пределах толеранса её диапазона
         best_j = None
         best_d = None
         for j, b in enumerate(base_list):
             if matched_base[j]:
                 continue
             d = abs(u["freq"] - b["freq"])
-            if d <= tolerance_mhz and (best_d is None or d < best_d):
+            tol = _band_tol_mhz(b)
+            if d <= tol and (best_d is None or d < best_d):
                 best_d = d
                 best_j = j
         if best_j is not None:
@@ -710,19 +776,19 @@ def show_diff(base_data, update_data, scan_min, scan_max, tolerance_mhz=0.1):
     # changed: список (f, diffs, u, b) — 4 элемента
     changed_freqs = [f for f, _, _, _ in changed]
     changed_sts = {f: u for f, _, u, _ in changed}
+    changed_pairs = [(u, b) for _, _, u, b in changed]
     # gone_sts — только потерянные в диапазоне (не все base)
     gone_sts = {b["freq"]: b for b in base_list if b["freq"] in gone_in_range}
     return {
         "new": new_f, "new_sts": new_sts,
         "gone": gone_in_range, "gone_sts": gone_sts,
         "changed": changed_freqs, "changed_sts": changed_sts,
+        "changed_pairs": changed_pairs,
     }
 
 # ==========================================================================
-
 def interactive_merge(base_data, diff_info, scan_min, scan_max):
-    base_sts = {round(s["freq"], 1): s for s in base_data.get("stations", [])}
-    to_add, to_remove, to_update = [], [], []
+    to_add, to_remove, to_update_pairs = [], [], []
     if diff_info["new"]:
         print("\n--- Добавить новые станции ---")
         sel = interactive_select("Добавить: все (a), номера (1,2), нет (n) [по умолчанию a]: ",
@@ -737,48 +803,47 @@ def interactive_merge(base_data, diff_info, scan_min, scan_max):
         print("\n--- Обновить изменённые станции ---")
         sel = interactive_select("Обновить: все (a), номера (1,2), нет (n) [по умолчанию a]: ",
                                 diff_info["changed"], default_all=True)
-        for idx in sel: to_update.append(diff_info["changed"][idx])
-    print(f"\nИтого: +{len(to_add)} добавить, -{len(to_remove)} удалить, ~{len(to_update)} обновить")
+        pair_map = {f: p for f, p in zip(diff_info["changed"], diff_info.get("changed_pairs", []))}
+        for idx in sel:
+            f = diff_info["changed"][idx]
+            if f in pair_map:
+                to_update_pairs.append(pair_map[f])
+            else:
+                # страховка для старых вызовов без пар
+                to_update_pairs.append((diff_info["changed_sts"][f], None))
+    print(f"\nИтого: +{len(to_add)} добавить, -{len(to_remove)} удалить, ~{len(to_update_pairs)} обновить")
 
-#    resp = input("Подтвердить? (y/N): ").strip().lower()
     try:
         resp = input("Confirm? (y/N): ").strip().lower()
     except UnicodeDecodeError:
-        # Если ввод битый — считаем отказом
         resp = "n"
 
-    if resp == "y" or resp == "yes":
-        pass  # логика подтверждения уже ниже
-    else:
+    if resp not in ("y", "yes"):
         print("[*] Слияние отменено.")
         return None
 
-    for f in to_remove:
-        base_sts.pop(f, None)
+    stations = base_data["stations"]
 
-    for f in to_add:
-        s = diff_info["new_sts"][f]
-        if f in base_sts and not s.get("name_ru") and base_sts[f].get("name_ru"):
-            s["name_ru"] = base_sts[f]["name_ru"]
-        base_sts[f] = s
+    # Удаление — по точной частоте (gone построены из base, округление не нужно)
+    rm = set(round(f, 3) for f in to_remove)
+    if rm:
+        base_data["stations"] = [s for s in stations if round(s["freq"], 3) not in rm]
 
-    for f in to_update:
-        s = diff_info["changed_sts"][f]
-        old = base_sts.get(f, {})
-        if not s.get("name_ru") and old.get("name_ru"):
-            s["name_ru"] = old["name_ru"]
-        old_rds = old.get("rds", {})
-        new_rds = s.get("rds", {})
-        if not new_rds and old_rds:
-            s["rds"] = old_rds
-            print(f"    [preserved] {f:.1f} MHz: RDS сохранён (PI={old_rds.get('PI','?')})")
-        elif new_rds and old_rds:
-            for key in ["PI", "PS", "PTY", "RadioText", "Stereo", "TP", "TA", "AF"]:
-                if not new_rds.get(key) and old_rds.get(key):
-                    new_rds[key] = old_rds[key]
-                    print(f"    [preserved] {f:.1f} MHz: rds.{key} сохранён")
-        base_sts[f] = s
-    base_data["stations"] = sorted(base_sts.values(), key=lambda x: x["freq"])
+    # Добавление — новые станции без старых записей
+    for s in to_add:
+        base_data["stations"].append(s)
+
+    # Обновление — мягкий мерж поверх СТАРОЙ записи (по объекту, а не по ключу!)
+    for u, b in to_update_pairs:
+        if b is None:
+            continue
+        merged = soft_merge_station(u, b)
+        for i, st in enumerate(base_data["stations"]):
+            if st is b:
+                base_data["stations"][i] = merged
+                break
+
+    base_data["stations"].sort(key=lambda x: x["freq"])
     base_data["last_merge"] = datetime.now().isoformat()
     return base_data
 
