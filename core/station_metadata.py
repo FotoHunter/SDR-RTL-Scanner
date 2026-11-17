@@ -51,6 +51,24 @@ def load_broadcast_centers(region: str, regions_dir: Path) -> dict:
         return _CACHE[cache_key]
 
 
+def _is_vhf_broadcast(station: dict) -> bool:
+    """Автопривязка центра возможна только для УКВ-вещания.
+    На КВ дистанция до наблюдателя ничего не говорит об источнике:
+    сигнал может прийти с любой трассы. Атрибуция HF — только
+    вручную, по факту прослушки."""
+    band = station.get("_band")
+    band_name = ""
+    if isinstance(band, dict):
+        band_name = band.get("name") or ""
+    if not band_name:
+        band_name = station.get("band_name") or ""
+    if band_name in ("FM-broadcast", "OIRT"):
+        return True
+    if station.get("_is_oirt"):
+        return True
+    return False
+
+
 def enrich_station(station: dict, region: str, regions_dir: Path,
                    observer_coords=None):
     data = load_broadcast_centers(region, regions_dir)
@@ -70,7 +88,13 @@ def enrich_station(station: dict, region: str, regions_dir: Path,
 
     # 2. Автопоиск по координатам наблюдателя (если явной привязки нет)
     site_geo = None
-    if not site_id and observer_coords and data["sites"]:
+#    if not site_id and observer_coords and data["sites"]:
+    site_geo = None
+    if (not site_id
+            and _is_vhf_broadcast(station)
+            and observer_coords
+            and data["sites"]):
+
         best_id, best_d = None, None
         olat, olon = observer_coords
         if olat is not None and olon is not None:
@@ -93,6 +117,9 @@ def enrich_station(station: dict, region: str, regions_dir: Path,
         site_name = s.get("name_ru", site_id)
     else:
         site_name = ""
+        site_id = None
+        site_source = None
+        site_confidence = None
 
     station["site"] = site_name
     station["site_id"] = site_id

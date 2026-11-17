@@ -1384,7 +1384,7 @@ def mode_fullscan(args, ctx: dict | None, region: str | None, output_path: str |
             st["stereo"] = None
             st["modulation"] = st_mod
             st["band_name"] = st_band.get("name", "Unknown") if st_band else "Unknown"
-            # Обогащаем станцию метаданными (site, ppm и т.д.) перед сохранением
+            # Обогащаем станцию метаданными (site, ppm и т.д.) перед сохранением - для HF - не актуально, только для локального FM
             enrich_station(st, CURRENT_REGION, REGIONS_DIR,
             observer_coords=(ctx or {}).get("observer_coords"),)
             continue
