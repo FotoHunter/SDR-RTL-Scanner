@@ -906,7 +906,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "Unknown"
+      "band_name": "Unknown",
+      "_band": {
+        "freq_min": 3,
+        "freq_max": 30,
+        "name": "VLF",
+        "modulation": "MSK",
+        "threshold": -10.0,
+        "bandwidth": 200,
+        "step": 100,
+        "description": "Подлодки, навигация, эталоны времени (DCF77, РТЦ Бета)",
+        "notes": "Российский Альфа-навигация 11-14 кГц"
+      }
     },
     {
       "freq": 26.646,
@@ -975,7 +986,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "FM",
-      "band_name": "Unknown"
+      "band_name": "Unknown",
+      "_band": {
+        "freq_min": 3,
+        "freq_max": 30,
+        "name": "VLF",
+        "modulation": "MSK",
+        "threshold": -10.0,
+        "bandwidth": 200,
+        "step": 100,
+        "description": "Подлодки, навигация, эталоны времени (DCF77, РТЦ Бета)",
+        "notes": "Российский Альфа-навигация 11-14 кГц"
+      }
     },
     {
       "freq": 28.8,
@@ -1316,35 +1338,95 @@
       "signal": -6.94,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 51.1,
       "signal": -9.31,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 52.0,
       "signal": -7.47,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 53.6,
       "signal": -3.64,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 54.3,
       "signal": -2.95,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 55.047,
@@ -1435,7 +1517,19 @@
       "signal": 2.33,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 65.4,
@@ -1631,14 +1725,38 @@
       "signal": -3.85,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 76.4,
       "signal": 0.95,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 77.633,
@@ -1666,70 +1784,190 @@
       "signal": 0.25,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 79.2,
       "signal": 1.59,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 79.4,
       "signal": 1.06,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 80.1,
       "signal": 0.31,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 81.0,
       "signal": 1.54,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 81.2,
       "signal": 2.54,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 81.9,
       "signal": 1.65,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 82.6,
       "signal": 9.26,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 83.3,
       "signal": 13.42,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 84.0,
       "signal": 10.92,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 84.7,
@@ -1756,7 +1994,19 @@
       "signal": 15.35,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 85.4,
@@ -1783,7 +2033,19 @@
       "signal": 6.13,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 86.1,
@@ -2126,7 +2388,19 @@
       "signal": 12.16,
       "name_ru": "Новое радио",
       "stereo": true,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 91.5,
@@ -2209,7 +2483,19 @@
       "signal": 8.12,
       "name_ru": "Хит FM",
       "stereo": true,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 92.9,
@@ -2318,7 +2604,19 @@
       "signal": 8.14,
       "name_ru": "Радио Звезда",
       "stereo": true,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 94.5,
@@ -2524,7 +2822,19 @@
       "signal": 4.73,
       "name_ru": "Радио Орфей",
       "stereo": true,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 98.1,
@@ -3072,266 +3382,722 @@
       "signal": -2.86,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 111.2,
       "signal": 5.29,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 115.2,
       "signal": 13.43,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 119.2,
       "signal": 11.71,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 121.4,
       "signal": 0.21,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 125.0,
       "signal": 10.07,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 127.2,
       "signal": -3.75,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 127.8,
       "signal": -8.87,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 129.6,
       "signal": -7.53,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 129.9,
       "signal": -9.23,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 130.6,
       "signal": -7.21,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 131.3,
       "signal": -8.27,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 132.7,
       "signal": -8.72,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 135.0,
       "signal": -4.91,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 141.2,
       "signal": -5.2,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 141.7,
       "signal": 8.75,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 143.2,
       "signal": 3.93,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 144.0,
       "signal": 8.11,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 147.1,
       "signal": -1.58,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 148.3,
       "signal": 10.01,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 149.7,
       "signal": -2.61,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 150.0,
       "signal": 7.24,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 150.8,
       "signal": -3.55,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 151.2,
       "signal": 3.51,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 153.0,
       "signal": -3.55,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 30,
+        "freq_max": 153,
+        "name": "LF-marine",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 100,
+        "description": "Морская навигация, маяки",
+        "notes": "NDB-маяки, LORAN-C (100 кГц — закрыт)"
+      },
+      "band_name": "LF-marine"
     },
     {
       "freq": 154.6,
       "signal": -1.17,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 155.3,
       "signal": -3.18,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 157.7,
       "signal": -3.93,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 159.2,
       "signal": 5.62,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 159.7,
       "signal": -4.83,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 161.8,
       "signal": -3.79,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 168.7,
       "signal": 6.27,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 170.1,
       "signal": 7.39,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 171.5,
       "signal": -8.3,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 172.2,
       "signal": -7.57,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 172.8,
       "signal": 6.15,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 176.0,
       "signal": 1.22,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     },
     {
       "freq": 184.0,
       "signal": 1.22,
       "name_ru": "",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 153,
+        "freq_max": 281,
+        "name": "LF-broadcast",
+        "modulation": "AM",
+        "threshold": -30.0,
+        "bandwidth": 9000,
+        "step": 9000,
+        "description": "ДВ-вещание",
+        "notes": "РФ: Радио России 153 кГц, Маяк 261 кГц. Шаг 9 кГц (Европа/РФ), 10 кГц (США)"
+      },
+      "band_name": "LF-broadcast"
     }
   ],
   "last_merge": "2026-11-17T11:54:53.025929"
