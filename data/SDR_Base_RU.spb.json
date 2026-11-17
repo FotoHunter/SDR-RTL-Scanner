@@ -341,6 +341,15 @@
       "band_name": "HF-misc-60m"
     },
     {
+      "freq": 5.416,
+      "signal": -43.43,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-misc-60m"
+    },
+    {
       "freq": 6.05,
       "signal": -37.21,
       "_band": {
@@ -404,20 +413,8 @@
       "band_name": "Ham-40m"
     },
     {
-      "freq": 7.195,
-      "signal": -38.38,
-      "_band": {
-        "freq_min": 7100,
-        "freq_max": 7300,
-        "name": "Ham-40m",
-        "modulation": "LSB",
-        "threshold": -40.0,
-        "bandwidth": 2400,
-        "step": 100,
-        "description": "Любительский 40 м",
-        "notes": "IARU R1: 7100–7200 кГц. Вещание до 7300 в США"
-      },
-      "_is_oirt": false,
+      "freq": 7.221,
+      "signal": -37.03,
       "name_ru": "",
       "rds": {},
       "stereo": null,
@@ -445,20 +442,17 @@
       "band_name": "HF-misc-41m"
     },
     {
-      "freq": 9.63,
-      "signal": -37.41,
-      "_band": {
-        "freq_min": 9400,
-        "freq_max": 9900,
-        "name": "HF-broadcast-31m",
-        "modulation": "AM",
-        "threshold": -35.0,
-        "bandwidth": 6000,
-        "step": 5000,
-        "description": "КВ-вещание 31 м",
-        "notes": "Универсальный дневной/ночной, очень популярный"
-      },
-      "_is_oirt": false,
+      "freq": 9.396,
+      "signal": -25.77,
+      "name_ru": "Listen!!!",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-misc-41m"
+    },
+    {
+      "freq": 9.64,
+      "signal": -36.97,
       "name_ru": "",
       "rds": {},
       "stereo": null,
@@ -466,20 +460,8 @@
       "band_name": "HF-broadcast-31m"
     },
     {
-      "freq": 9.953,
-      "signal": -36.95,
-      "_band": {
-        "freq_min": 9900,
-        "freq_max": 10100,
-        "name": "HF-marine-NM",
-        "modulation": "USB",
-        "threshold": -40.0,
-        "bandwidth": 2400,
-        "step": 500,
-        "description": "Морская коротковолновая",
-        "notes": "NAVTEX 518 кГц (MF)"
-      },
-      "_is_oirt": false,
+      "freq": 9.987,
+      "signal": -38.27,
       "name_ru": "",
       "rds": {},
       "stereo": null,
@@ -487,22 +469,31 @@
       "band_name": "HF-marine-NM"
     },
     {
-      "freq": 10.05,
-      "signal": -33.18,
-      "name_ru": "",
+      "freq": 10.124,
+      "signal": -34.72,
+      "name_ru": "Listen !!!",
       "rds": {},
       "stereo": null,
-      "modulation": "USB",
-      "band_name": "HF-marine-NM"
+      "modulation": "CW",
+      "band_name": "Ham-30m"
     },
     {
       "freq": 10.948,
-      "signal": -42.9,
+      "signal": -42.84,
       "name_ru": "",
       "rds": {},
       "stereo": null,
       "modulation": "USB",
       "band_name": "HF-misc-25m"
+    },
+    {
+      "freq": 11.83,
+      "signal": -36.81,
+      "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "AM",
+      "band_name": "HF-broadcast-25m"
     },
     {
       "freq": 11.866,
@@ -523,9 +514,18 @@
       "band_name": "HF-marine-3"
     },
     {
-      "freq": 13.69,
-      "signal": -34.18,
+      "freq": 12.873,
+      "signal": -41.43,
       "name_ru": "",
+      "rds": {},
+      "stereo": null,
+      "modulation": "USB",
+      "band_name": "HF-marine-3"
+    },
+    {
+      "freq": 13.69,
+      "signal": -34.32,
+      "name_ru": "Listen !!!",
       "rds": {},
       "stereo": null,
       "modulation": "AM",
@@ -2756,5 +2756,5 @@
       "rds": {}
     }
   ],
-  "last_merge": "2026-11-16T16:07:22.459450"
+  "last_merge": "2026-11-17T10:30:01.894180"
 }
