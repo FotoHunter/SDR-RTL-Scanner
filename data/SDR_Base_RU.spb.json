@@ -347,7 +347,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-60m"
+      "band_name": "HF-misc-60m",
+      "_band": {
+        "freq_min": 4000,
+        "freq_max": 5900,
+        "name": "HF-misc-60m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиация, фиксированная",
+        "notes": "Ham 60 м (5.25–5.45 МГц, вторичка в РФ)"
+      }
     },
     {
       "freq": 6.05,
@@ -419,7 +430,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "LSB",
-      "band_name": "Ham-40m"
+      "band_name": "Ham-40m",
+      "_band": {
+        "freq_min": 7100,
+        "freq_max": 7300,
+        "name": "Ham-40m",
+        "modulation": "LSB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 40 м",
+        "notes": "IARU R1: 7100–7200 кГц. Вещание до 7300 в США"
+      }
     },
     {
       "freq": 7.392,
@@ -442,31 +464,79 @@
       "band_name": "HF-misc-41m"
     },
     {
-      "freq": 9.396,
-      "signal": -25.77,
+      "freq": 9.395,
+      "signal": -28.51,
       "name_ru": "Listen!!!",
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-41m"
+      "band_name": "HF-misc-41m",
+      "site": "",
+      "site_id": null,
+      "site_geo": null,
+      "site_source": null,
+      "site_confidence": null,
+      "_band": {
+        "freq_min": 7300,
+        "freq_max": 9400,
+        "name": "HF-misc-41m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Фиксированная, морская, авиация",
+        "notes": "FT8 7.074, 10.136 МГц"
+      }
     },
     {
-      "freq": 9.64,
-      "signal": -36.97,
+      "freq": 9.7,
+      "signal": -37.75,
       "name_ru": "",
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-31m"
+      "band_name": "HF-broadcast-31m",
+      "site": "",
+      "site_id": null,
+      "site_geo": null,
+      "site_source": null,
+      "site_confidence": null,
+      "_band": {
+        "freq_min": 9400,
+        "freq_max": 9900,
+        "name": "HF-broadcast-31m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 31 м",
+        "notes": "Универсальный дневной/ночной, очень популярный"
+      }
     },
     {
-      "freq": 9.987,
-      "signal": -38.27,
+      "freq": 9.904,
+      "signal": -27.78,
       "name_ru": "",
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-marine-NM"
+      "band_name": "HF-marine-NM",
+      "site": "",
+      "site_id": null,
+      "site_geo": null,
+      "site_source": null,
+      "site_confidence": null,
+      "_band": {
+        "freq_min": 9900,
+        "freq_max": 10100,
+        "name": "HF-marine-NM",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская коротковолновая",
+        "notes": "NAVTEX 518 кГц (MF)"
+      }
     },
     {
       "freq": 10.124,
@@ -475,7 +545,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "CW",
-      "band_name": "Ham-30m"
+      "band_name": "Ham-30m",
+      "_band": {
+        "freq_min": 10100,
+        "freq_max": 10150,
+        "name": "Ham-30m",
+        "modulation": "CW",
+        "threshold": -45.0,
+        "bandwidth": 500,
+        "step": 50,
+        "description": "Любительский 30 м (узкий)",
+        "notes": "IARU R1: 10100–10150, CW/data только"
+      }
     },
     {
       "freq": 10.948,
@@ -484,7 +565,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-25m"
+      "band_name": "HF-misc-25m",
+      "_band": {
+        "freq_min": 10150,
+        "freq_max": 11600,
+        "name": "HF-misc-25m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Фиксированная связь",
+        "notes": "Часть занята вещанием"
+      }
     },
     {
       "freq": 11.83,
@@ -493,7 +585,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-25m"
+      "band_name": "HF-broadcast-25m",
+      "_band": {
+        "freq_min": 11600,
+        "freq_max": 12100,
+        "name": "HF-broadcast-25m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 25 м",
+        "notes": "Дневной, межконтинентальный"
+      }
     },
     {
       "freq": 11.866,
@@ -502,7 +605,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-25m"
+      "band_name": "HF-broadcast-25m",
+      "_band": {
+        "freq_min": 11600,
+        "freq_max": 12100,
+        "name": "HF-broadcast-25m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 25 м",
+        "notes": "Дневной, межконтинентальный"
+      }
     },
     {
       "freq": 12.775,
@@ -511,7 +625,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-marine-3"
+      "band_name": "HF-marine-3",
+      "_band": {
+        "freq_min": 12100,
+        "freq_max": 13600,
+        "name": "HF-marine-3",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиационная",
+        "notes": "Volmet 13.265, 13.276"
+      }
     },
     {
       "freq": 12.873,
@@ -520,7 +645,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-marine-3"
+      "band_name": "HF-marine-3",
+      "_band": {
+        "freq_min": 12100,
+        "freq_max": 13600,
+        "name": "HF-marine-3",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиационная",
+        "notes": "Volmet 13.265, 13.276"
+      }
     },
     {
       "freq": 13.69,
@@ -529,7 +665,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-22m"
+      "band_name": "HF-broadcast-22m",
+      "_band": {
+        "freq_min": 13600,
+        "freq_max": 13800,
+        "name": "HF-broadcast-22m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 22 м",
+        "notes": "Дневной, дальний"
+      }
     },
     {
       "freq": 13.919,
@@ -538,7 +685,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "Ham-20m"
+      "band_name": "Ham-20m",
+      "_band": {
+        "freq_min": 13800,
+        "freq_max": 14000,
+        "name": "Ham-20m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 20 м",
+        "notes": "IARU R1: 14000–14200 кГц. Дневной DX"
+      }
     },
     {
       "freq": 14.249,
@@ -547,7 +705,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-19m"
+      "band_name": "HF-misc-19m",
+      "_band": {
+        "freq_min": 14000,
+        "freq_max": 15100,
+        "name": "HF-misc-19m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Фиксированная связь",
+        "notes": "Радиолюбители — внеполосно запрещено"
+      }
     },
     {
       "freq": 15.383,
@@ -556,7 +725,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-19m"
+      "band_name": "HF-broadcast-19m",
+      "_band": {
+        "freq_min": 15100,
+        "freq_max": 15600,
+        "name": "HF-broadcast-19m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 19 м",
+        "notes": "Дневной, очень популярный"
+      }
     },
     {
       "freq": 17.68,
@@ -565,7 +745,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-16m"
+      "band_name": "HF-misc-16m",
+      "_band": {
+        "freq_min": 15600,
+        "freq_max": 18068,
+        "name": "HF-misc-16m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиация, фиксированная",
+        "notes": "Airline volmet 15.010, 13.265"
+      }
     },
     {
       "freq": 18.118,
@@ -574,7 +765,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "Ham-17m"
+      "band_name": "Ham-17m",
+      "_band": {
+        "freq_min": 18068,
+        "freq_max": 18168,
+        "name": "Ham-17m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 17 м",
+        "notes": "IARU R1: 18068–18168 кГц"
+      }
     },
     {
       "freq": 18.591,
@@ -583,7 +785,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-15m"
+      "band_name": "HF-misc-15m",
+      "_band": {
+        "freq_min": 18168,
+        "freq_max": 18900,
+        "name": "HF-misc-15m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Фиксированная связь",
+        "notes": "Внеполосная передача запрещена"
+      }
     },
     {
       "freq": 18.992,
@@ -592,7 +805,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-15m"
+      "band_name": "HF-broadcast-15m",
+      "_band": {
+        "freq_min": 18900,
+        "freq_max": 19090,
+        "name": "HF-broadcast-15m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 15 м",
+        "notes": "Дневной, межконтинентальный"
+      }
     },
     {
       "freq": 21.161,
@@ -601,7 +825,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "HF-misc-13m"
+      "band_name": "HF-misc-13m",
+      "_band": {
+        "freq_min": 19090,
+        "freq_max": 21450,
+        "name": "HF-misc-13m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 500,
+        "description": "Морская, авиация, фиксированная",
+        "notes": "Вещание 13 м: 21450–21850"
+      }
     },
     {
       "freq": 21.643,
@@ -610,7 +845,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "AM",
-      "band_name": "HF-broadcast-13m"
+      "band_name": "HF-broadcast-13m",
+      "_band": {
+        "freq_min": 21450,
+        "freq_max": 21850,
+        "name": "HF-broadcast-13m",
+        "modulation": "AM",
+        "threshold": -35.0,
+        "bandwidth": 6000,
+        "step": 5000,
+        "description": "КВ-вещание 13 м",
+        "notes": "Дневной, солнечная активность"
+      }
     },
     {
       "freq": 24.413,
@@ -640,7 +886,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "Ham-12m"
+      "band_name": "Ham-12m",
+      "_band": {
+        "freq_min": 24890,
+        "freq_max": 24990,
+        "name": "Ham-12m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 12 м",
+        "notes": "IARU R1: 24890–24990 кГц. Солнечный максимум"
+      }
     },
     {
       "freq": 25.637,
@@ -677,7 +934,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "FM",
-      "band_name": "CB-27MHz"
+      "band_name": "CB-27MHz",
+      "_band": {
+        "freq_min": 26965,
+        "freq_max": 27405,
+        "name": "CB-27MHz",
+        "modulation": "FM",
+        "threshold": -30.0,
+        "bandwidth": 10000,
+        "step": 10000,
+        "description": "Гражданский диапазон (Си-Би)",
+        "notes": "РФ: до 10 Вт, AM/FM. Европа: 40 каналов. США: FRS/CB тоже"
+      }
     },
     {
       "freq": 27.19,
@@ -716,7 +984,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "USB",
-      "band_name": "Ham-10m"
+      "band_name": "Ham-10m",
+      "_band": {
+        "freq_min": 28000,
+        "freq_max": 29700,
+        "name": "Ham-10m",
+        "modulation": "USB",
+        "threshold": -40.0,
+        "bandwidth": 2400,
+        "step": 100,
+        "description": "Любительский 10 м",
+        "notes": "IARU R1: 28000–29700 кГц. Спорадический E, солнечный пик"
+      }
     },
     {
       "freq": 29.83,
@@ -725,7 +1004,18 @@
       "rds": {},
       "stereo": null,
       "modulation": "NFM",
-      "band_name": "HF-VHF-misc"
+      "band_name": "HF-VHF-misc",
+      "_band": {
+        "freq_min": 29700,
+        "freq_max": 50000,
+        "name": "HF-VHF-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 20000,
+        "description": "Метеорологи, пейджинг, служебные, ретрансляторы",
+        "notes": "Радиозонд 403 МГц. Пейджинг — закрыт"
+      }
     },
     {
       "freq": 30.355,
@@ -1184,7 +1474,19 @@
         "lon": 30.13541
       },
       "site_source": "auto",
-      "site_confidence": "medium"
+      "site_confidence": "medium",
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "threshold": -5.0,
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      }
     },
     {
       "freq": 69.468,
@@ -1224,7 +1526,19 @@
         "lon": 30.13541
       },
       "site_source": "auto",
-      "site_confidence": "medium"
+      "site_confidence": "medium",
+      "_band": {
+        "freq_min": 65900,
+        "freq_max": 74000,
+        "name": "OIRT",
+        "modulation": "WFM",
+        "threshold": -5.0,
+        "bandwidth": 250000,
+        "step": 30000,
+        "country": "RU",
+        "description": "УКВ-вещание (OIRT, СССР)",
+        "notes": "Пилот 31.25 кГц, полярная модуляция. Девиация 50 кГц. РФ: 69.5, 73.1 МГц"
+      }
     },
     {
       "freq": 71.989,
@@ -1424,7 +1738,18 @@
       "modulation": "NFM",
       "band_name": "VHF-mid-misc",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      }
     },
     {
       "freq": 85.2,
@@ -1440,7 +1765,18 @@
       "modulation": "NFM",
       "band_name": "VHF-mid-misc",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      }
     },
     {
       "freq": 86.0,
@@ -1456,7 +1792,18 @@
       "modulation": "NFM",
       "band_name": "VHF-mid-misc",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      }
     },
     {
       "freq": 86.4,
@@ -1465,7 +1812,18 @@
       "modulation": "NFM",
       "band_name": "VHF-mid-misc",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      }
     },
     {
       "freq": 86.8,
@@ -1474,7 +1832,18 @@
       "modulation": "NFM",
       "band_name": "VHF-mid-misc",
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 76000,
+        "freq_max": 87500,
+        "name": "VHF-mid-misc",
+        "modulation": "NFM",
+        "threshold": -40.0,
+        "bandwidth": 12000,
+        "step": 25000,
+        "description": "Служебные, радиоастрономия (76–87.5 МГц)",
+        "notes": "РФ: ведомственные, радиоастрономия"
+      }
     },
     {
       "freq": 87.5,
@@ -1526,6 +1895,17 @@
         "gain_db": 25,
         "rds_snr_db": 2.6,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1554,6 +1934,17 @@
         "gain_db": 25,
         "rds_snr_db": 7.9,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1583,6 +1974,17 @@
         "gain_db": -1,
         "rds_snr_db": 1.9,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1609,6 +2011,17 @@
         "gain_db": 25,
         "rds_snr_db": 4.4,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1637,6 +2050,17 @@
         "gain_db": 25,
         "rds_snr_db": 5.2,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1731,6 +2155,17 @@
         "gain_db": 25,
         "rds_snr_db": 1.5,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1756,6 +2191,17 @@
         "gain_db": 50,
         "rds_snr_db": 3.8,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1793,6 +2239,17 @@
       "site_geo": {
         "lat": 59.9833,
         "lon": 30.1333
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1843,6 +2300,17 @@
         "gain_db": 25,
         "rds_snr_db": 1.8,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -1967,7 +2435,18 @@
       "band_name": "FM-broadcast",
       "ppm_measured": -75,
       "stereo": false,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      }
     },
     {
       "freq": 96.4,
@@ -2027,6 +2506,17 @@
       "site_geo": {
         "lat": 59.9833,
         "lon": 30.1333
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2140,6 +2630,17 @@
         "gain_db": 25,
         "rds_snr_db": 5.6,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2191,6 +2692,17 @@
         "gain_db": 50,
         "rds_snr_db": 1.4,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2210,6 +2722,17 @@
         "gain_db": 25,
         "rds_snr_db": 8.9,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2270,7 +2793,18 @@
         "rds_snr_db": 3.1,
         "stereo": true
       },
-      "site": ""
+      "site": "",
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      }
     },
     {
       "freq": 103.4,
@@ -2288,6 +2822,17 @@
         "gain_db": 25,
         "rds_snr_db": 4.0,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2442,6 +2987,17 @@
         "gain_db": 25,
         "rds_snr_db": 5.5,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2451,7 +3007,18 @@
       "modulation": "WFM",
       "band_name": "FM-broadcast",
       "stereo": true,
-      "rds": {}
+      "rds": {},
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
+      }
     },
     {
       "freq": 107.4,
@@ -2469,6 +3036,17 @@
         "gain_db": 25,
         "rds_snr_db": 3.2,
         "stereo": true
+      },
+      "_band": {
+        "freq_min": 87500,
+        "freq_max": 108000,
+        "name": "FM-broadcast",
+        "modulation": "WFM",
+        "threshold": -35.0,
+        "bandwidth": 200000,
+        "step": 100000,
+        "description": "FM-вещание (CCIR)",
+        "notes": "Пилот 19 кГц, RDS 57 кГц. Девиация 75 кГц (US) / 50 кГц (EU). РФ: шаг 100 кГц"
       }
     },
     {
@@ -2756,5 +3334,5 @@
       "rds": {}
     }
   ],
-  "last_merge": "2026-11-17T10:30:01.894180"
+  "last_merge": "2026-11-17T11:54:53.025929"
 }
